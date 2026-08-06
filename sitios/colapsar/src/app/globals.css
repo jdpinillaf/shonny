@@ -8,6 +8,11 @@
   --color-humo: #8a8f8b;
   --color-terracota: #a8624a;
 
+  /* El río (landing #2). Mismo gris, con azul. */
+  --color-hondo: #05090e;
+  --color-agua: #16222e;
+  --color-espuma: #8fb6c9;
+
   --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
   --font-mono: var(--font-courier), ui-monospace, "Courier New", monospace;
 }
@@ -121,10 +126,85 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
 }
 
+/* ── El río (landing #2) ─────────────────────────────────────────────── */
+
+/* Las notas sumergidas: además de girar, suben y bajan. Sin el vaivén vertical
+   se leen como colgadas de una pared, no suspendidas en agua. */
+@keyframes ondear {
+  0%,
+  100% {
+    transform: rotate(calc(var(--reposo) - var(--vaiven))) translateY(calc(var(--flote) * -1));
+  }
+  50% {
+    transform: rotate(calc(var(--reposo) + var(--vaiven))) translateY(var(--flote));
+  }
+}
+
+.ondear {
+  animation: ondear var(--dur) ease-in-out var(--retardo) infinite;
+}
+
+/* Luz colándose por la superficie. Dos capas a distinta velocidad y escala: con
+   una sola se ve el patrón repetirse. */
+@keyframes derivar-luz {
+  0% {
+    background-position:
+      0% 0%,
+      100% 100%;
+  }
+  100% {
+    background-position:
+      100% 60%,
+      0% 20%;
+  }
+}
+
+.causticas {
+  background-image:
+    radial-gradient(
+      42% 28% at 30% 25%,
+      rgba(160, 205, 228, 0.5) 0%,
+      rgba(160, 205, 228, 0) 60%
+    ),
+    radial-gradient(
+      36% 22% at 70% 70%,
+      rgba(120, 175, 205, 0.42) 0%,
+      rgba(120, 175, 205, 0) 62%
+    );
+  background-size:
+    160% 160%,
+    130% 130%;
+  opacity: 0.5;
+  animation: derivar-luz 34s ease-in-out infinite alternate;
+}
+
+/* Anillos de onda del plan B, cuando no hay WebGL. */
+@keyframes anillo {
+  0% {
+    width: 0;
+    height: 0;
+    margin: 0;
+    opacity: 0.7;
+  }
+  100% {
+    width: 82vmax;
+    height: 82vmax;
+    margin: -41vmax;
+    opacity: 0;
+  }
+}
+
+.anillo {
+  animation: anillo 5.5s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .nota,
   .canal-img,
-  .cursor {
+  .cursor,
+  .ondear,
+  .causticas,
+  .anillo {
     animation: none !important;
   }
 }
