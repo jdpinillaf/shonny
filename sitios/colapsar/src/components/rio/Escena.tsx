@@ -123,6 +123,16 @@ export function Escena() {
     setActo("pregunta");
   }, []);
 
+  // El agua acusa las dos mitades del remate: la onda de la primera es el
+  // texto deshaciéndose, la de la segunda es la card rompiendo la superficie.
+  // Sin ellas la transición pasa por encima del río sin tocarlo.
+  useEffect(() => {
+    if (acto !== "disco") return;
+    agua.current?.salpicar(0.5, 0.48, 0.5);
+    const t = setTimeout(() => agua.current?.salpicar(0.5, 0.44, 0.62), 1150);
+    return () => clearTimeout(t);
+  }, [acto]);
+
   return (
     <MotionConfig reducedMotion="user">
       <main
@@ -181,7 +191,7 @@ export function Escena() {
                   key="pregunta"
                   className="text-center"
                   exit={{ opacity: 0, y: 40, filter: "blur(12px)" }}
-                  transition={{ duration: 0.85, ease: SUAVE }}
+                  transition={{ duration: 1.1, ease: "easeIn" }}
                 >
                   <motion.p
                     className="placa text-[9px] text-espuma/70 md:text-[10px]"
@@ -199,15 +209,19 @@ export function Escena() {
                     className="glow mt-7 font-serif text-[clamp(1.9rem,6.2vw,4.1rem)] leading-[1.12] tracking-[-0.01em] md:mt-9"
                   />
 
-                  {inputListo && <InputRio onEnviar={enviar} quieto={quieto} />}
+                  {/* Se renderiza siempre: montarlo recién al estar listo hacía
+                      crecer el bloque de golpe y la pregunta saltaba. */}
+                  <InputRio onEnviar={enviar} quieto={quieto} listo={inputListo} />
                 </motion.div>
               )}
 
               {acto === "colapso" && (
                 <motion.div
                   key="colapso"
-                  exit={{ opacity: 0, y: -22, filter: "blur(8px)" }}
-                  transition={{ duration: 0.6, ease: SUAVE }}
+                  // Se hunde, no se va hacia arriba: el texto se diluye en el
+                  // agua y de ahí mismo sale después la card.
+                  exit={{ opacity: 0, y: 46, filter: "blur(18px)" }}
+                  transition={{ duration: 1.2, ease: "easeIn" }}
                 >
                   <PreguntaEmergente
                     texto={site.invitacion}
@@ -220,7 +234,7 @@ export function Escena() {
 
               {acto === "disco" && (
                 <motion.div key="disco" className="flex justify-center">
-                  <Disco onOtraVez={otraVez} />
+                  <Disco onOtraVez={otraVez} emerge />
                 </motion.div>
               )}
             </AnimatePresence>

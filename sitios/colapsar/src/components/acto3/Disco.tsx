@@ -6,10 +6,17 @@ import { CardSpotify } from "./CardSpotify";
 
 const SUAVE = [0.16, 1, 0.3, 1] as const;
 
-export function Disco({ onOtraVez }: { onOtraVez: () => void }) {
+export function Disco({
+  onOtraVez,
+  emerge = false,
+}: {
+  onOtraVez: () => void;
+  /** Lo enciende el río: la card sale del agua en vez de solo subir. */
+  emerge?: boolean;
+}) {
   return (
     <div className="flex flex-col items-center">
-      <CardSpotify />
+      <CardSpotify emerge={emerge} />
 
       <motion.div
         className="mt-8 text-center"

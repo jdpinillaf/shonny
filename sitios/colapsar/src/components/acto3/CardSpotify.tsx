@@ -14,16 +14,25 @@ const SUAVE = [0.16, 1, 0.3, 1] as const;
  * se satura, y el halo detrás es una copia desenfocada de ella misma — el color
  * literalmente se sale del disco.
  */
-export function CardSpotify() {
+/**
+ * `emerge` la hace salir del agua: desde más abajo, más chica y desenfocada.
+ * Apagado por default a propósito — la landing #1 usa esta misma card y su
+ * entrada ya está aprobada.
+ */
+export function CardSpotify({ emerge = false }: { emerge?: boolean }) {
   return (
     <motion.a
       href={site.presave.spotify}
       target="_blank"
       rel="noreferrer"
       className="relative block w-full max-w-[352px] focus:outline-none"
-      initial={{ opacity: 0, y: 54, scale: 0.94 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 1.05, ease: SUAVE }}
+      initial={
+        emerge
+          ? { opacity: 0, y: 78, scale: 0.9, filter: "blur(22px)" }
+          : { opacity: 0, y: 54, scale: 0.94 }
+      }
+      animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      transition={{ duration: emerge ? 1.8 : 1.05, ease: SUAVE }}
       whileHover={{ y: -5 }}
       whileFocus={{ y: -5 }}
     >

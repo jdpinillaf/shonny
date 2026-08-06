@@ -126,7 +126,10 @@ export function Agua({ ref, onSinAgua, quieto = false, lluvia = false }: Props) 
       gl.uniform1i(uSim.estado, 0);
       gl.uniform2f(uSim.texel, 1 / LADO, 1 / LADO);
       gl.uniform1f(uSim.amort, quieto ? 0.955 : 0.984);
-      gl.uniform1f(uSim.radio, gota && gota.f > 0.4 ? 0.055 : 0.022);
+      // El radio sale de la fuerza. Con un escalón fijo, la perturbación más
+      // leve del sereno abría un anillo tan ancho como el de la gota: el agua
+      // se veía hirviendo en vez de respirando.
+      gl.uniform1f(uSim.radio, gota ? 0.014 + gota.f * 0.05 : 0.02);
       if (gota) gl.uniform3f(uSim.gota, gota.x, gota.y, gota.f);
       else gl.uniform3f(uSim.gota, 0, 0, 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -143,16 +146,17 @@ export function Agua({ ref, onSinAgua, quieto = false, lluvia = false }: Props) 
     const dibujar = (t: number) => {
       if (!vivo) return;
 
-      // Un río no se queda quieto. Con la amortiguación en 0.984 las ondas de
-      // la gota mueren en unos segundos y, si nadie mueve el mouse, el agua
-      // queda como un vidrio. Estas gotitas mantienen la superficie viva.
+      // Sereno: un río no se queda quieto, pero tampoco hierve. Apenas lo
+      // suficiente para que la superficie respire cuando nadie toca nada — el
+      // movimiento fuerte tiene que venir del puntero, que pega una orden de
+      // magnitud más fuerte que esto.
       if (llueve.current && !quieto && t > proximaLluvia) {
         cola.current.push({
           x: Math.random(),
           y: Math.random(),
-          f: 0.045 + Math.random() * 0.05,
+          f: 0.014 + Math.random() * 0.014,
         });
-        proximaLluvia = t + 340 + Math.random() * 620;
+        proximaLluvia = t + 1600 + Math.random() * 2000;
       }
 
       const pasos = Math.max(1, Math.min(cola.current.length, MAX_PASOS));
