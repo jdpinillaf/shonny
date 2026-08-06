@@ -10,13 +10,14 @@ npm run dev     # http://localhost:3000
 npm run build
 ```
 
-**Son dos landings, no una.** Comparten fotos, audio, portada, textos y toda la
-card de Spotify — cambiar la canción o el link de pre-save actualiza las dos.
+**Son tres landings, no una.** Comparten fotos, audio, portada, textos y toda la
+card de Spotify — cambiar la canción o el link de pre-save actualiza las tres.
 
 | Ruta | Landing | Qué es |
 |---|---|---|
 | `/` | **#1 · El museo** | Televisores en blanco y negro que cortan de canal, notas de papel colgadas de un chinche |
 | `/rio` | **#2 · El río** | Una gota cae, de las ondas se forma la pregunta y todo flota bajo el agua, en azul |
+| `/cuarto` | **#3 · El cuarto oscuro** | Todo pegado en la pared como mosaico, bajo una roja que titila, y se revela como papel en la cubeta |
 
 ---
 
@@ -129,7 +130,70 @@ Chrome de verdad o puppeteer headed.
 
 ---
 
-# Pendientes (las dos landings)
+# Landing #3 — el cuarto oscuro (`/cuarto`)
+
+Todo pegado en la pared como mosaico —fotos, notas y tiras de negativos, sin
+huecos— salvo un rectángulo en el centro donde no hay nada. Ahí van la pregunta,
+el input y después la card. **El hueco es el punto**: está todo pegado menos eso,
+que es lo que nunca pasó.
+
+Gris con un rojo leve, bajo una bombilla de seguridad que titila. Misma máquina
+de estados (`cuarto/CuartoOscuro.tsx`), mismos atajos `?acto=`, mismo
+`<Disco />` sin tocar.
+
+## El revelado
+
+Arranca en negro. La roja prende con dos parpadeos y la pared entra **lavada**
+—sin negros, plana— y le sube el contraste hasta asentarse. La ola sale del
+hueco hacia afuera: se revela primero lo que rodea a la pregunta.
+
+Cada pieza se revela con un `@keyframes` y su propio `--retardo`, no con motion:
+son casi treinta elementos animando `filter` a la vez. Es el mismo patrón de
+`.nota` y `.canal-img` en la #1.
+
+El retardo se estira contra las **distancias reales** de la tabla, no contra el
+largo de la rejilla. Como el hueco es grande, ninguna pieza cae cerca de su
+centro: midiendo en absoluto todos los retardos se apelotonan en el último
+tercio y la pared se revela casi de golpe.
+
+## El input
+
+Una copia instantánea sin revelar. Se escribe en la banda blanca de abajo y al
+enviar la copia **se revela… vacía**: un gris sobreexpuesto y nada más. No hay
+foto de eso porque no pasó; lo único que existe es el pie que escribiste. Después
+se despega del centro y va a pegarse a la pared como una pieza más.
+
+## Cuatro cosas que no son obvias
+
+- **La tabla de piezas y el hueco están acoplados** (`cuarto/piezas.ts`), igual
+  que `MARCOS` y `RANURAS` en la #1. Las piezas están calzadas a mano para cubrir
+  exactamente las celdas que el hueco deja libres. Si se mueve el hueco hay que
+  reabrir la tabla; dos piezas en la misma celda se superponen sin avisar.
+- **Las piezas del borde se pegan más torcidas y más grandes** (`scale(1.13)`).
+  La rejilla las corta en línea perfectamente recta y eso delata la maqueta: el
+  centro se lee como un rectángulo recortado con tijera en vez de un pedazo de
+  pared sin pegar.
+- **El rojo va en `soft-light`, no en `overlay`.** Overlay aclara lo que ya es
+  claro: los papeles se iban a rosa pastel y la pared quedaba partida en dos,
+  rosa arriba y gris abajo. Y las capas de `Safelight.tsx` son hermanas sueltas,
+  no hijas de un contenedor — `mix-blend-mode` mezcla contra el fondo de su
+  contexto de apilamiento, así que envolverlas en un div con `z-index` las
+  dejaría mezclándose solo entre ellas y la pared saldría gris.
+- **El atenuador del acto final va DEBAJO del tinte.** Encima se lleva también el
+  rojo y el cuarto se vuelve gris de golpe, como si fuera otra página.
+
+## Fotosensibilidad
+
+El titileo tiene amplitud máxima 0.08 sobre un velo casi negro y nunca dos saltos
+a menos de 360ms. El apagón de arranque es lo único con amplitud grande y son
+cinco pasos en 2.4s: 2.5 cambios por segundo. WCAG 2.3.1 corta en tres por
+segundo. **Si alguien sube estos números hay que volver a medirlo**, no
+estimarlo. Con `prefers-reduced-motion` no titila nada y la pared arranca ya
+revelada.
+
+---
+
+# Pendientes (las tres landings)
 
 - **El link de pre-save.** `site.presave.spotify` y `.apple` apuntan a `#`.
   Hay que crear la campaña en Feature.fm / Presave.io / Linkfire desde la cuenta
@@ -140,6 +204,11 @@ Chrome de verdad o puppeteer headed.
   compartida es backend (almacenamiento + moderación) y es la fase siguiente.
 
 ## Fotos
+
+Son **ocho** y la #3 las repite: el mosaico tiene doce piezas de foto y seis
+tiras de negativos. Se reparten barajadas y cada pieza usa su propio
+`object-position`, así las repeticiones se leen como encuadres distintos. Con
+catorce o más no repetiría ninguna.
 
 Las de `public/fotos/` son derivadas a 1400px de originales de 4000×6000.
 Para regenerarlas desde una carpeta nueva:
