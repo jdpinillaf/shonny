@@ -49,7 +49,7 @@ export function Disco({ onOtraVez }: { onOtraVez: () => void }) {
           onClick={onOtraVez}
           className="border border-tiza/25 bg-noche/70 px-5 py-2.5 font-mono text-[9.5px] uppercase tracking-[0.24em] text-tiza/85 transition-colors hover:border-tiza/60 hover:text-tiza"
         >
-          dejá otra cosa que nunca pasó
+          deja otra cosa que nunca pasó
         </button>
       </motion.div>
     </div>

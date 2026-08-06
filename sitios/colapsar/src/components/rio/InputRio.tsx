@@ -98,7 +98,7 @@ export function InputRio({
         transition={{ duration: 0.8, delay: 0.6 }}
       >
         <span className="placa text-[7.5px] text-espuma/60">
-          nadie va a saber que fuiste vos
+          nadie va a saber que fuiste tú
         </span>
         <span className="font-mono text-[10px] tabular-nums text-espuma/60">
           {valor.length}/{site.maxRespuesta}

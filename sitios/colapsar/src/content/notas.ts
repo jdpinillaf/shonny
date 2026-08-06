@@ -3,28 +3,35 @@
  * en producción estas serían las respuestas reales de la gente.
  *
  * Registro: primera persona, concreta, seca. Un hecho, no un poema.
+ *
+ * Español caribeño, con tuteo. Nada de voseo ni de España: el objeto que
+ * aparece en cada frase tiene que ser de acá — el tinto, la boleta, el
+ * matrimonio, la tienda de la esquina. Eso es lo que hace que se sientan
+ * escritas por alguien y no traducidas.
  */
 export const notas: readonly string[] = [
   "Te guardé el lado izquierdo de la cama tres años.",
-  "Aprendí a hacer tu café. Nunca viniste a desayunar.",
-  "Compré dos boletos. Viajé sola.",
+  "Aprendí a hacerte el tinto. Nunca viniste a desayunar.",
+  "Compré dos tiquetes. Viajé sola.",
   "Ensayé la conversación cuarenta veces. Nunca la tuvimos.",
-  "Dijiste «algún día» y yo escuché una fecha.",
+  "Dijiste “algún día” y yo escuché una fecha.",
   "Sigues en mis contactos de emergencia.",
   "Le puse tu nombre a una playlist que nadie abrió.",
   "Me sé el camino a tu casa y nunca timbré.",
   "Tenía lista la respuesta para cuando preguntaras. No preguntaste.",
-  "Guardé el vestido para una boda que no hubo.",
+  "Guardé el vestido para un matrimonio que no hubo.",
   "Te presenté a mi mamá en mi cabeza.",
   "Escribí el mensaje. Lo borré. Doce veces.",
+  "Aprendí a bailar para no pisarte.",
   "Aparté el sábado entero, por si acaso.",
   "Todavía me muevo despacio para no despertarte.",
-  "Aprendí tu canción favorita en guitarra.",
+  "Me aprendí tu canción en guitarra. Nunca te la toqué.",
   "Dejé la puerta sin seguro un año.",
-  "Te esperé en un restaurante que ya cerró.",
+  "Te esperé en la esquina hasta que cerró la tienda.",
   "Nos imaginé viejos. Con perro.",
   "Practiqué decir tu apellido junto al mío.",
-  "Guardé el ticket del cine al que no fuimos.",
+  "Guardé la boleta de un cine al que no fuimos.",
+  "Subí a la terraza a esperarte. Se hizo de día.",
   "Sé exactamente cómo te habrías reído.",
   "Colgué dos toallas. Usé una.",
 ] as const;

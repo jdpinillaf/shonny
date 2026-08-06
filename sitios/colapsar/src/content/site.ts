@@ -8,7 +8,7 @@ export const site = {
   // La placa de arriba y la pregunta que se teclea.
   placa: "Museo de cosas que nunca pasaron",
   pregunta: "¿Qué esperaste que nunca llegó?",
-  marcador: "escribilo acá…",
+  marcador: "escríbelo aquí…",
 
   // Lo que se teclea al responder.
   invitacion: "Ven, acompáñame a colapsar.",

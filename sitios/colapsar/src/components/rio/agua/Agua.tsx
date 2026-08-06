@@ -15,13 +15,21 @@ type Props = {
   /** Se llama si el navegador no da WebGL2 con render a float. */
   onSinAgua?: () => void;
   quieto?: boolean;
+  /** Gotitas de fondo. Apagadas hasta que cae la gota. */
+  lluvia?: boolean;
 };
 
 const MAX_PASOS = 4;
 
-export function Agua({ ref, onSinAgua, quieto = false }: Props) {
+export function Agua({ ref, onSinAgua, quieto = false, lluvia = false }: Props) {
   const lienzo = useRef<HTMLCanvasElement>(null);
   const cola = useRef<{ x: number; y: number; f: number }[]>([]);
+
+  // Por ref y no por dependencia: si `lluvia` entrara en las deps del efecto de
+  // abajo, prenderla reiniciaría el contexto WebGL entero — texturas, FBO y el
+  // lecho que tardó en armarse.
+  const llueve = useRef(lluvia);
+  llueve.current = lluvia;
 
   useImperativeHandle(ref, () => ({
     salpicar: (x, y, f) => {
@@ -138,7 +146,7 @@ export function Agua({ ref, onSinAgua, quieto = false }: Props) {
       // Un río no se queda quieto. Con la amortiguación en 0.984 las ondas de
       // la gota mueren en unos segundos y, si nadie mueve el mouse, el agua
       // queda como un vidrio. Estas gotitas mantienen la superficie viva.
-      if (!quieto && t > proximaLluvia) {
+      if (llueve.current && !quieto && t > proximaLluvia) {
         cola.current.push({
           x: Math.random(),
           y: Math.random(),

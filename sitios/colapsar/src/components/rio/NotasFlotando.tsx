@@ -10,27 +10,34 @@ import type { Puntero } from "@/lib/usePuntero";
  * fondo) y manda sobre todo: cuánto se corren con el mouse, cuánto se ven y
  * cuánto se desenfocan. Las de arriba se mueven más, como en el agua.
  *
+ * Las coordenadas van en fracción de viewport, no en string de porcentaje,
+ * porque hace falta medir la distancia de cada nota al punto donde cayó la
+ * gota: de ahí sale su retardo de entrada.
+ *
  * El centro queda libre: ahí van la pregunta, el input y después la card.
  */
-type Ranura = { x: string; y: string; hondura: number; movil: boolean };
+type Ranura = { x: number; y: number; hondura: number; movil: boolean };
 
 const RANURAS: Ranura[] = [
-  { x: "7%", y: "78%", hondura: 0.15, movil: true },
-  { x: "54%", y: "87%", hondura: 0.55, movil: true },
-  { x: "3%", y: "12%", hondura: 0.35, movil: false },
-  { x: "20%", y: "34%", hondura: 0.85, movil: false },
-  { x: "6%", y: "52%", hondura: 0.05, movil: false },
-  { x: "25%", y: "66%", hondura: 0.7, movil: false },
-  // Lejos del centro: a 31% el borde derecho llegaba a rozar la nota nueva.
-  { x: "26%", y: "6%", hondura: 0.6, movil: false },
-  { x: "58%", y: "9%", hondura: 0.9, movil: false },
-  { x: "77%", y: "24%", hondura: 0.25, movil: false },
-  { x: "86%", y: "52%", hondura: 0.75, movil: false },
-  { x: "72%", y: "72%", hondura: 0.4, movil: false },
+  { x: 0.07, y: 0.78, hondura: 0.15, movil: true },
+  { x: 0.54, y: 0.87, hondura: 0.55, movil: true },
+  { x: 0.03, y: 0.12, hondura: 0.35, movil: false },
+  { x: 0.2, y: 0.34, hondura: 0.85, movil: false },
+  { x: 0.06, y: 0.52, hondura: 0.05, movil: false },
+  { x: 0.25, y: 0.66, hondura: 0.7, movil: false },
+  // Lejos del centro: a 0.31 el borde derecho rozaba la nota nueva.
+  { x: 0.26, y: 0.06, hondura: 0.6, movil: false },
+  { x: 0.58, y: 0.09, hondura: 0.9, movil: false },
+  { x: 0.77, y: 0.24, hondura: 0.25, movil: false },
+  { x: 0.86, y: 0.52, hondura: 0.75, movil: false },
+  { x: 0.72, y: 0.72, hondura: 0.4, movil: false },
 ];
 
 /** Donde emerge lo que acaba de escribir la persona. */
-const RANURA_NUEVA: Ranura = { x: "50%", y: "7%", hondura: 0, movil: true };
+const RANURA_NUEVA: Ranura = { x: 0.5, y: 0.07, hondura: 0, movil: true };
+
+/** Cuánto tarda la onda en cruzar la pantalla y destapar la nota más lejana. */
+const CRUCE = 1.5;
 
 const REPARTO = [...notas]
   .map((texto, i) => ({ texto, orden: azar(`rio-${i}`) }))
@@ -42,12 +49,16 @@ function Nota({
   texto,
   ranura,
   puntero,
+  origen,
+  activo,
   nueva = false,
   quieto,
 }: {
   texto: string;
   ranura: Ranura;
   puntero: Puntero;
+  origen: { x: number; y: number };
+  activo: boolean;
   nueva?: boolean;
   quieto: boolean;
 }) {
@@ -60,32 +71,34 @@ function Nota({
   const semilla = texto;
   const reposo = entre(semilla, -4, 4, 1);
 
+  // La onda las va destapando a su paso: el retardo es la distancia al punto
+  // donde cayó la gota, no un azar. Con azar entran desordenadas y se pierde la
+  // relación entre lo que se ve expandirse y lo que aparece.
+  const dist = Math.hypot(ranura.x - origen.x, ranura.y - origen.y);
+  const retardo = nueva ? 0 : (dist / 0.85) * CRUCE + entre(semilla, 0, 0.25, 7);
+
   return (
     <motion.div
       className="absolute w-[44vw] max-w-[200px] md:w-[190px]"
       style={{
-        left: ranura.x,
-        top: ranura.y,
+        left: `${ranura.x * 100}%`,
+        top: `${ranura.y * 100}%`,
         x: quieto ? 0 : x,
         y: quieto ? 0 : y,
         marginLeft: nueva ? "-95px" : 0,
       }}
-      initial={
-        nueva
-          ? { opacity: 0, scale: 0.86, filter: "blur(16px)" }
+      initial={{ opacity: 0, scale: nueva ? 0.86 : 1, filter: "blur(20px)" }}
+      animate={
+        activo
+          ? {
+              opacity: nueva ? 0.95 : 0.34 + cerca * 0.4,
+              scale: 1,
+              filter: `blur(${nueva ? 0 : ranura.hondura * 1.9}px)`,
+            }
           : { opacity: 0, filter: "blur(20px)" }
       }
-      animate={{
-        opacity: nueva ? 0.95 : 0.34 + cerca * 0.4,
-        scale: 1,
-        filter: `blur(${nueva ? 0 : ranura.hondura * 1.9}px)`,
-      }}
       exit={{ opacity: 0, filter: "blur(20px)", transition: { duration: 0.5 } }}
-      transition={{
-        duration: nueva ? 1.3 : 2.2,
-        delay: nueva ? 0 : entre(semilla, 0, 1.6, 7),
-        ease: [0.16, 1, 0.3, 1],
-      }}
+      transition={{ duration: nueva ? 1.3 : 1.9, delay: retardo, ease: [0.16, 1, 0.3, 1] }}
     >
       <div
         className="ondear relative px-3.5 pb-2.5 pt-3.5"
@@ -129,10 +142,15 @@ export function NotasFlotando({
   respuestas,
   puntero,
   quieto,
+  activo,
+  origen,
 }: {
   respuestas: string[];
   puntero: Puntero;
   quieto: boolean;
+  /** Falso hasta que la gota toca el agua. */
+  activo: boolean;
+  origen: { x: number; y: number };
 }) {
   const ultima = respuestas.at(-1);
 
@@ -140,7 +158,14 @@ export function NotasFlotando({
     <div aria-hidden className="pointer-events-none fixed inset-0 z-10">
       {RANURAS.map((ranura, i) => (
         <div key={i} className={ranura.movil ? "" : "hidden md:block"}>
-          <Nota texto={REPARTO[i]} ranura={ranura} puntero={puntero} quieto={quieto} />
+          <Nota
+            texto={REPARTO[i]}
+            ranura={ranura}
+            puntero={puntero}
+            origen={origen}
+            activo={activo}
+            quieto={quieto}
+          />
         </div>
       ))}
 
@@ -150,6 +175,8 @@ export function NotasFlotando({
           texto={ultima}
           ranura={RANURA_NUEVA}
           puntero={puntero}
+          origen={origen}
+          activo={activo}
           nueva
           quieto={quieto}
         />

@@ -27,9 +27,13 @@ export function Escena() {
   const [respuestas, setRespuestas] = useState<string[]>([]);
   const [quieto, setQuieto] = useState(false);
   const [sinAgua, setSinAgua] = useState(false);
+  // Antes del impacto no se mueve nada: ni notas, ni cartas con el mouse, ni
+  // ondas, ni lluvia de fondo. Todo junto desde el segundo cero se lee como
+  // ruido y la gota, que es lo que hay que mirar, se pierde.
+  const [caida, setCaida] = useState(false);
 
   const agua = useRef<AguaApi>(null);
-  const puntero = usePuntero(!quieto);
+  const puntero = usePuntero(!quieto && caida);
   const sonido = useSonido();
   const encender = sonido.encender;
 
@@ -40,7 +44,10 @@ export function Escena() {
     } catch {}
 
     const salto = new URLSearchParams(window.location.search).get("acto");
-    if (salto === "pregunta" || salto === "colapso" || salto === "disco") setActo(salto);
+    if (salto === "pregunta" || salto === "colapso" || salto === "disco") {
+      setActo(salto);
+      setCaida(true); // saltarse la gota no puede dejar la página congelada
+    }
   }, []);
 
   useEffect(() => {
@@ -54,7 +61,7 @@ export function Escena() {
   // El puntero agita el agua. Limitado por reloj: sin esto un mouse rápido
   // encola cientos de gotas por segundo y la simulación se satura en espuma.
   useEffect(() => {
-    if (quieto) return;
+    if (quieto || !caida) return;
     let ultima = 0;
 
     const mover = (e: PointerEvent) => {
@@ -81,15 +88,21 @@ export function Escena() {
       window.removeEventListener("pointermove", mover);
       window.removeEventListener("pointerdown", tocar);
     };
-  }, [quieto]);
+  }, [quieto, caida]);
 
   const alCaer = useCallback(() => {
     agua.current?.salpicar(IMPACTO.x, IMPACTO.y, 0.95);
+    setCaida(true);
     // La canción entra con la gota. Si el navegador la bloquea, `useSonido`
     // deja armado el primer gesto — que además tira otra gota al agua.
     encender();
     setActo("pregunta");
   }, [encender]);
+
+  // El chorrito que rebota vuelve a caer: segundo golpe, más chico.
+  const alRebotar = useCallback(() => {
+    agua.current?.salpicar(IMPACTO.x, IMPACTO.y, 0.4);
+  }, []);
 
   const enviar = useCallback((texto: string, pos: { x: number; y: number }) => {
     // La respuesta cae al río donde estaba escrita.
@@ -119,13 +132,35 @@ export function Escena() {
         {sinAgua ? (
           <RioSinAgua quieto={quieto} />
         ) : (
-          <Agua ref={agua} quieto={quieto} onSinAgua={() => setSinAgua(true)} />
+          <Agua
+            ref={agua}
+            quieto={quieto}
+            lluvia={caida}
+            onSinAgua={() => setSinAgua(true)}
+          />
         )}
 
-        <NotasFlotando respuestas={respuestas} puntero={puntero} quieto={quieto} />
+        {/* Antes de la gota el río está velado: se intuye agua oscura y nada
+            más. El impacto destapa el fondo. */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 z-[5]"
+          style={{ background: "var(--color-hondo)" }}
+          initial={{ opacity: 0.75 }}
+          animate={{ opacity: caida ? 0 : 0.75 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+        />
+
+        <NotasFlotando
+          respuestas={respuestas}
+          puntero={puntero}
+          quieto={quieto}
+          activo={caida}
+          origen={IMPACTO}
+        />
         <Causticas quieto={quieto} />
 
-        {acto === "gota" && <Gota onImpacto={alCaer} />}
+        {acto === "gota" && <Gota onImpacto={alCaer} onRebote={alRebotar} />}
 
         {/* Hunde el fondo justo donde va el texto: sobre una cáustica clara la
             pregunta se pierde. */}
@@ -159,7 +194,7 @@ export function Escena() {
 
                   <PreguntaEmergente
                     texto={site.pregunta}
-                    demora={0.25}
+                    demora={0.5}
                     onListo={() => setInputListo(true)}
                     className="glow mt-7 font-serif text-[clamp(1.9rem,6.2vw,4.1rem)] leading-[1.12] tracking-[-0.01em] md:mt-9"
                   />

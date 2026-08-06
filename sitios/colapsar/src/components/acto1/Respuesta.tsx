@@ -74,7 +74,7 @@ export function Respuesta({ onEnviar }: { onEnviar: (texto: string) => void }) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.7 }}
       >
-        <span className="placa text-[7.5px]">nadie va a saber que fuiste vos</span>
+        <span className="placa text-[7.5px]">nadie va a saber que fuiste tú</span>
         <span className="font-mono text-[10px] text-humo/70 tabular-nums">
           {valor.length}/{site.maxRespuesta}
         </span>
