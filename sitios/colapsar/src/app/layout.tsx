@@ -20,7 +20,16 @@ const courier = Courier_Prime({
 const titulo = `${site.cancion} — ${site.artista}`;
 const descripcion = "Museo de cosas que nunca pasaron.";
 
+// La portada del OG se declara con ruta relativa, así que sin base Next la
+// resuelve contra localhost:3000 y el link no muestra imagen en ningún lado.
+// Vercel expone el dominio de producción en build; en local vale el puerto que
+// haya. Es lo único de la página que solo se rompe una vez publicada.
+const base = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : `http://localhost:${process.env.PORT ?? 3000}`;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(base),
   title: titulo,
   description: descripcion,
   openGraph: {
