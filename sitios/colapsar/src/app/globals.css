@@ -1,26 +1,130 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-noche: #0b0d0c;
+  --color-verde: #2e4440;
+  --color-tiza: #f2f0ea;
+  --color-papel: #d6d1c4;
+  --color-humo: #8a8f8b;
+  --color-terracota: #a8624a;
+
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-mono: var(--font-courier), ui-monospace, "Courier New", monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-noche);
+  color: var(--color-tiza);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* El glow del artwork: tres capas, de duro a difuso. */
+.glow {
+  text-shadow:
+    0 0 1px rgba(242, 240, 234, 0.85),
+    0 0 16px rgba(242, 240, 234, 0.42),
+    0 0 52px rgba(242, 240, 234, 0.2);
+}
+
+.glow-suave {
+  text-shadow:
+    0 0 10px rgba(242, 240, 234, 0.26),
+    0 0 34px rgba(242, 240, 234, 0.12);
+}
+
+/* Placa de museo. */
+.placa {
+  font-family: var(--font-mono);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--color-humo);
+}
+
+/* Líneas de barrido del televisor. */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.38) 3px,
+    rgba(0, 0, 0, 0.38) 4px
+  );
+  opacity: 0.5;
+}
+
+/* El cursor de la máquina de escribir. */
+@keyframes parpadeo {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  49%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.4em;
+  height: 0.78em;
+  margin-left: 0.1em;
+  background: var(--color-tiza);
+  box-shadow: 0 0 14px rgba(242, 240, 234, 0.55);
+  animation: parpadeo 1.06s steps(1) infinite;
+}
+
+/* Péndulo de las notas colgadas. */
+@keyframes colgar {
+  0%,
+  100% {
+    transform: rotate(calc(var(--reposo) - var(--vaiven)));
+  }
+  50% {
+    transform: rotate(calc(var(--reposo) + var(--vaiven)));
+  }
+}
+
+.nota {
+  transform-origin: 50% 2px;
+  animation: colgar var(--dur) ease-in-out var(--retardo) infinite;
+}
+
+/* Deriva ken-burns de cada canal. */
+@keyframes deriva {
+  from {
+    transform: scale(1.08) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.22) translate3d(var(--dx), var(--dy), 0);
+  }
+}
+
+.canal-img {
+  animation: deriva var(--dur) ease-in-out var(--retardo) infinite alternate;
+}
+
+/* Grano fino sobre todo. */
+.grano {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nota,
+  .canal-img,
+  .cursor {
+    animation: none !important;
+  }
 }
