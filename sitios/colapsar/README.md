@@ -41,6 +41,57 @@ Las ranuras de las notas (`fondo/MuroNotas.tsx`) están calzadas en los huecos
 que dejan los televisores (`fondo/Canales.tsx`). Al mover un marco hay que
 mover una ranura, si no las notas caen encima de las caras.
 
+La cifra que corona la placa se lee junto con ella: **"1.200 cosas que nunca
+pasaron"**. Son una sola frase partida en dos cuerpos, por eso el número va en
+serif y grande y la placa se queda de pie de foto. La luz que lo recorre es
+`.cifra` en `globals.css`: un degradado que se mueve, recortado contra el texto
+con `background-clip`. El número sale de `site.coleccion` y **está puesto a
+mano**: las respuestas viven en el `localStorage` de cada persona y no hay nada
+que las sume. Cuando exista el backend, ese es el sitio donde enchufarlo.
+
+## Móvil es otra maqueta, no la misma recortada
+
+Escritorio reparte las notas en los huecos que dejan los televisores. **En móvil
+es al revés: las notas van encima de las fotos.** Dos montones, arriba y abajo,
+y el centro libre.
+
+Son dos tablas ordenadas de mejor a peor, `PIEZAS_MOVIL` en `fondo/Canales.tsx`
+y `PAPELES_MOVIL` en `fondo/MuroNotas.tsx`, en el mismo orden: la ranura *n* cae
+sobre el marco *n*. Al mover una hay que mover la otra. No hace falta z-index —
+la pared vive en z-10 y los canales en z-0, así que el papel ya queda delante.
+
+Para tantear la densidad hay dos parámetros, solo de móvil:
+
+```
+?fotos=N     0 a 6   (por defecto 5)
+?notas=N     0 a 8   (por defecto 7)
+```
+
+Los defaults son `FOTOS_MOVIL` y `NOTAS_MOVIL`, exportados de cada fichero.
+
+Tres cosas que se rompen fácil:
+
+- **Comprobar siempre a 320x700, no a 375x812.** Los porcentajes son del alto
+  del viewport, pero el papel mide en px y encima crece cuando la pantalla es
+  estrecha, porque el texto se envuelve más. En la pantalla baja el centro sube
+  y el papel baja a la vez, así que es ahí donde una nota se come la placa.
+- **En el acto del disco el collage de móvil se apaga** (`ATENUAR`, en
+  `Canales.tsx`). El bloque del disco baja hasta el 86% y le cae justo encima al
+  montón de abajo: sin eso, el "COLAPSAR / SHONNY" es ilegible sobre una pila de
+  papeles. Además cuenta bien lo que pasa ahí: el museo se apaga y queda la
+  canción.
+- **El velo de `Museo.tsx`** llega a 0.92 de negro en el centro y no se apaga
+  hasta los bordes, así que todo lo que se acerque al medio se ve mucho más
+  oscuro de lo que sugieren los porcentajes. Se mira con los ojos.
+
+En móvil ya no queda fondo limpio donde aterriza la nota recién escrita. Se
+apoya en que se pinta la última: dentro de z-10 manda el orden del DOM y el
+papel es opaco, así que se lee encima del collage en vez de sobre negro.
+
+Las dos listas se montan siempre y el CSS esconde una, así que un móvil también
+pide las fotos de escritorio. El `display:none` no frena a un `<img>` lazy. Es
+el precio de tener dos maquetas a mano en vez de una responsive.
+
 ## Abrir una nota
 
 Las notas se pueden leer de cerca: al hacerles click se despegan de la pared,

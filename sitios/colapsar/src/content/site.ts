@@ -7,8 +7,14 @@ export const site = {
 
   // La placa de arriba y la pregunta que se teclea.
   placa: "Museo de cosas que nunca pasaron",
-  pregunta: "¿Qué esperaste que nunca llegó?",
+  pregunta: "Deja tu confesión",
   marcador: "escríbelo aquí…",
+
+  // La cifra que corona la placa: se lee junto con ella, "1.200 cosas que nunca
+  // pasaron". Es un número puesto a mano, no un conteo: las respuestas viven en
+  // el localStorage de cada persona y no hay nada que las sume. Cuando exista el
+  // backend, este es el sitio donde enchufarlo.
+  coleccion: 1200,
 
   // Lo que se teclea al responder.
   invitacion: "Ven, acompáñame a colapsar.",

@@ -102,6 +102,33 @@ body {
   animation: colgar var(--dur) ease-in-out var(--retardo) infinite;
 }
 
+/* La luz que recorre la cifra. Es el mismo barrido del televisor, pero recortado
+   contra el texto: el degradado se mueve y `background-clip: text` lo enmascara.
+   Sin animación se queda en su posición inicial, que ya es legible. */
+@keyframes barrido-cifra {
+  from {
+    background-position: 220% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+.cifra {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-humo) 38%,
+    var(--color-tiza) 50%,
+    var(--color-humo) 62%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: barrido-cifra 6.5s linear 1.2s infinite;
+}
+
 /* Deriva ken-burns de cada canal. */
 @keyframes deriva {
   from {
@@ -124,7 +151,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .nota,
   .canal-img,
-  .cursor {
+  .cursor,
+  .cifra {
     animation: none !important;
   }
 }

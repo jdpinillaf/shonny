@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { site } from "@/content/site";
-import { entre, indice } from "@/lib/semilla";
+import { corrido, entre, indice } from "@/lib/semilla";
 import { cuadrosDeEstatica } from "./estatica";
 
 /**
@@ -14,15 +14,73 @@ import { cuadrosDeEstatica } from "./estatica";
  * persona, y es el único momento de la página en que algo tiene que leerse
  * sobre fondo limpio.
  */
-type Marco = { id: string; x: string; y: string; w: string; h: string; movil: boolean };
+type Marco = { id: string; x: string; y: string; w: string; h: string };
 
-const MARCOS: Marco[] = [
-  { id: "a", x: "2%", y: "6%", w: "20vw", h: "30vh", movil: true },
-  { id: "b", x: "13%", y: "56%", w: "17vw", h: "27vh", movil: false },
-  { id: "c", x: "76%", y: "10%", w: "21vw", h: "32vh", movil: true },
-  { id: "d", x: "80%", y: "58%", w: "18vw", h: "28vh", movil: false },
-  { id: "f", x: "52%", y: "78%", w: "16vw", h: "24vh", movil: false },
+const MARCOS_ESCRITORIO: Marco[] = [
+  { id: "a", x: "2%", y: "6%", w: "20vw", h: "30vh" },
+  { id: "b", x: "13%", y: "56%", w: "17vw", h: "27vh" },
+  { id: "c", x: "76%", y: "10%", w: "21vw", h: "32vh" },
+  { id: "d", x: "80%", y: "58%", w: "18vw", h: "28vh" },
+  { id: "f", x: "52%", y: "78%", w: "16vw", h: "24vh" },
 ];
+
+/**
+ * Móvil no es escritorio recortado: es un collage propio, con sus fotos y las
+ * notas encima (las ranuras que las tapan están en `MuroNotas.tsx`, en el mismo
+ * orden). La lista va de mejor a peor, así que `?fotos=1` enseña la mejor
+ * colocación sola y cada número que subes añade la siguiente.
+ *
+ * Dos montones, arriba y abajo, y el medio libre. **La pantalla más baja
+ * manda**: estos porcentajes son del alto del viewport, pero el papel mide en px
+ * y encima crece cuando la pantalla es estrecha, porque el texto se envuelve
+ * más. En un 320x700 el centro sube y el papel baja a la vez. Comprobar siempre
+ * a 320x700, no a 375x812.
+ *
+ * Lo demás que hay que dejar en paz:
+ *
+ * - El medio (y 36-64%): placa, pregunta, input y después la card.
+ * - El velo de `Museo.tsx` llega a 0.92 de negro en el centro y no se apaga
+ *   hasta los bordes, así que todo lo que se acerque al medio se ve mucho más
+ *   oscuro de lo que sugieren estos porcentajes. Se mira con los ojos.
+ *
+ * El ancho tiene suelo: los `minWidth`/`minHeight` de `Canal` pisan al vw/vh en
+ * pantalla chica. Por debajo de ~34vw bajar el número deja de tener efecto.
+ */
+const PIEZAS_MOVIL = [
+  { id: "m1", x: -6, y: 1, w: "52vw", h: "24vh" },
+  { id: "m2", x: 52, y: 67, w: "50vw", h: "23vh" },
+  { id: "m3", x: -4, y: 74, w: "48vw", h: "22vh" },
+  { id: "m4", x: 46, y: 3, w: "46vw", h: "21vh" },
+  { id: "m5", x: 22, y: 66, w: "44vw", h: "19vh" },
+  { id: "m6", x: 14, y: 17, w: "42vw", h: "15vh" },
+];
+
+const MARCOS_MOVIL: Marco[] = PIEZAS_MOVIL.map((p) => ({
+  id: p.id,
+  w: p.w,
+  h: p.h,
+  ...corrido(p.id, p.x, p.y),
+}));
+
+/** Cuántas fotos entran en móvil. Se tantea con `?fotos=`. */
+export const FOTOS_MOVIL = 5;
+export const TOPE_FOTOS = MARCOS_MOVIL.length;
+
+/**
+ * Cuando entra el disco, el collage de móvil se apaga.
+ *
+ * En escritorio el centro se libera y ya, pero en móvil el bloque del disco baja
+ * hasta el 86% y le cae justo encima al montón de abajo: el "COLAPSAR / SHONNY"
+ * se vuelve ilegible sobre una pila de papeles. Apagarlo también cuenta bien lo
+ * que pasa ahí — el museo se apaga y queda la canción.
+ *
+ * Va en CSS y no en motion porque envuelve el árbol entero: una transición de
+ * opacidad sobre un contenedor es gratis, y `MotionConfig` no llega hasta acá.
+ */
+export const ATENUAR = (apagado: boolean) => ({
+  opacity: apagado ? 0.22 : 1,
+  transition: "opacity 1.6s ease-out",
+});
 
 const DURACION_CORTE = 150; // ms de estática al cambiar de canal
 
@@ -56,7 +114,15 @@ function Estatica({ activa }: { activa: boolean }) {
   );
 }
 
-function Canal({ marco, quieto }: { marco: Marco; quieto: boolean }) {
+function Canal({
+  marco,
+  quieto,
+  primera,
+}: {
+  marco: Marco;
+  quieto: boolean;
+  primera: boolean;
+}) {
   const total = site.fotos.length;
   const [foto, setFoto] = useState(() => indice(marco.id, total));
   const [cortando, setCortando] = useState(false);
@@ -122,10 +188,15 @@ function Canal({ marco, quieto }: { marco: Marco; quieto: boolean }) {
           src={site.fotos[foto]}
           alt=""
           fill
-          sizes="24vw"
+          sizes="(max-width: 767px) 55vw, 24vw"
           className="object-cover"
           style={{ filter: "grayscale(1) contrast(1.16) brightness(0.74)" }}
-          priority={marco.id === "a" || marco.id === "c"}
+          // Solo la primera de cada lista, para no precargar de más. El resto se
+          // queda en el `loading="lazy"` de next/image, que igual las pide todas
+          // enseguida: las dos listas se montan siempre (una la esconde el CSS)
+          // y el `display:none` no frena a un `<img>` lazy. Es el precio de
+          // tener dos maquetas hechas a mano en vez de una responsive.
+          priority={primera}
         />
       </div>
 
@@ -144,14 +215,28 @@ function Canal({ marco, quieto }: { marco: Marco; quieto: boolean }) {
   );
 }
 
-export function Canales({ quieto }: { quieto: boolean }) {
+export function Canales({
+  quieto,
+  fotos,
+  apagado,
+}: {
+  quieto: boolean;
+  fotos: number;
+  apagado: boolean;
+}) {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
-      {MARCOS.map((m) => (
-        <div key={m.id} className={m.movil ? "" : "hidden md:block"}>
-          <Canal marco={m} quieto={quieto} />
-        </div>
-      ))}
+      <div className="hidden md:block">
+        {MARCOS_ESCRITORIO.map((m, i) => (
+          <Canal key={m.id} marco={m} quieto={quieto} primera={i === 0} />
+        ))}
+      </div>
+
+      <div className="md:hidden" style={ATENUAR(apagado)}>
+        {MARCOS_MOVIL.slice(0, fotos).map((m, i) => (
+          <Canal key={m.id} marco={m} quieto={quieto} primera={i === 0} />
+        ))}
+      </div>
     </div>
   );
 }

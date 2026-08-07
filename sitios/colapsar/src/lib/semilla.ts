@@ -35,3 +35,18 @@ export function entre(semilla: string, min: number, max: number, via = 0): numbe
 export function indice(semilla: string, n: number, via = 0): number {
   return Math.floor(azar(semilla, via) * n) % n;
 }
+
+/**
+ * Un empujón chico y estable sobre unas coordenadas en %.
+ *
+ * Las tablas de posiciones se escriben con números redondos, y eso se lee como
+ * rejilla: las piezas quedan alineadas entre sí sin que nadie lo haya pedido.
+ * Esto las descuadra lo justo, y como sale de la semilla del id, la misma
+ * pantalla se sigue viendo siempre igual.
+ */
+export function corrido(semilla: string, x: number, y: number) {
+  return {
+    x: `${(x + entre(semilla, -2, 2, 11)).toFixed(1)}%`,
+    y: `${(y + entre(semilla, -1.5, 1.5, 12)).toFixed(1)}%`,
+  };
+}

@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { useRef } from "react";
 import { entre } from "@/lib/semilla";
 
-export type Ranura = { x: string; y: string; movil: boolean };
+export type Ranura = { x: string; y: string };
 
 /**
  * De dónde salió la nota que se abrió: lo que hace falta para mandarla de vuelta
@@ -25,7 +25,7 @@ export type Origen = {
 };
 
 /** El pie de museo. Lo comparten la nota de la pared y la nota abierta. */
-export const PIE = "s/f · anónimo · nos perdimos la oportunidad";
+export const PIE = "anónimo · nos perdimos la oportunidad";
 
 export const PAPEL = {
   tinta: "#22201c",
@@ -42,12 +42,22 @@ type Props = {
   /** La que acaba de escribir la persona: entra desde el centro y se queda encendida. */
   nueva?: boolean;
   quieto: boolean;
+  /** Hay un puntero de verdad, no un dedo. */
+  puntero: boolean;
   onAbrir: (origen: Origen) => void;
   /** Está abierta en grande: se apaga acá para que no se vea dos veces. */
   oculta?: boolean;
 };
 
-export function Nota({ texto, ranura, nueva = false, quieto, onAbrir, oculta = false }: Props) {
+export function Nota({
+  texto,
+  ranura,
+  nueva = false,
+  quieto,
+  puntero,
+  onAbrir,
+  oculta = false,
+}: Props) {
   const semilla = texto;
   const reposo = entre(semilla, -3.4, 3.4, 1);
   const papel = useRef<HTMLButtonElement>(null);
@@ -82,7 +92,10 @@ export function Nota({ texto, ranura, nueva = false, quieto, onAbrir, oculta = f
         y: 0,
         filter: "blur(0px)",
       }}
-      whileHover={{ opacity: 1, scale: 1.035 }}
+      // Solo con puntero: en táctil el toque cuenta como hover y se queda
+      // pegado, así que la nota se quedaría encendida y un pelo más grande
+      // después de cerrarla.
+      whileHover={puntero ? { opacity: 1, scale: 1.035 } : undefined}
       exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.4 } }}
       transition={
         nueva

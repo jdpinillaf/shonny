@@ -6,8 +6,8 @@ import { Pregunta } from "./acto1/Pregunta";
 import { Respuesta } from "./acto1/Respuesta";
 import { Colapso } from "./acto2/Colapso";
 import { Disco } from "./acto3/Disco";
-import { Canales } from "./fondo/Canales";
-import { MuroNotas } from "./fondo/MuroNotas";
+import { Canales, FOTOS_MOVIL, TOPE_FOTOS } from "./fondo/Canales";
+import { MuroNotas, NOTAS_MOVIL, TOPE_NOTAS } from "./fondo/MuroNotas";
 import { Sonido } from "./Sonido";
 import { site } from "@/content/site";
 import { useSonido } from "@/lib/useSonido";
@@ -22,6 +22,9 @@ export function Museo() {
   const [inputListo, setInputListo] = useState(false);
   const [respuestas, setRespuestas] = useState<string[]>([]);
   const [quieto, setQuieto] = useState(false);
+  const [puntero, setPuntero] = useState(false);
+  const [fotos, setFotos] = useState(FOTOS_MOVIL);
+  const [cuantasNotas, setCuantasNotas] = useState(NOTAS_MOVIL);
   const sonido = useSonido();
 
   // Las respuestas se leen después del montaje. Si se leyeran durante el render
@@ -34,10 +37,26 @@ export function Museo() {
       // localStorage bloqueado (modo privado): la pared arranca vacía y ya.
     }
 
+    const params = new URLSearchParams(window.location.search);
+
     // ?acto=colapso | ?acto=disco entra directo a ese momento. Sirve para
     // revisar el final sin volver a escribir la respuesta cada vez.
-    const salto = new URLSearchParams(window.location.search).get("acto");
+    const salto = params.get("acto");
     if (salto === "colapso" || salto === "disco") setActo(salto);
+
+    // ?fotos=N y ?notas=N tantean cuánta densidad aguanta el collage de móvil.
+    // Escritorio los ignora: sus tablas siguen fijas y puestas a mano.
+    const cuenta = (clave: string, porDefecto: number, tope: number) => {
+      // El `null` de un param que no viene hay que atajarlo antes: `Number(null)`
+      // es 0, y 0 pasa la validación tan campante. Sin esto, no poner el
+      // parámetro deja la pared vacía en vez de dejar el default.
+      const crudo = params.get(clave);
+      if (!crudo) return porDefecto;
+      const n = Number(crudo);
+      return Number.isInteger(n) && n >= 0 && n <= tope ? n : porDefecto;
+    };
+    setFotos(cuenta("fotos", FOTOS_MOVIL, TOPE_FOTOS));
+    setCuantasNotas(cuenta("notas", NOTAS_MOVIL, TOPE_NOTAS));
   }, []);
 
   useEffect(() => {
@@ -46,6 +65,12 @@ export function Museo() {
     leer();
     mq.addEventListener("change", leer);
     return () => mq.removeEventListener("change", leer);
+  }, []);
+
+  // El hover de las notas solo se monta si hay un puntero de verdad: en táctil
+  // el toque cuenta como hover y se queda pegado.
+  useEffect(() => {
+    setPuntero(window.matchMedia("(hover: hover)").matches);
   }, []);
 
   // El audio no se toca acá: `useSonido` ya lo enciende con el primer gesto de
@@ -75,8 +100,14 @@ export function Museo() {
     // "user" es lo que las desarma.
     <MotionConfig reducedMotion="user">
       <main className="relative h-dvh w-full overflow-hidden">
-        <Canales quieto={quieto} />
-        <MuroNotas respuestas={respuestas} quieto={quieto} />
+        <Canales quieto={quieto} fotos={fotos} apagado={acto === "disco"} />
+        <MuroNotas
+          respuestas={respuestas}
+          quieto={quieto}
+          puntero={puntero}
+          notas={cuantasNotas}
+          apagado={acto === "disco"}
+        />
 
         {/* Rebaja lo que haya detrás justo donde va el texto. Sin esto, una nota
             o un canal claro pueden dejar la pregunta ilegible. Cuando entra el
@@ -105,7 +136,10 @@ export function Museo() {
                   exit={{ opacity: 0, y: -26, filter: "blur(5px)" }}
                   transition={{ duration: 0.62, ease: SUAVE }}
                 >
-                  <Pregunta onListo={preguntaLista} />
+                  <Pregunta
+                    onListo={preguntaLista}
+                    total={site.coleccion + respuestas.length}
+                  />
                   {inputListo && <Respuesta onEnviar={enviar} />}
                 </motion.div>
               )}
