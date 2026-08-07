@@ -41,13 +41,13 @@ Las ranuras de las notas (`fondo/MuroNotas.tsx`) están calzadas en los huecos
 que dejan los televisores (`fondo/Canales.tsx`). Al mover un marco hay que
 mover una ranura, si no las notas caen encima de las caras.
 
-La cifra que corona la placa se lee junto con ella: **"1.200 cosas que nunca
-pasaron"**. Son una sola frase partida en dos cuerpos, por eso el número va en
-serif y grande y la placa se queda de pie de foto. La luz que lo recorre es
-`.cifra` en `globals.css`: un degradado que se mueve, recortado contra el texto
-con `background-clip`. El número sale de `site.coleccion` y **está puesto a
-mano**: las respuestas viven en el `localStorage` de cada persona y no hay nada
-que las sume. Cuando exista el backend, ese es el sitio donde enchufarlo.
+Bajo la placa va el recuento, **"1.200 cosas que nunca pasaron"**, con la cifra
+en serif y grande y el resto de la frase pequeño al lado: es lo que lo separa de
+un dato de pie de página y hace que se mire. La luz que lo recorre es `.cifra` en
+`globals.css`, un degradado que se mueve recortado contra el texto con
+`background-clip`. El número sale de `site.coleccion` y **está puesto a mano**:
+las respuestas viven en el `localStorage` de cada persona y no hay nada que las
+sume. Cuando exista el backend, ese es el sitio donde enchufarlo.
 
 ## Móvil es otra maqueta, no la misma recortada
 

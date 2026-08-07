@@ -6,15 +6,16 @@ export const site = {
   cancion: "Colapsar",
 
   // La placa de arriba y la pregunta que se teclea.
-  placa: "Museo de cosas que nunca pasaron",
+  placa: "Museo de lo que nunca pasó",
   pregunta: "Deja tu confesión",
   marcador: "escríbelo aquí…",
 
-  // La cifra que corona la placa: se lee junto con ella, "1.200 cosas que nunca
-  // pasaron". Es un número puesto a mano, no un conteo: las respuestas viven en
-  // el localStorage de cada persona y no hay nada que las sume. Cuando exista el
-  // backend, este es el sitio donde enchufarlo.
+  // El recuento que va bajo la placa: "1.200 cosas que nunca pasaron". El número
+  // está puesto a mano, no es un conteo: las respuestas viven en el localStorage
+  // de cada persona y no hay nada que las sume. Cuando exista el backend, este
+  // es el sitio donde enchufarlo.
   coleccion: 1200,
+  recuento: "cosas que nunca pasaron",
 
   // Lo que se teclea al responder.
   invitacion: "Ven, acompáñame a colapsar.",

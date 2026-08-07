@@ -30,29 +30,34 @@ export function Pregunta({ onListo, total }: { onListo: () => void; total: numbe
 
   return (
     <div className="text-center">
-      {/* La cifra corona la placa y se lee con ella: "1.200 cosas que nunca
-          pasaron". Por eso va en serif y grande y la placa se queda de pie de
-          foto: son una sola frase partida en dos cuerpos. */}
-      <motion.p
-        className="cifra font-serif text-[clamp(2rem,8.5vw,3.4rem)] leading-[1] tracking-[-0.02em]"
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {conMiles(total)}
-      </motion.p>
-
       <motion.p
         // `.placa` trae 0.34em de tracking, que a este cuerpo parte el título en
         // dos líneas por debajo de 375px. El clamp y el tracking corto lo
         // sostienen en una sola línea hasta 320px, y en `md` recupera el
         // espaciado de placa de museo.
-        className="placa mt-2 text-[clamp(9px,2.6vw,16px)] tracking-[0.22em] md:tracking-[0.34em]"
+        className="placa text-[clamp(9px,2.6vw,16px)] tracking-[0.22em] md:tracking-[0.34em]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.4, delay: 0.3 }}
       >
         {site.placa}
+      </motion.p>
+
+      {/* El recuento, debajo de la placa. La cifra va en serif y grande y el
+          resto de la frase pequeño al lado: es lo que la separa de un dato de
+          pie de página y hace que se mire. */}
+      <motion.p
+        className="cifra mt-3 flex items-baseline justify-center gap-2 font-serif"
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <span className="text-[clamp(1.7rem,6.4vw,2.8rem)] leading-[1] tracking-[-0.02em]">
+          {conMiles(total)}
+        </span>
+        <span className="text-[clamp(0.72rem,2.5vw,1.05rem)] leading-[1]">
+          {site.recuento}
+        </span>
       </motion.p>
 
       <h1 className="glow mt-7 font-serif text-[clamp(1.9rem,6.2vw,4.1rem)] leading-[1.12] tracking-[-0.01em] md:mt-9">
