@@ -22,7 +22,11 @@ export function Pregunta({ onListo }: { onListo: () => void }) {
   return (
     <div className="text-center">
       <motion.p
-        className="placa text-[9px] md:text-[10px]"
+        // `.placa` trae 0.34em de tracking, que a este cuerpo parte el título en
+        // dos líneas por debajo de 375px. El clamp y el tracking corto lo
+        // sostienen en una sola línea hasta 320px, y en `md` recupera el
+        // espaciado de placa de museo.
+        className="placa text-[clamp(9px,2.6vw,16px)] tracking-[0.22em] md:tracking-[0.34em]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.4, delay: 0.3 }}

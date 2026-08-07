@@ -1,9 +1,11 @@
 "use client";
 
 import { AnimatePresence } from "motion/react";
+import { useState } from "react";
 import { notas } from "@/content/notas";
 import { azar } from "@/lib/semilla";
-import { Nota, type Ranura } from "./Nota";
+import { Nota, type Origen, type Ranura } from "./Nota";
+import { NotaAbierta } from "./NotaAbierta";
 
 /**
  * Ranuras de la pared, en % del viewport.
@@ -51,19 +53,59 @@ export function MuroNotas({
 }) {
   const ultima = respuestas.at(-1);
 
-  return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-10">
-      {RANURAS.map((ranura, i) => (
-        <div key={i} className={ranura.movil ? "" : "hidden md:block"}>
-          <Nota texto={REPARTO[i]} ranura={ranura} quieto={quieto} />
-        </div>
-      ))}
+  // `abierta` monta la nota grande; `hueco` es la de la pared que se apaga
+  // mientras tanto. Son dos porque el hueco tiene que seguir vacío durante el
+  // vuelo de vuelta: si se llenara al cerrar, la nota se vería dos veces.
+  const [abierta, setAbierta] = useState<Origen | null>(null);
+  const [hueco, setHueco] = useState<Origen | null>(null);
 
-      <AnimatePresence mode="wait">
-        {ultima && (
-          <Nota key={ultima} texto={ultima} ranura={RANURA_NUEVA} nueva quieto={quieto} />
+  const abrir = (origen: Origen) => {
+    setAbierta(origen);
+    setHueco(origen);
+  };
+
+  const volvioAPegarse = () => {
+    hueco?.boton?.focus();
+    setHueco(null);
+  };
+
+  return (
+    <>
+      {/* La pared no recibe clicks: se los devuelve cada papel por su cuenta.
+          Si no, este `fixed inset-0` se comería los del centro. */}
+      <div className="pointer-events-none fixed inset-0 z-10">
+        {RANURAS.map((ranura, i) => (
+          <div key={i} className={ranura.movil ? "" : "hidden md:block"}>
+            <Nota
+              texto={REPARTO[i]}
+              ranura={ranura}
+              quieto={quieto}
+              onAbrir={abrir}
+              oculta={hueco?.texto === REPARTO[i]}
+            />
+          </div>
+        ))}
+
+        <AnimatePresence mode="wait">
+          {ultima && (
+            <Nota
+              key={ultima}
+              texto={ultima}
+              ranura={RANURA_NUEVA}
+              nueva
+              quieto={quieto}
+              onAbrir={abrir}
+              oculta={hueco?.texto === ultima}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+
+      <AnimatePresence onExitComplete={volvioAPegarse}>
+        {abierta && (
+          <NotaAbierta key={abierta.texto} origen={abierta} onCerrar={() => setAbierta(null)} />
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }

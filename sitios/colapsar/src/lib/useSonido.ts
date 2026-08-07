@@ -6,6 +6,9 @@ import { site } from "@/content/site";
 /** Cualquiera de estos cuenta como gesto de usuario para el navegador. */
 const GESTOS = ["pointerdown", "keydown", "touchstart", "wheel"] as const;
 
+/** La canción es fondo, no protagonista. */
+const VOLUMEN = 0.4;
+
 /**
  * Los 15 segundos, en loop, sonando lo antes que el navegador deje.
  *
@@ -36,7 +39,7 @@ export function useSonido() {
   const encender = useCallback(() => {
     const el = audio.current;
     if (!el || !el.paused) return;
-    el.volume = 0.7;
+    el.volume = VOLUMEN;
     el.play().then(
       () => setSonando(true),
       // Puede negarse igual. No vale la pena interrumpir nada: el botón de la
@@ -60,7 +63,7 @@ export function useSonido() {
       for (const g of GESTOS) document.removeEventListener(g, alGesto);
     };
 
-    el.volume = 0.7;
+    el.volume = VOLUMEN;
     el.play().then(
       () => {
         if (vivo) setSonando(true);

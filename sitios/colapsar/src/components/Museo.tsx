@@ -93,8 +93,11 @@ export function Museo() {
           transition={{ duration: 1.4, ease: "easeOut" }}
         />
 
-        <div className="relative z-30 flex h-full items-center justify-center px-5">
-          <div className="w-full max-w-[860px]">
+        {/* La columna tapa la pantalla entera, así que sin esto se comería los
+            clicks de las notas de la pared. Solo el bloque de contenido —el
+            ancho de 860px centrado, donde no hay ninguna ranura— los recibe. */}
+        <div className="pointer-events-none relative z-30 flex h-full items-center justify-center px-5">
+          <div className="pointer-events-auto w-full max-w-[860px]">
             <AnimatePresence mode="wait">
               {acto === "pregunta" && (
                 <motion.div
