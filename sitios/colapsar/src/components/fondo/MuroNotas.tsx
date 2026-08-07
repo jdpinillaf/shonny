@@ -2,10 +2,11 @@
 
 import { AnimatePresence } from "motion/react";
 import { useState } from "react";
-import { notas } from "@/content/notas";
-import { azar, corrido } from "@/lib/semilla";
+import { tajadas } from "@/content/coleccion";
+import { corrido } from "@/lib/semilla";
 import { ATENUAR } from "./Canales";
-import { Nota, type Origen, type Ranura } from "./Nota";
+import { Nota, type Ranura } from "./Nota";
+import { type Origen } from "./Papel";
 import { NotaAbierta } from "./NotaAbierta";
 
 /**
@@ -37,17 +38,22 @@ const RANURAS_ESCRITORIO: Ranura[] = [
  * el papel ya queda delante de la foto. El collage es cuestión de coordenadas.
  */
 const PAPELES_MOVIL = [
-  // Las de arriba van altas a propósito: tapan el medio de su foto y no la
-  // esquina. En un 320x700 el papel es más alto (el texto se envuelve más) y el
+  // Tres arriba y cuatro abajo con las 7 por defecto, y en ese orden: cinco
+  // abajo se apiñan.
+  //
+  // Las tres de arriba van escalonadas en x y en y porque a 320px el papel mide
+  // 134px y tres no caben en fila: así se leen como una pila y no como una
+  // tabla. Y van altas a propósito, tapando el medio de su foto y no la
+  // esquina — en un 320x700 el papel crece (el texto se envuelve más) y el
   // centro de la página sube, así que del 16% para abajo ya se come la placa.
-  { id: "p1", x: 18, y: 12 },
+  { id: "p1", x: 22, y: 13 },
   { id: "p2", x: 30, y: 78 },
   { id: "p3", x: 4, y: 88 },
-  { id: "p4", x: 54, y: 2 },
-  { id: "p5", x: 46, y: 68 },
-  { id: "p6", x: 20, y: 66 },
-  { id: "p7", x: 60, y: 88 },
-  { id: "p8", x: -4, y: 1 },
+  { id: "p4", x: 56, y: 1 },
+  { id: "p5", x: -8, y: 3 },
+  { id: "p6", x: 46, y: 68 },
+  { id: "p7", x: 20, y: 66 },
+  { id: "p8", x: 60, y: 88 },
 ];
 
 const RANURAS_MOVIL: Ranura[] = PAPELES_MOVIL.map((p) => corrido(p.id, p.x, p.y));
@@ -66,21 +72,9 @@ export const TOPE_NOTAS = RANURAS_MOVIL.length;
  */
 const RANURA_NUEVA: Ranura = { x: "50%", y: "5%" };
 
-/**
- * Reparto sin repetir: baraja determinista y se corta en dos tajadas que no se
- * solapan. Que no se solapen importa: las dos listas se montan en el DOM (una
- * la esconde el CSS), y si un texto saliera en las dos, el `oculta` casaría con
- * ambas y abrir una apagaría la otra.
- */
-const BARAJA = [...notas]
-  .map((texto, i) => ({ texto, orden: azar(`baraja-${i}`) }))
-  .sort((a, b) => a.orden - b.orden)
-  .map((n) => n.texto);
-
-const REPARTO_ESCRITORIO = BARAJA.slice(0, RANURAS_ESCRITORIO.length);
-const REPARTO_MOVIL = BARAJA.slice(
+const { escritorio: REPARTO_ESCRITORIO, movil: REPARTO_MOVIL } = tajadas(
   RANURAS_ESCRITORIO.length,
-  RANURAS_ESCRITORIO.length + RANURAS_MOVIL.length,
+  RANURAS_MOVIL.length,
 );
 
 export function MuroNotas({

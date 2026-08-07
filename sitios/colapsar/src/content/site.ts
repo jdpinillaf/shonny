@@ -10,11 +10,9 @@ export const site = {
   pregunta: "Deja tu confesión",
   marcador: "escríbelo aquí…",
 
-  // El recuento que va bajo la placa: "1.200 cosas que nunca pasaron". El número
-  // está puesto a mano, no es un conteo: las respuestas viven en el localStorage
-  // de cada persona y no hay nada que las sume. Cuando exista el backend, este
-  // es el sitio donde enchufarlo.
-  coleccion: 1200,
+  // El recuento que va bajo la placa: "24 cosas que nunca pasaron". El número no
+  // se escribe acá porque no es copy: es lo que hay de verdad en `notas.ts` más
+  // lo que haya escrito la persona, y el mural enseña exactamente eso.
   recuento: "cosas que nunca pasaron",
 
   // Lo que se teclea al responder.

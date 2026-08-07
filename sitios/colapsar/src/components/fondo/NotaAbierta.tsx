@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { PAPEL, PIE, type Origen } from "./Nota";
+import { PIE, TINTA, type Origen } from "./Papel";
 
 /** Arranca lento: la nota se despega antes de viajar, sin quedarse quieta. */
 const DESPEGUE = [0.5, 0, 0.25, 1] as const;
@@ -89,7 +89,7 @@ export function NotaAbierta({
         onClick={onCerrar}
         aria-label="Cerrar nota"
         className="absolute right-3 top-3 h-7 w-7 cursor-pointer font-mono text-[17px] leading-none opacity-55 transition-opacity hover:opacity-100"
-        style={{ color: PAPEL.tinta }}
+        style={{ color: TINTA.texto }}
       >
         ×
       </button>
@@ -97,7 +97,7 @@ export function NotaAbierta({
       <p className="text-[17px] leading-[1.6] md:text-[19px]">{origen.texto}</p>
       <p
         className="mt-5 border-t pt-3 text-[8.5px] uppercase tracking-[0.28em]"
-        style={{ borderColor: PAPEL.borde, color: PAPEL.pie }}
+        style={{ borderColor: TINTA.borde, color: TINTA.pie }}
       >
         {PIE}
       </p>
@@ -106,7 +106,7 @@ export function NotaAbierta({
 
   const fondoPapel = {
     background: "var(--color-papel)",
-    color: PAPEL.tinta,
+    color: TINTA.texto,
   };
 
   return (

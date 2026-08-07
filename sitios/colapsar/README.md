@@ -41,19 +41,51 @@ Las ranuras de las notas (`fondo/MuroNotas.tsx`) están calzadas en los huecos
 que dejan los televisores (`fondo/Canales.tsx`). Al mover un marco hay que
 mover una ranura, si no las notas caen encima de las caras.
 
-Bajo la placa va el recuento, **"1.200 cosas que nunca pasaron"**, con la cifra
-en serif y grande y el resto de la frase pequeño al lado: es lo que lo separa de
-un dato de pie de página y hace que se mire. La luz que lo recorre es `.cifra` en
+Bajo la placa va el recuento, **"24 cosas que nunca pasaron"**, con la cifra en
+serif y grande y el resto de la frase pequeño al lado: es lo que lo separa de un
+dato de pie de página y hace que se mire. La luz que lo recorre es `.cifra` en
 `globals.css`, un degradado que se mueve recortado contra el texto con
-`background-clip`. El número sale de `site.coleccion` y **está puesto a mano**:
-las respuestas viven en el `localStorage` de cada persona y no hay nada que las
-sume. Cuando exista el backend, ese es el sitio donde enchufarlo.
+`background-clip`. El número no es copy: son las notas de `content/notas.ts` más
+las respuestas de esa persona, y sube al enviar.
+
+## El mural
+
+El recuento es la única puerta a la colección entera. Al hundirlo se abre
+`components/mural/Mural.tsx`: la rejilla completa, dos columnas en móvil y
+cuatro desde `md`, y se cierra con la `×`, con `Escape` o tocando afuera.
+
+**El alto está cortado a propósito** — `max-h-[46vh] md:max-h-[56vh]` — para que
+se vean unas tres filas en móvil y tres o cuatro en escritorio y la siguiente
+asome por abajo. Si cupiera todo, el mural dejaría de parecer que tiene fondo y
+no habría nada que explorar.
+
+Las respuestas de la persona van primero, lo último arriba del todo. Después la
+colección barajada.
+
+Cuatro cosas que se rompen fácil:
+
+- **`overscroll-contain` en el contenedor con scroll no es opcional.** `body`
+  tiene `overflow: hidden` y sin eso el scroll que llega al final se lo lleva la
+  página por detrás.
+- **`NotaAbierta` va dentro del árbol del mural, no al lado.** Los dos viven en
+  `z-[35]`, y entre hermanos del mismo z manda el orden del DOM.
+- **El `Escape` del mural se calla mientras hay una nota abierta**, si no un solo
+  toque cerraría las dos cosas.
+- La celda se queda vacía hasta que termina el vuelo de vuelta (`onExitComplete`),
+  igual que en la pared. Con un solo estado, la nota se ve dos veces mientras
+  vuelve.
+
+El papel en sí vive en `fondo/Papel.tsx` y lo pintan tanto la pared como el
+mural. Está aparte porque los dos lo ponen en sitios muy distintos —uno absoluto
+y colgando de un chinche, el otro en una celda— y el fondo, la tinta y el pie son
+justo lo que se desincroniza a la tercera vez que se toca el copy.
 
 ## Móvil es otra maqueta, no la misma recortada
 
 Escritorio reparte las notas en los huecos que dejan los televisores. **En móvil
 es al revés: las notas van encima de las fotos.** Dos montones, arriba y abajo,
-y el centro libre.
+y el centro libre. Con las 7 por defecto salen **tres arriba y cuatro abajo** —
+cinco abajo se apiñan— y por eso el orden de la tabla no es el de la pantalla.
 
 Son dos tablas ordenadas de mejor a peor, `PIEZAS_MOVIL` en `fondo/Canales.tsx`
 y `PAPELES_MOVIL` en `fondo/MuroNotas.tsx`, en el mismo orden: la ranura *n* cae

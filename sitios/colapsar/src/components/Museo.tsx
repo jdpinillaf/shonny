@@ -8,7 +8,9 @@ import { Colapso } from "./acto2/Colapso";
 import { Disco } from "./acto3/Disco";
 import { Canales, FOTOS_MOVIL, TOPE_FOTOS } from "./fondo/Canales";
 import { MuroNotas, NOTAS_MOVIL, TOPE_NOTAS } from "./fondo/MuroNotas";
+import { Mural } from "./mural/Mural";
 import { Sonido } from "./Sonido";
+import { notas } from "@/content/notas";
 import { site } from "@/content/site";
 import { useSonido } from "@/lib/useSonido";
 
@@ -25,6 +27,7 @@ export function Museo() {
   const [puntero, setPuntero] = useState(false);
   const [fotos, setFotos] = useState(FOTOS_MOVIL);
   const [cuantasNotas, setCuantasNotas] = useState(NOTAS_MOVIL);
+  const [mural, setMural] = useState(false);
   const sonido = useSonido();
 
   // Las respuestas se leen después del montaje. Si se leyeran durante el render
@@ -138,7 +141,9 @@ export function Museo() {
                 >
                   <Pregunta
                     onListo={preguntaLista}
-                    total={site.coleccion + respuestas.length}
+                    total={notas.length + respuestas.length}
+                    muralAbierto={mural}
+                    onAbrirMural={() => setMural(true)}
                   />
                   {inputListo && <Respuesta onEnviar={enviar} />}
                 </motion.div>
@@ -162,6 +167,10 @@ export function Museo() {
             </AnimatePresence>
           </div>
         </div>
+
+        <AnimatePresence>
+          {mural && <Mural respuestas={respuestas} onCerrar={() => setMural(false)} />}
+        </AnimatePresence>
 
         {/* Grano y barrido sobre absolutamente todo, interfaz incluida. */}
         <div
