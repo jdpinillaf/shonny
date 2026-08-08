@@ -1,6 +1,19 @@
 /**
  * Todo lo que cambia sin tocar componentes vive acá.
  */
+
+/**
+ * Lo que dura el adelanto. Estuvo escrito a mano en tres sitios sin relación —el
+ * nombre del archivo, la barra de la card y su etiqueta— y a la primera que se
+ * cambió el corte, los tres dejaron de decir lo mismo. Ahora sale de acá.
+ */
+const ADELANTO = 40;
+
+/** 40 → "0:40". Local por lo mismo que `conMiles` en `Pregunta`: formato, no dato. */
+function reloj(segundos: number) {
+  return `${Math.floor(segundos / 60)}:${String(segundos % 60).padStart(2, "0")}`;
+}
+
 export const site = {
   artista: "Shonny",
   cancion: "Colapsar",
@@ -26,9 +39,15 @@ export const site = {
 
   portada: "/portada.jpg",
 
-  // 15s del master (0:50 → 1:05). Suena al enviar la respuesta.
-  // Si el archivo no está, el control de sonido no se muestra.
-  audio: "/audio/colapsar-15s.mp3",
+  // 40s del master (0:50 → 1:30), en loop. Suena desde el primer gesto de la
+  // visita. Si el archivo no está, el control de sonido no se muestra.
+  audio: `/audio/colapsar-${ADELANTO}s.mp3`,
+  adelanto: { segundos: ADELANTO, reloj: reloj(ADELANTO) },
+
+  // Las ocho salieron del mismo export, así que miden todas igual. El tamaño se
+  // apunta porque una pieza necesita su aspect-ratio para volar sin deformarse,
+  // y leerlo del archivo pediría tocar el disco en el servidor.
+  fotosTamano: { w: 933, h: 1400 },
 
   fotos: [
     "/fotos/01.jpg",

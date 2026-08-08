@@ -1,13 +1,15 @@
 "use client";
 
 import { motion } from "motion/react";
+import { type Pieza } from "@/content/pieza";
 import { entre } from "@/lib/semilla";
-import { Papel, type Origen } from "./Papel";
+import { Papel } from "./Papel";
+import { type Origen } from "./origen";
 
 export type Ranura = { x: string; y: string };
 
 type Props = {
-  texto: string;
+  pieza: Pieza;
   ranura: Ranura;
   /** La que acaba de escribir la persona: entra desde el centro y se queda encendida. */
   nueva?: boolean;
@@ -21,7 +23,7 @@ type Props = {
 
 /** El papel colgado de la pared: su ranura, su chinche y su péndulo. */
 export function Nota({
-  texto,
+  pieza,
   ranura,
   nueva = false,
   quieto,
@@ -29,7 +31,10 @@ export function Nota({
   onAbrir,
   oculta = false,
 }: Props) {
-  const semilla = texto;
+  // La semilla es el id y no el texto: dos personas escriben lo mismo y sus dos
+  // notas colgarían con la misma inclinación y el mismo vaivén, que es justo el
+  // tipo de coincidencia que se lee como error.
+  const semilla = pieza.id;
   const reposo = entre(semilla, -3.4, 3.4, 1);
 
   return (
@@ -80,7 +85,7 @@ export function Nota({
           }}
         />
 
-        <Papel texto={texto} reposo={reposo} onAbrir={onAbrir} oculta={oculta} />
+        <Papel pieza={pieza} reposo={reposo} onAbrir={onAbrir} oculta={oculta} />
       </div>
     </motion.div>
   );

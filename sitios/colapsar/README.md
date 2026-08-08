@@ -162,15 +162,20 @@ producción serían las respuestas reales de la gente.
 
 ## El sonido
 
-`public/audio/colapsar-15s.mp3` son 15 segundos del master, del 0:50 al 1:05,
+`public/audio/colapsar-40s.mp3` son 40 segundos del master, del 0:50 al 1:30,
 con fade de entrada y de salida para que el loop no chasquee. Para regenerarlo
 desde otro punto:
 
 ```bash
-ffmpeg -y -ss 50 -t 15 -i Colapsar_MASTER.wav \
-  -af "afade=t=in:st=0:d=0.25,afade=t=out:st=14.2:d=0.8,loudnorm=I=-16:TP=-1.5:LRA=11" \
-  -ar 44100 -ac 2 -codec:a libmp3lame -b:a 160k public/audio/colapsar-15s.mp3
+ffmpeg -y -ss 50 -t 40 -i Colapsar_MASTER.wav \
+  -af "afade=t=in:st=0:d=0.25,afade=t=out:st=39.2:d=0.8,loudnorm=I=-16:TP=-1.5:LRA=11" \
+  -ar 44100 -ac 2 -codec:a libmp3lame -b:a 160k public/audio/colapsar-40s.mp3
 ```
+
+La duración manda desde `ADELANTO`, en `src/content/site.ts`: de ahí salen el
+nombre del archivo, la barra de la card y su etiqueta. Estuvieron los tres
+escritos a mano y se desincronizaron a la primera. Si cambias el `-t`, cambia
+`ADELANTO`; el fade de salida va siempre en `duración - 0.8`.
 
 La canción tiene que sonar apenas entran. Chrome y Safari **bloquean el audio
 con sonido hasta que la persona haga algún gesto en la página** y eso no se
@@ -193,15 +198,72 @@ Si el mp3 no está, el control no se dibuja y no se rompe nada.
   Hay que crear la campaña en Feature.fm / Presave.io / Linkfire desde la cuenta
   del distribuidor: Spotify solo aprueba pre-save propio a organizaciones, no a
   personas, así que no se puede armar desde acá.
-- **Las respuestas no se guardan en ningún servidor.** Viven en `localStorage`,
-  o sea que cada persona ve la pared con lo suyo y nada más. Que la pared sea
-  compartida es backend (almacenamiento + moderación) y es la fase siguiente.
+- **En móvil casi no se puede tocar una foto.** El collage pone los papeles
+  encima de los televisores a propósito, así que de cada marco solo queda
+  tocable el borde: entre un 14% y un 33% según el marco, y el quinto (`m5`,
+  tapado por `p7`) se queda en un 2%. En escritorio se tocan enteros. Arreglarlo
+  es mover coordenadas del collage de móvil, que está ajustado a mano.
+
+## La pared es de la gente
+
+Lo que alguien escribe se publica para todos, y puede venir con una foto. Antes
+vivía solo en su `localStorage`; ahora eso sigue pasando —y es lo que hace que
+vea lo suyo al instante— pero además se manda a `POST /api/piezas`.
+
+Una **pieza** (`src/content/pieza.ts`) es la unidad de todo: un `id`, un texto
+opcional y una foto opcional. Una nota es una pieza sin foto, una foto de la
+colección es una pieza sin texto, y lo que sube alguien puede traer las dos. Por
+eso hay un solo modal (`PiezaAbierta`) y lo abren la pared, el mural y los
+televisores.
+
+**El `id` es la identidad, nunca el texto.** Lo era hasta que la pared se abrió:
+dos personas escriben lo mismo y abrir una nota apagaba a su gemela, y una pieza
+de solo foto entraba con la clave en `undefined`.
+
+El camino del envío:
+
+```
+POST /api/piezas   →  responde 200 SIEMPRE, y dentro de after():
+                      sniff de bytes → sharp (quita EXIF, acota, valida)
+                      → presupuesto → moderar → Blob → Redis → revalidateTag
+```
+
+Tres cosas que no se pueden tocar:
+
+- **Responde 200 pase lo que pase.** Rechazada, cortada por el rate limit o con
+  el modelo caído: siempre lo mismo. Un 4xx delata dónde está el límite, y quien
+  vino a tantearlo lo encuentra en tres intentos. El rechazo silencioso es el
+  diseño.
+- **El trabajo va en `after()`.** La persona ya está viendo el colapso y puede
+  cerrar la pestaña; una petición abortada se lleva la invocación por delante.
+- **`moderar()` falla cerrado.** Cualquier error devuelve `false`. Nada sin
+  moderar llega a la pared.
+
+Para retirar algo: `DELETE /api/piezas/<id>` con `authorization: Bearer
+$ADMIN_TOKEN`.
+
+Variables que hacen falta (`vercel env pull .env.local`):
+`BLOB_READ_WRITE_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`,
+`VERCEL_OIDC_TOKEN` (el gateway), y a mano `ADMIN_TOKEN`,
+`NEXT_PUBLIC_BLOB_HOST` y opcionalmente `MODELO_MODERACION`.
+
+Sin ninguna de ellas la página sigue en pie: `leerPiezas()` cae a las semillas.
+Eso no es cortesía, es obligatorio — la página se prerrenderiza en `next build`.
+
+Y la lectura va envuelta en `unstable_cache`: sin eso la ruta entera se vuelve
+dinámica y cada visita gasta un comando de Redis.
 
 ## Fotos
 
-Son **ocho** y los cinco televisores las van rotando, así que se repiten: cada
-canal las baraja con su propia semilla y corta en su propio momento, por eso no
-se lee como repetición.
+Las de semilla son **ocho** y los cinco televisores las van rotando, así que se
+repiten: cada canal las baraja con su propia semilla y corta en su propio
+momento, por eso no se lee como repetición. Las que sube la gente entran al
+mismo pool.
+
+**Cuántos marcos hay es constante de maqueta; cuántas fotos hay es dato.** Las
+ranuras de los papeles están puestas a mano encima de los marcos, uno a uno: si
+el número de marcos pasara a depender de cuántas fotos haya, el collage de móvil
+se deshace.
 
 Las de `public/fotos/` son derivadas a 1400px de originales de 4000×6000.
 Para regenerarlas desde una carpeta nueva:

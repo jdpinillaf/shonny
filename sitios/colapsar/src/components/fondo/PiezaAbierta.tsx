@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { PIE, TINTA, type Origen } from "./Papel";
+import { PIE, TINTA } from "./Papel";
+import { type Origen } from "./origen";
 
 /** Arranca lento: la nota se despega antes de viajar, sin quedarse quieta. */
 const DESPEGUE = [0.5, 0, 0.25, 1] as const;
@@ -24,7 +26,12 @@ const CAJA = "pointer-events-auto relative w-[min(86vw,440px)] px-7 pb-6 pt-8";
 type Vuelo = { dx: number; dy: number; s: number };
 
 /**
- * La nota despegada de la pared.
+ * La pieza despegada de donde estuviera.
+ *
+ * Una sola para las tres: el papel de la pared, la celda del mural y el
+ * televisor. Antes solo existían notas y bastaba con el texto; ahora una pieza
+ * puede traer foto, texto o las dos, y tener dos modales casi iguales era la vía
+ * rápida a que el vuelo de uno se arreglara y el del otro no.
  *
  * El vuelo es un FLIP a mano en vez de un `layoutId`: la nota de la pared cuelga
  * de la animación CSS `colgar`, y una animación de layout mediría el bounding
@@ -32,7 +39,7 @@ type Vuelo = { dx: number; dy: number; s: number };
  * —lo trae `origen.reposo`— y se anima a cero explícitamente. Todo son
  * transforms: nada de animar `width` ni `top`.
  */
-export function NotaAbierta({
+export function PiezaAbierta({
   origen,
   onCerrar,
 }: {
@@ -42,12 +49,13 @@ export function NotaAbierta({
   const medidor = useRef<HTMLDivElement>(null);
   const boton = useRef<HTMLButtonElement>(null);
   const [vuelo, setVuelo] = useState<Vuelo | null>(null);
+  const { pieza } = origen;
 
-  // Primer pase: la nota grande se pinta en su sitio del centro pero invisible,
+  // Primer pase: la pieza grande se pinta en su sitio del centro pero invisible,
   // se mide, y de ahí sale el transform que la manda de vuelta al hueco de la
   // pared. Va en `useLayoutEffect` y no en `useEffect` porque el resultado tiene
   // que estar puesto antes del primer pintado; si no, se cuela un fotograma con
-  // la nota ya centrada.
+  // la pieza ya centrada.
   useLayoutEffect(() => {
     const el = medidor.current;
     if (!el) return;
@@ -73,7 +81,7 @@ export function NotaAbierta({
 
   const cuerpo = (
     <>
-      {/* El chinche viaja con ella: sigue siendo la misma nota. */}
+      {/* El chinche viaja con ella: sigue siendo la misma pieza. */}
       <div
         aria-hidden
         className="absolute left-1/2 top-0 h-[11px] w-[11px] -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -87,14 +95,38 @@ export function NotaAbierta({
         ref={boton}
         type="button"
         onClick={onCerrar}
-        aria-label="Cerrar nota"
-        className="absolute right-3 top-3 h-7 w-7 cursor-pointer font-mono text-[17px] leading-none opacity-55 transition-opacity hover:opacity-100"
+        aria-label="Cerrar pieza"
+        className="absolute right-3 top-3 z-10 h-7 w-7 cursor-pointer font-mono text-[17px] leading-none opacity-55 transition-opacity hover:opacity-100"
         style={{ color: TINTA.texto }}
       >
         ×
       </button>
 
-      <p className="text-[17px] leading-[1.6] md:text-[19px]">{origen.texto}</p>
+      {pieza.foto && (
+        // El `aspectRatio` no es estética: es lo que le da alto a la caja **antes
+        // de que la imagen cargue**. El pase de medición corre en el layout
+        // inmediato, cuando el `<img>` todavía no ocupa nada; sin esto el destino
+        // mide de menos y la pieza entra volando desde un sitio que no es.
+        //
+        // Sigue en gris. La portada del disco es el único objeto a color de la
+        // página y meter acá una foto saturada le rompe el momento.
+        <div
+          className="relative mb-4 w-full overflow-hidden"
+          style={{ aspectRatio: `${pieza.foto.w} / ${pieza.foto.h}` }}
+        >
+          <Image
+            src={pieza.foto.url}
+            alt={pieza.texto ?? "Foto del museo"}
+            fill
+            sizes="(max-width: 767px) 86vw, 440px"
+            className="object-cover"
+            style={{ filter: "grayscale(1) contrast(1.12)" }}
+          />
+        </div>
+      )}
+
+      {pieza.texto && <p className="text-[17px] leading-[1.6] md:text-[19px]">{pieza.texto}</p>}
+
       <p
         className="mt-5 border-t pt-3 text-[8.5px] uppercase tracking-[0.28em]"
         style={{ borderColor: TINTA.borde, color: TINTA.pie }}
@@ -113,9 +145,9 @@ export function NotaAbierta({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Nota del museo"
+      aria-label="Pieza del museo"
       // Entre el contenido (z-30) y la película (z-40): el grano y el barrido
-      // van sobre absolutamente todo, la nota abierta incluida.
+      // van sobre absolutamente todo, la pieza abierta incluida.
       className="fixed inset-0 z-[35]"
     >
       {/* Sin `backdrop-filter`: filtrar el viewport entero mientras algo grande

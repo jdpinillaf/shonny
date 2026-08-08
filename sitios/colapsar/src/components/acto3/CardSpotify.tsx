@@ -107,18 +107,26 @@ export function CardSpotify({ emerge = false }: { emerge?: boolean }) {
           </span>
         </div>
 
-        {/* La barra recorre los 15 segundos del adelanto y vuelve a empezar. */}
+        {/* La barra recorre el adelanto entero y vuelve a empezar. No va atada
+            al audio de verdad: la canción arranca con el primer gesto de la
+            visita, mucho antes de que esta card se monte, así que sincronizarlas
+            pediría cablear `useSonido` hasta acá. Es decoración y se asume. */}
         <div className="mt-3.5 h-[3px] w-full overflow-hidden bg-white/15">
           <motion.div
             className="h-full bg-white/85"
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}
-            transition={{ duration: 15, ease: "linear", repeat: Infinity, delay: 1 }}
+            transition={{
+              duration: site.adelanto.segundos,
+              ease: "linear",
+              repeat: Infinity,
+              delay: 1,
+            }}
           />
         </div>
         <div className="mt-1.5 flex justify-between font-mono text-[9px] text-[#a7a7a7]">
           <span>0:00</span>
-          <span>adelanto · 0:15</span>
+          <span>adelanto · {site.adelanto.reloj}</span>
         </div>
       </div>
     </motion.a>

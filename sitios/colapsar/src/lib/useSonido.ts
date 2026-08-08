@@ -10,7 +10,7 @@ const GESTOS = ["pointerdown", "keydown", "touchstart", "wheel"] as const;
 const VOLUMEN = 0.4;
 
 /**
- * Los 15 segundos, en loop, sonando lo antes que el navegador deje.
+ * El adelanto, en loop, sonando lo antes que el navegador deje.
  *
  * Chrome y Safari bloquean el audio con sonido hasta que la persona haga algún
  * gesto en la página; no hay forma de saltarse eso y un autoplay a secas falla

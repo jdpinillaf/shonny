@@ -1,13 +1,21 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { site } from "@/content/site";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { type Pieza } from "@/content/pieza";
 import { corrido, entre, indice } from "@/lib/semilla";
 import { cuadrosDeEstatica } from "./estatica";
+import { medir, type Origen } from "./origen";
 
 /**
  * Los marcos. Coordenadas en % del viewport.
+ *
+ * **Cuántos marcos hay es constante de maqueta; cuántas fotos hay es dato.** Los
+ * televisores son 5 en escritorio y 6 en móvil pase lo que pase: las ranuras de
+ * `MuroNotas.tsx` están puestas a mano encima de estos marcos, uno a uno. Si el
+ * número de marcos pasara a depender de cuántas fotos haya subido la gente, los
+ * papeles dejarían de caer sobre sus marcos y el collage de móvil se deshace. Lo
+ * único que crece con la colección es de dónde sacan la imagen.
  *
  * El centro queda libre (ahí van la pregunta, el input y la card) y la franja
  * de arriba al centro también: es donde aterriza la nota que escribe la
@@ -42,6 +50,8 @@ const MARCOS_ESCRITORIO: Marco[] = [
  * - El velo de `Museo.tsx` llega a 0.92 de negro en el centro y no se apaga
  *   hasta los bordes, así que todo lo que se acerque al medio se ve mucho más
  *   oscuro de lo que sugieren estos porcentajes. Se mira con los ojos.
+ * - `m4` y `m6` son los que más se acercan al bloque central de contenido, que
+ *   sí recibe clicks. Al tocarlos hay que comprobar que siguen siendo tocables.
  *
  * El ancho tiene suelo: los `minWidth`/`minHeight` de `Canal` pisan al vw/vh en
  * pantalla chica. Por debajo de ~34vw bajar el número deja de tener efecto.
@@ -116,21 +126,31 @@ function Estatica({ activa }: { activa: boolean }) {
 
 function Canal({
   marco,
+  pool,
   quieto,
   primera,
+  onAbrir,
+  huecoId,
 }: {
   marco: Marco;
+  pool: readonly Pieza[];
   quieto: boolean;
   primera: boolean;
+  onAbrir: (origen: Origen) => void;
+  /** La pieza que está abierta en grande, si la hay. Solo la sabe comparar el marco. */
+  huecoId: string | null;
 }) {
-  const total = site.fotos.length;
-  const [foto, setFoto] = useState(() => indice(marco.id, total));
+  const total = pool.length;
+  const cuadro = useRef<HTMLButtonElement>(null);
+  const [foto, setFoto] = useState(() => indice(marco.id, Math.max(total, 1)));
   const [cortando, setCortando] = useState(false);
 
   // Cada marco lleva su propio reloj. Si compartieran uno, todos cortarían a la
   // vez y dejaría de parecer un cuarto con varios televisores prendidos.
   useEffect(() => {
-    if (quieto) return;
+    // Con una sola foto no hay a dónde cortar, y con ninguna la cuenta de abajo
+    // da NaN: `% 0` no existe y `total - 1` se vuelve negativo.
+    if (quieto || total < 2) return;
     let corte: ReturnType<typeof setTimeout>;
     let siguiente: ReturnType<typeof setTimeout>;
 
@@ -155,9 +175,25 @@ function Canal({
     };
   }, [marco.id, total, quieto]);
 
+  // La colección crece: si se aprueba una pieza mientras alguien mira la página,
+  // el índice que tenía este marco puede quedar fuera de rango.
+  const pieza = pool[foto % Math.max(total, 1)];
+  if (!pieza?.foto) return null;
+
+  const abrir = () => {
+    // Se mide **el marco**, no el div de dentro: ese está a mitad de la deriva
+    // ken-burns, con un scale animado, y su rectángulo no es el que se ve.
+    const el = cuadro.current;
+    if (el) onAbrir(medir(el, pieza, 0));
+  };
+
   return (
-    <div
-      className="scanlines absolute overflow-hidden"
+    <button
+      ref={cuadro}
+      type="button"
+      onClick={abrir}
+      aria-label={pieza.texto ? `Abrir pieza: ${pieza.texto}` : "Abrir foto del museo"}
+      className="scanlines pointer-events-auto absolute cursor-pointer overflow-hidden"
       style={{
         left: marco.x,
         top: marco.y,
@@ -166,9 +202,13 @@ function Canal({
         minWidth: 128,
         minHeight: 168,
         boxShadow: "0 0 0 1px rgba(242,240,234,0.07), 0 30px 90px rgba(0,0,0,0.6)",
+        // Igual que el papel: `opacity` y no `visibility`, para que el marco
+        // siga siendo enfocable y se le pueda devolver el foco al cerrar.
+        opacity: pieza.id === huecoId ? 0 : 1,
       }}
     >
       <div
+        aria-hidden
         className="canal-img absolute inset-0"
         style={
           {
@@ -185,7 +225,7 @@ function Canal({
         }
       >
         <Image
-          src={site.fotos[foto]}
+          src={pieza.foto.url}
           alt=""
           fill
           sizes="(max-width: 767px) 55vw, 24vw"
@@ -211,30 +251,61 @@ function Canal({
             "radial-gradient(120% 100% at 50% 45%, rgba(11,13,12,0) 40%, rgba(11,13,12,0.72) 100%)",
         }}
       />
-    </div>
+    </button>
   );
 }
 
 export function Canales({
+  pool,
   quieto,
   fotos,
   apagado,
+  onAbrir,
+  huecoId,
 }: {
+  /** Las piezas que traen foto. Los marcos son fijos; esto es lo que crece. */
+  pool: readonly Pieza[];
   quieto: boolean;
   fotos: number;
   apagado: boolean;
+  onAbrir: (origen: Origen) => void;
+  huecoId: string | null;
 }) {
+  if (pool.length === 0) return null;
+
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
+    // El contenedor no puede llevar `aria-hidden`: dentro hay botones enfocables
+    // y un subárbol oculto con foco dentro es la violación `aria-hidden-focus`.
+    // Lo decorativo se esconde pieza a pieza, ahí dentro.
+    //
+    // Sí sigue siendo `pointer-events-none`: ocupa la pantalla entera y sin eso
+    // se comería los clicks de todo lo demás. Cada marco los reactiva.
+    <div className="pointer-events-none fixed inset-0 z-0">
       <div className="hidden md:block">
         {MARCOS_ESCRITORIO.map((m, i) => (
-          <Canal key={m.id} marco={m} quieto={quieto} primera={i === 0} />
+          <Canal
+            key={m.id}
+            marco={m}
+            pool={pool}
+            quieto={quieto}
+            primera={i === 0}
+            onAbrir={onAbrir}
+            huecoId={huecoId}
+          />
         ))}
       </div>
 
       <div className="md:hidden" style={ATENUAR(apagado)}>
         {MARCOS_MOVIL.slice(0, fotos).map((m, i) => (
-          <Canal key={m.id} marco={m} quieto={quieto} primera={i === 0} />
+          <Canal
+            key={m.id}
+            marco={m}
+            pool={pool}
+            quieto={quieto}
+            primera={i === 0}
+            onAbrir={onAbrir}
+            huecoId={huecoId}
+          />
         ))}
       </div>
     </div>

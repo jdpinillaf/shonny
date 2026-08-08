@@ -2,11 +2,13 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { BARAJA } from "@/content/coleccion";
+import { type Pieza } from "@/content/pieza";
 import { site } from "@/content/site";
 import { entre } from "@/lib/semilla";
-import { NotaAbierta } from "../fondo/NotaAbierta";
-import { Papel, type Origen } from "../fondo/Papel";
+import { Papel } from "../fondo/Papel";
+import { PiezaAbierta } from "../fondo/PiezaAbierta";
+import { type Origen } from "../fondo/origen";
+import { CeldaFoto } from "./CeldaFoto";
 
 const SUAVE = [0.16, 1, 0.3, 1] as const;
 
@@ -17,29 +19,28 @@ const SUAVE = [0.16, 1, 0.3, 1] as const;
  * el alto recortado para que se vean unas tres filas y el resto se alcance
  * scrolleando: la gracia es que se note que hay más de lo que cabe.
  *
- * Las respuestas de la persona van primero, lo último arriba del todo. Después
- * la colección barajada.
+ * Es el único sitio donde las notas y las fotos se ven juntas: en la pared las
+ * fotos están en los televisores y las notas colgadas, y acá comparten rejilla.
  */
 export function Mural({
-  respuestas,
+  piezas,
   onCerrar,
 }: {
-  respuestas: string[];
+  /** Ya vienen ordenadas y sin repetir desde `Museo`: lo suyo primero. */
+  piezas: readonly Pieza[];
   onCerrar: () => void;
 }) {
   const cerrar = useRef<HTMLButtonElement>(null);
 
-  // Igual que en la pared: `abierta` monta la nota grande y `hueco` apaga la
+  // Igual que en la pared: `abierta` monta la pieza grande y `hueco` apaga la
   // celda, y el hueco no se limpia hasta que termina el vuelo de vuelta. Con uno
-  // solo, la nota se ve dos veces mientras vuelve.
+  // solo, la pieza se ve dos veces mientras vuelve.
   const [abierta, setAbierta] = useState<Origen | null>(null);
   const [hueco, setHueco] = useState<Origen | null>(null);
 
-  const piezas = [...respuestas].reverse().concat(BARAJA.filter((t) => !respuestas.includes(t)));
-
   useEffect(() => {
     const alTeclear = (e: KeyboardEvent) => {
-      // El Escape es de la nota abierta mientras haya una: cerrar la nota no
+      // El Escape es de la pieza abierta mientras haya una: cerrar la pieza no
       // puede cerrar el mural que hay detrás.
       if (e.key === "Escape" && !abierta) onCerrar();
     };
@@ -115,27 +116,48 @@ export function Mural({
               `overscroll-contain` no es opcional: `body` tiene `overflow: hidden`
               y sin esto el scroll que llega al final se lo lleva la página. */}
           <div className="max-h-[46vh] overflow-y-auto overscroll-contain pb-2 pr-1 md:max-h-[56vh]">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-              {piezas.map((texto, i) => (
-                <motion.div
-                  key={texto}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  // Escalonado corto y con techo: con la colección entera, un
-                  // retardo por índice sin tope dejaría las últimas entrando
-                  // varios segundos después.
-                  transition={{ duration: 0.5, delay: Math.min(i * 0.03, 0.5), ease: SUAVE }}
-                >
-                  <Papel
-                    texto={texto}
-                    // Acá no cuelga de un chinche, pero una inclinación chica y
-                    // estable es lo que separa la rejilla de una tabla.
-                    reposo={entre(texto, -1.5, 1.5, 9)}
-                    onAbrir={abrir}
-                    oculta={hueco?.texto === texto}
-                  />
-                </motion.div>
-              ))}
+            {/* Columnas y no rejilla. Desde que el mural mezcla papeles y fotos,
+                las alturas son muy distintas: en una rejilla, una foto estira su
+                fila entera y deja a los papeles de al lado flotando sobre un
+                hueco enorme. Con columnas cada pieza se apila debajo de la
+                anterior y el mural vuelve a leerse como un tablón. */}
+            <div className="columns-2 gap-3 [column-fill:_balance] md:columns-4 md:gap-5">
+              {piezas.map((pieza, i) => {
+                // Acá no cuelga de un chinche, pero una inclinación chica y
+                // estable es lo que separa la rejilla de una tabla.
+                const reposo = entre(pieza.id, -1.5, 1.5, 9);
+                return (
+                  <motion.div
+                    key={pieza.id}
+                    // `break-inside-avoid` es obligatorio con columnas: sin él
+                    // una pieza se parte por la mitad entre el pie de una
+                    // columna y la cabeza de la siguiente.
+                    className="mb-3 break-inside-avoid md:mb-5"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    // Escalonado corto y con techo: con la colección entera, un
+                    // retardo por índice sin tope dejaría las últimas entrando
+                    // varios segundos después.
+                    transition={{ duration: 0.5, delay: Math.min(i * 0.03, 0.5), ease: SUAVE }}
+                  >
+                    {pieza.foto ? (
+                      <CeldaFoto
+                        pieza={pieza}
+                        reposo={reposo}
+                        onAbrir={abrir}
+                        oculta={hueco?.pieza.id === pieza.id}
+                      />
+                    ) : (
+                      <Papel
+                        pieza={pieza}
+                        reposo={reposo}
+                        onAbrir={abrir}
+                        oculta={hueco?.pieza.id === pieza.id}
+                      />
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </motion.div>
@@ -145,7 +167,11 @@ export function Mural({
           del mismo z manda el orden del DOM. */}
       <AnimatePresence onExitComplete={volvioASuSitio}>
         {abierta && (
-          <NotaAbierta key={abierta.texto} origen={abierta} onCerrar={() => setAbierta(null)} />
+          <PiezaAbierta
+            key={abierta.pieza.id}
+            origen={abierta}
+            onCerrar={() => setAbierta(null)}
+          />
         )}
       </AnimatePresence>
     </div>

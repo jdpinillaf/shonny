@@ -1,13 +1,13 @@
 "use client";
 
 import { AnimatePresence } from "motion/react";
-import { useState } from "react";
+import { useMemo } from "react";
 import { tajadas } from "@/content/coleccion";
+import { conTexto, type Pieza } from "@/content/pieza";
 import { corrido } from "@/lib/semilla";
 import { ATENUAR } from "./Canales";
 import { Nota, type Ranura } from "./Nota";
-import { type Origen } from "./Papel";
-import { NotaAbierta } from "./NotaAbierta";
+import { type Origen } from "./origen";
 
 /**
  * Ranuras de la pared, en % del viewport.
@@ -72,96 +72,90 @@ export const TOPE_NOTAS = RANURAS_MOVIL.length;
  */
 const RANURA_NUEVA: Ranura = { x: "50%", y: "5%" };
 
-const { escritorio: REPARTO_ESCRITORIO, movil: REPARTO_MOVIL } = tajadas(
-  RANURAS_ESCRITORIO.length,
-  RANURAS_MOVIL.length,
-);
-
 export function MuroNotas({
-  respuestas,
+  piezas,
+  ultima,
   quieto,
   puntero,
   notas: cuantas,
   apagado,
+  onAbrir,
+  huecoId,
 }: {
-  respuestas: string[];
+  /** La colección entera. Acá solo cuelgan las que traen texto. */
+  piezas: readonly Pieza[];
+  /** Lo que acaba de escribir la persona, si escribió algo en esta visita. */
+  ultima: Pieza | undefined;
   quieto: boolean;
   puntero: boolean;
   notas: number;
   apagado: boolean;
+  onAbrir: (origen: Origen) => void;
+  huecoId: string | null;
 }) {
-  const ultima = respuestas.at(-1);
-
-  // `abierta` monta la nota grande; `hueco` es la de la pared que se apaga
-  // mientras tanto. Son dos porque el hueco tiene que seguir vacío durante el
-  // vuelo de vuelta: si se llenara al cerrar, la nota se vería dos veces.
-  const [abierta, setAbierta] = useState<Origen | null>(null);
-  const [hueco, setHueco] = useState<Origen | null>(null);
-
-  const abrir = (origen: Origen) => {
-    setAbierta(origen);
-    setHueco(origen);
-  };
-
-  const volvioAPegarse = () => {
-    hueco?.boton?.focus();
-    setHueco(null);
-  };
+  // La baraja se calculaba al importar el módulo, cuando la colección era una
+  // constante del repo. Ahora llega por props y cambia sola cuando se aprueba
+  // algo, así que se rehace acá — y solo cuando la lista cambia de verdad.
+  //
+  // La recién escrita se saca de la baraja: tiene su propia ranura en el centro
+  // y, si además le tocara una de la pared, se vería dos veces. Pasa de verdad
+  // en cuanto la moderación la aprueba y vuelve dentro de `piezas`.
+  const { escritorio, movil } = useMemo(
+    () =>
+      tajadas(
+        conTexto(piezas).filter((p) => p.id !== ultima?.id),
+        RANURAS_ESCRITORIO.length,
+        RANURAS_MOVIL.length,
+      ),
+    [piezas, ultima?.id],
+  );
 
   return (
-    <>
-      {/* La pared no recibe clicks: se los devuelve cada papel por su cuenta.
-          Si no, este `fixed inset-0` se comería los del centro. */}
-      <div className="pointer-events-none fixed inset-0 z-10">
-        <div className="hidden md:block">
-          {RANURAS_ESCRITORIO.map((ranura, i) => (
-            <Nota
-              key={REPARTO_ESCRITORIO[i]}
-              texto={REPARTO_ESCRITORIO[i]}
-              ranura={ranura}
-              quieto={quieto}
-              puntero={puntero}
-              onAbrir={abrir}
-              oculta={hueco?.texto === REPARTO_ESCRITORIO[i]}
-            />
-          ))}
-        </div>
-
-        <div className="md:hidden" style={ATENUAR(apagado)}>
-          {RANURAS_MOVIL.slice(0, cuantas).map((ranura, i) => (
-            <Nota
-              key={REPARTO_MOVIL[i]}
-              texto={REPARTO_MOVIL[i]}
-              ranura={ranura}
-              quieto={quieto}
-              puntero={puntero}
-              onAbrir={abrir}
-              oculta={hueco?.texto === REPARTO_MOVIL[i]}
-            />
-          ))}
-        </div>
-
-        <AnimatePresence mode="wait">
-          {ultima && (
-            <Nota
-              key={ultima}
-              texto={ultima}
-              ranura={RANURA_NUEVA}
-              nueva
-              quieto={quieto}
-              puntero={puntero}
-              onAbrir={abrir}
-              oculta={hueco?.texto === ultima}
-            />
-          )}
-        </AnimatePresence>
+    // La pared no recibe clicks: se los devuelve cada papel por su cuenta.
+    // Si no, este `fixed inset-0` se comería los del centro.
+    <div className="pointer-events-none fixed inset-0 z-10">
+      <div className="hidden md:block">
+        {escritorio.map((pieza, i) => (
+          <Nota
+            key={pieza.id}
+            pieza={pieza}
+            ranura={RANURAS_ESCRITORIO[i]}
+            quieto={quieto}
+            puntero={puntero}
+            onAbrir={onAbrir}
+            oculta={huecoId === pieza.id}
+          />
+        ))}
       </div>
 
-      <AnimatePresence onExitComplete={volvioAPegarse}>
-        {abierta && (
-          <NotaAbierta key={abierta.texto} origen={abierta} onCerrar={() => setAbierta(null)} />
+      <div className="md:hidden" style={ATENUAR(apagado)}>
+        {movil.slice(0, cuantas).map((pieza, i) => (
+          <Nota
+            key={pieza.id}
+            pieza={pieza}
+            ranura={RANURAS_MOVIL[i]}
+            quieto={quieto}
+            puntero={puntero}
+            onAbrir={onAbrir}
+            oculta={huecoId === pieza.id}
+          />
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        {ultima && (
+          <Nota
+            key={ultima.id}
+            pieza={ultima}
+            ranura={RANURA_NUEVA}
+            nueva
+            quieto={quieto}
+            puntero={puntero}
+            onAbrir={onAbrir}
+            oculta={huecoId === ultima.id}
+          />
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

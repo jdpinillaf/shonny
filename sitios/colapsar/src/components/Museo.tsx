@@ -1,16 +1,19 @@
 "use client";
 
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pregunta } from "./acto1/Pregunta";
-import { Respuesta } from "./acto1/Respuesta";
+import { Respuesta, type FotoLista } from "./acto1/Respuesta";
 import { Colapso } from "./acto2/Colapso";
 import { Disco } from "./acto3/Disco";
 import { Canales, FOTOS_MOVIL, TOPE_FOTOS } from "./fondo/Canales";
 import { MuroNotas, NOTAS_MOVIL, TOPE_NOTAS } from "./fondo/MuroNotas";
+import { PiezaAbierta } from "./fondo/PiezaAbierta";
+import { type Origen } from "./fondo/origen";
 import { Mural } from "./mural/Mural";
 import { Sonido } from "./Sonido";
-import { notas } from "@/content/notas";
+import { barajar } from "@/content/coleccion";
+import { conFoto, esPieza, unir, type Pieza } from "@/content/pieza";
 import { site } from "@/content/site";
 import { useSonido } from "@/lib/useSonido";
 
@@ -19,26 +22,71 @@ type Acto = "pregunta" | "colapso" | "disco";
 const GUARDADO = "colapsar:respuestas";
 const SUAVE = [0.16, 1, 0.3, 1] as const;
 
-export function Museo() {
+/**
+ * Lo que la persona escribió en este navegador.
+ *
+ * Se guardaba como `string[]` y ahora son piezas con id. Se leen los dos
+ * formatos: quien ya tenga cosas guardadas de antes no puede encontrarse la
+ * pared vacía porque cambiamos de forma.
+ */
+function leerMias(): Pieza[] {
+  try {
+    const crudo = localStorage.getItem(GUARDADO);
+    if (!crudo) return [];
+    const datos: unknown = JSON.parse(crudo);
+    if (!Array.isArray(datos)) return [];
+    return datos
+      .map((x, i): Pieza | null => {
+        if (typeof x === "string") return { id: `local-${i}-${x.length}`, texto: x, creado: 0 };
+        return esPieza(x) ? x : null;
+      })
+      .filter((p): p is Pieza => p !== null);
+  } catch {
+    // localStorage bloqueado (modo privado): la pared arranca vacía y ya.
+    return [];
+  }
+}
+
+export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
   const [acto, setActo] = useState<Acto>("pregunta");
   const [inputListo, setInputListo] = useState(false);
-  const [respuestas, setRespuestas] = useState<string[]>([]);
+  const [mias, setMias] = useState<Pieza[]>([]);
   const [quieto, setQuieto] = useState(false);
   const [puntero, setPuntero] = useState(false);
   const [fotos, setFotos] = useState(FOTOS_MOVIL);
   const [cuantasNotas, setCuantasNotas] = useState(NOTAS_MOVIL);
   const [mural, setMural] = useState(false);
+
+  // El par que abre cualquier pieza, viva donde viva. Vive acá y no en
+  // `MuroNotas` porque ahora despegan también los televisores, que son hermanos
+  // suyos. `abierta` monta la pieza grande; `hueco` es la de la pared o el marco
+  // que se apaga mientras tanto. Son dos porque el hueco tiene que seguir vacío
+  // durante el vuelo de vuelta: si se llenara al cerrar, se vería dos veces.
+  const [abierta, setAbierta] = useState<Origen | null>(null);
+  const [hueco, setHueco] = useState<Origen | null>(null);
+
   const sonido = useSonido();
+
+  // Lo del servidor y lo de esta persona son la misma colección. Se unen por id:
+  // en cuanto la moderación aprueba lo que escribió, su pieza vuelve desde el
+  // servidor y las dos copias se colapsan en una.
+  const coleccion = useMemo(() => unir(mias, piezas), [mias, piezas]);
+  const fotosDeLaColeccion = useMemo(() => conFoto(coleccion), [coleccion]);
+  const ultima = mias.at(-1);
+
+  // El mural va barajado y no en el orden en que llegan las piezas. Sin esto las
+  // notas salen todas primero y las fotos amontonadas al final, que es el orden
+  // en que se declaran las semillas: la rejilla se lee como dos bloques pegados
+  // en vez de como una colección. Lo suyo va delante, lo último arriba del todo.
+  const paraMural = useMemo(
+    () => unir([...mias].reverse(), barajar(piezas)),
+    [mias, piezas],
+  );
 
   // Las respuestas se leen después del montaje. Si se leyeran durante el render
   // el HTML del servidor y el del cliente no coincidirían.
   useEffect(() => {
-    try {
-      const crudo = localStorage.getItem(GUARDADO);
-      if (crudo) setRespuestas(JSON.parse(crudo));
-    } catch {
-      // localStorage bloqueado (modo privado): la pared arranca vacía y ya.
-    }
+    setMias(leerMias());
 
     const params = new URLSearchParams(window.location.search);
 
@@ -76,18 +124,46 @@ export function Museo() {
     setPuntero(window.matchMedia("(hover: hover)").matches);
   }, []);
 
+  const abrir = useCallback((origen: Origen) => {
+    setAbierta(origen);
+    setHueco(origen);
+  }, []);
+
+  const volvioASuSitio = useCallback(() => {
+    hueco?.boton?.focus();
+    setHueco(null);
+  }, [hueco]);
+
   // El audio no se toca acá: `useSonido` ya lo enciende con el primer gesto de
   // la visita, que siempre pasa antes de este envío. Volver a llamarlo acá le
   // reviviría la canción a quien la haya apagado a propósito.
-  const enviar = useCallback((texto: string) => {
-    setRespuestas((prev) => {
-      const siguiente = [...prev, texto].slice(-8);
+  const enviar = useCallback((texto: string, foto?: FotoLista) => {
+    // El id lo pone el cliente para que, cuando la pieza vuelva aprobada desde
+    // el servidor, se reconozca como la misma y no salga dos veces.
+    const pieza: Pieza = { id: crypto.randomUUID(), texto, creado: Date.now() };
+
+    setMias((prev) => {
+      const siguiente = [...prev, pieza].slice(-8);
       try {
         localStorage.setItem(GUARDADO, JSON.stringify(siguiente));
       } catch {}
       return siguiente;
     });
     setActo("colapso");
+
+    // Se manda y no se espera. La persona ya está viendo el colapso, y lo que
+    // pase con la moderación no le cambia nada de lo que ve: su nota está en su
+    // pared pase lo que pase. Sin `keepalive`, que tope en 64 KB y no le cabe
+    // una foto.
+    const cuerpo = new FormData();
+    cuerpo.set("id", pieza.id);
+    cuerpo.set("texto", texto);
+    if (foto) {
+      cuerpo.set("foto", foto.blob, "foto.jpg");
+      cuerpo.set("w", String(foto.w));
+      cuerpo.set("h", String(foto.h));
+    }
+    void fetch("/api/piezas", { method: "POST", body: cuerpo }).catch(() => {});
   }, []);
 
   const otraVez = useCallback(() => {
@@ -103,13 +179,23 @@ export function Museo() {
     // "user" es lo que las desarma.
     <MotionConfig reducedMotion="user">
       <main className="relative h-dvh w-full overflow-hidden">
-        <Canales quieto={quieto} fotos={fotos} apagado={acto === "disco"} />
+        <Canales
+          pool={fotosDeLaColeccion}
+          quieto={quieto}
+          fotos={fotos}
+          apagado={acto === "disco"}
+          onAbrir={abrir}
+          huecoId={hueco?.pieza.id ?? null}
+        />
         <MuroNotas
-          respuestas={respuestas}
+          piezas={coleccion}
+          ultima={ultima}
           quieto={quieto}
           puntero={puntero}
           notas={cuantasNotas}
           apagado={acto === "disco"}
+          onAbrir={abrir}
+          huecoId={hueco?.pieza.id ?? null}
         />
 
         {/* Rebaja lo que haya detrás justo donde va el texto. Sin esto, una nota
@@ -141,7 +227,7 @@ export function Museo() {
                 >
                   <Pregunta
                     onListo={preguntaLista}
-                    total={notas.length + respuestas.length}
+                    total={coleccion.length}
                     muralAbierto={mural}
                     onAbrirMural={() => setMural(true)}
                   />
@@ -169,7 +255,19 @@ export function Museo() {
         </div>
 
         <AnimatePresence>
-          {mural && <Mural respuestas={respuestas} onCerrar={() => setMural(false)} />}
+          {mural && <Mural piezas={paraMural} onCerrar={() => setMural(false)} />}
+        </AnimatePresence>
+
+        {/* Después del mural a propósito: los dos viven en z-[35] y entre
+            hermanos del mismo z manda el orden del DOM. */}
+        <AnimatePresence onExitComplete={volvioASuSitio}>
+          {abierta && (
+            <PiezaAbierta
+              key={abierta.pieza.id}
+              origen={abierta}
+              onCerrar={() => setAbierta(null)}
+            />
+          )}
         </AnimatePresence>
 
         {/* Grano y barrido sobre absolutamente todo, interfaz incluida. */}

@@ -1,17 +1,28 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { site } from "@/content/site";
+import { comprimir, type FotoLista } from "@/lib/comprimir";
+
+export type { FotoLista };
 
 /**
  * El input se dibuja solo: primero la línea crece de cero a su ancho, y recién
  * después aparecen el texto y el enviar. Es el mismo gesto de la máquina de
  * escribir, pero hecho con una regla.
  */
-export function Respuesta({ onEnviar }: { onEnviar: (texto: string) => void }) {
+export function Respuesta({
+  onEnviar,
+}: {
+  onEnviar: (texto: string, foto?: FotoLista) => void;
+}) {
   const [valor, setValor] = useState("");
+  const [foto, setFoto] = useState<FotoLista | null>(null);
+  const [cargando, setCargando] = useState(false);
   const campo = useRef<HTMLInputElement>(null);
+  const archivo = useRef<HTMLInputElement>(null);
+  const idArchivo = useId();
 
   useEffect(() => {
     // El foco se da después de que la línea terminó de crecer, si no el teclado
@@ -21,7 +32,25 @@ export function Respuesta({ onEnviar }: { onEnviar: (texto: string) => void }) {
   }, []);
 
   const limpio = valor.trim();
-  const puede = limpio.length > 1;
+  const puede = limpio.length > 1 && !cargando;
+
+  const elegir = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const elegido = e.target.files?.[0];
+    // El input se vacía siempre: si no, elegir la misma foto dos veces seguidas
+    // no dispara un segundo `change` y parece que el botón se rompió.
+    e.target.value = "";
+    if (!elegido) return;
+    setCargando(true);
+    try {
+      setFoto(await comprimir(elegido));
+    } catch {
+      // Una foto que no se puede leer no vale la pena explicarla: se queda sin
+      // adjuntar y la confesión se manda igual.
+      setFoto(null);
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <motion.form
@@ -31,7 +60,7 @@ export function Respuesta({ onEnviar }: { onEnviar: (texto: string) => void }) {
       transition={{ duration: 0.5 }}
       onSubmit={(e) => {
         e.preventDefault();
-        if (puede) onEnviar(limpio);
+        if (puede) onEnviar(limpio, foto ?? undefined);
       }}
     >
       <div className="relative">
@@ -74,7 +103,36 @@ export function Respuesta({ onEnviar }: { onEnviar: (texto: string) => void }) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.7 }}
       >
-        <span className="placa text-[7.5px]">aún no sabemos</span>
+        {/* Adjuntar va en placa de museo y no como botón: la foto es opcional y
+            no puede competirle al enviar. El input de verdad está escondido —
+            el nativo no se deja estilar— y lo dispara el label. */}
+        <div className="flex items-center gap-2">
+          <input
+            ref={archivo}
+            id={idArchivo}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={elegir}
+            className="sr-only"
+          />
+          <label
+            htmlFor={idArchivo}
+            className="placa cursor-pointer text-[7.5px] transition-colors hover:text-tiza"
+          >
+            {cargando ? "abriendo…" : foto ? "foto adjunta" : "adjuntar foto"}
+          </label>
+          {foto && (
+            <button
+              type="button"
+              onClick={() => setFoto(null)}
+              aria-label="Quitar la foto"
+              className="font-mono text-[11px] leading-none text-humo/70 transition-colors hover:text-tiza"
+            >
+              ×
+            </button>
+          )}
+        </div>
+
         <span className="font-mono text-[10px] text-humo/70 tabular-nums">
           {valor.length}/{site.maxRespuesta}
         </span>
