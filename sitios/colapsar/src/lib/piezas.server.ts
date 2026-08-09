@@ -22,6 +22,21 @@ const TOPE = 500;
 /** Llamadas al modelo que se permiten en un día. Tope duro de gasto. */
 const TOPE_DIARIO = 400;
 
+/**
+ * Cuántas piezas puede dejar una misma IP, y en cuánto tiempo.
+ *
+ * Es una hora y no diez minutos porque los dos frenos tienen que encajar: a 3
+ * cada 10 minutos, una sola IP llega a 432 al día y **se come sola el
+ * `TOPE_DIARIO` de 400**, dejando a todos los demás rechazados en silencio
+ * hasta medianoche. A 3 por hora son 72 al día: hacen falta seis IPs a tope el
+ * día entero para agotar el presupuesto.
+ *
+ * El precio es que la IP no es la persona. Detrás de un CGNAT de operador móvil
+ * hay mucha gente compartiendo salida, y ahí esto va a tumbar envíos legítimos.
+ */
+const POR_IP = 3;
+const VENTANA_IP = "1 h" as const;
+
 let cliente: Redis | null = null;
 
 /**
@@ -47,7 +62,7 @@ let limitador: Ratelimit | null = null;
 function limite(): Ratelimit {
   return (limitador ??= new Ratelimit({
     redis: redis(),
-    limiter: Ratelimit.slidingWindow(3, "10 m"),
+    limiter: Ratelimit.slidingWindow(POR_IP, VENTANA_IP),
     prefix: "ratelimit:piezas",
   }));
 }
