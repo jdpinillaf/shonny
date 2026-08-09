@@ -25,12 +25,21 @@ const TOPE_DIARIO = 400;
 let cliente: Redis | null = null;
 
 /**
- * Perezoso a propósito. `Redis.fromEnv()` lanza si faltan las variables, y en
- * el ámbito del módulo eso se ejecuta durante `next build`: la landing entera
- * dejaría de compilar por una variable que todavía no está puesta.
+ * Perezoso a propósito. Construirlo en el ámbito del módulo se ejecutaría
+ * durante `next build`, y la landing entera dejaría de compilar por una
+ * variable que todavía no está puesta.
+ *
+ * Y a mano en vez de con `Redis.fromEnv()`: cuando Upstash se provisiona desde
+ * el marketplace de Vercel, las variables llegan como `KV_REST_API_*`, y
+ * `fromEnv()` solo busca `UPSTASH_REDIS_REST_*`. Se aceptan las dos, que es lo
+ * que hace que funcione igual si algún día se cambia el marketplace por una
+ * cuenta propia de Upstash.
  */
 function redis(): Redis {
-  return (cliente ??= Redis.fromEnv());
+  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) throw new Error("sin credenciales de Redis");
+  return (cliente ??= new Redis({ url, token }));
 }
 
 let limitador: Ratelimit | null = null;
