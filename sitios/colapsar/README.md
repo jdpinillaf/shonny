@@ -240,12 +240,51 @@ Tres cosas que no se pueden tocar:
   moderar llega a la pared.
 
 Para retirar algo: `DELETE /api/piezas/<id>` con `authorization: Bearer
-$ADMIN_TOKEN`.
+$ADMIN_TOKEN`. Con token malo devuelve 404, no 401: no hay por qué confirmarle
+a nadie que el endpoint existe.
 
-Variables que hacen falta (`vercel env pull .env.local`):
-`BLOB_READ_WRITE_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`,
-`VERCEL_OIDC_TOKEN` (el gateway), y a mano `ADMIN_TOKEN`,
-`NEXT_PUBLIC_BLOB_HOST` y opcionalmente `MODELO_MODERACION`.
+## El filtro
+
+`src/lib/moderar.ts`. Una llamada con el texto y la foto, salida a un enum, y
+`catch → false`.
+
+**El modelo no se elige de memoria.** Por acá solo pasa lo que sube la gente —las
+fotos de la colección son fijas y nunca se moderan—, y con un retrato de estudio
+corriente `gpt-5-nano` y `gpt-4.1-nano` lo rechazaron como "desnudos" por unos
+hombros descubiertos. `gpt-5-mini` distingue un retrato de una desnudez. Ese es
+el error más caro que puede cometer esto y **no se ve por ningún lado**, porque
+el rechazo es silencioso: alguien sube algo inocente, no aparece, y no se entera
+nadie.
+
+Por eso existe `scripts/probar-moderacion.mjs`: ocho casos, cuatro que deben
+pasar y cuatro que deben caer. Pásalo cada vez que toques el modelo o el prompt.
+
+```bash
+node scripts/probar-moderacion.mjs                      # el modelo por defecto
+node scripts/probar-moderacion.mjs openai/gpt-5-nano    # comparar otro
+```
+
+El prompt lo lee de `moderar.ts` en vez de tener una copia: una segunda copia es
+la forma más segura de que el banco pase en verde mientras producción usa otras
+reglas.
+
+**El tier gratis del AI Gateway no aguanta esto.** Limita las peticiones por
+modelo, y una tanda de ocho casos seguidos ya cae con `GatewayRateLimitError`.
+Como `moderar()` falla cerrado, en un día de lanzamiento eso se traduce en
+rechazar a todo el mundo en silencio. Hay que tener créditos cargados, y conviene
+ponerle un presupuesto con límite duro. El tope diario de `hayPresupuesto()` es
+el otro freno, y ese sí es nuestro.
+
+Variables (`vercel env pull .env.local`): `BLOB_READ_WRITE_TOKEN`,
+`KV_REST_API_URL`, `KV_REST_API_TOKEN`, `VERCEL_OIDC_TOKEN` (el gateway),
+`NEXT_PUBLIC_BLOB_HOST`, `ADMIN_TOKEN`, y opcionalmente `MODELO_MODERACION`.
+
+Ojo con los nombres de Redis: **Upstash provisionado desde el marketplace de
+Vercel deja las credenciales como `KV_REST_API_*`, y `Redis.fromEnv()` solo mira
+`UPSTASH_REDIS_REST_*`**. Por eso el cliente se construye a mano aceptando las
+dos. Upstash Redis, además, es el único de su familia sin plan gratis en el
+marketplace: es Pay As You Go, del orden de veinte centavos al mes a este
+volumen. La cuenta propia en upstash.com sí tiene free de 500K comandos.
 
 Sin ninguna de ellas la página sigue en pie: `leerPiezas()` cae a las semillas.
 Eso no es cortesía, es obligatorio — la página se prerrenderiza en `next build`.
