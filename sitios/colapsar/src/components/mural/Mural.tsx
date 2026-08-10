@@ -8,7 +8,6 @@ import { entre } from "@/lib/semilla";
 import { Papel } from "../fondo/Papel";
 import { PiezaAbierta } from "../fondo/PiezaAbierta";
 import { type Origen } from "../fondo/origen";
-import { CeldaFoto } from "./CeldaFoto";
 
 const SUAVE = [0.16, 1, 0.3, 1] as const;
 
@@ -19,8 +18,9 @@ const SUAVE = [0.16, 1, 0.3, 1] as const;
  * el alto recortado para que se vean unas tres filas y el resto se alcance
  * scrolleando: la gracia es que se note que hay más de lo que cabe.
  *
- * Es el único sitio donde las notas y las fotos se ven juntas: en la pared las
- * fotos están en los televisores y las notas colgadas, y acá comparten rejilla.
+ * Solo notas. Las fotos de la colección se ven en los televisores de la pared y
+ * ahí se quedan: acá lo que se lee es lo que la gente escribió, y una foto en
+ * medio de la rejilla corta esa lectura en seco.
  */
 export function Mural({
   piezas,
@@ -116,11 +116,10 @@ export function Mural({
               `overscroll-contain` no es opcional: `body` tiene `overflow: hidden`
               y sin esto el scroll que llega al final se lo lleva la página. */}
           <div className="max-h-[46vh] overflow-y-auto overscroll-contain pb-2 pr-1 md:max-h-[56vh]">
-            {/* Columnas y no rejilla. Desde que el mural mezcla papeles y fotos,
-                las alturas son muy distintas: en una rejilla, una foto estira su
-                fila entera y deja a los papeles de al lado flotando sobre un
-                hueco enorme. Con columnas cada pieza se apila debajo de la
-                anterior y el mural vuelve a leerse como un tablón. */}
+            {/* Columnas y no rejilla. Los papeles no miden lo mismo —hay notas de
+                una línea y de cuatro— y en una rejilla cada fila se alinea al más
+                alto, dejando huecos debajo de los cortos. Con columnas cada papel
+                se apila debajo del anterior y el mural se lee como un tablón. */}
             <div className="columns-2 gap-3 [column-fill:_balance] md:columns-4 md:gap-5">
               {piezas.map((pieza, i) => {
                 // Acá no cuelga de un chinche, pero una inclinación chica y
@@ -140,21 +139,12 @@ export function Mural({
                     // varios segundos después.
                     transition={{ duration: 0.5, delay: Math.min(i * 0.03, 0.5), ease: SUAVE }}
                   >
-                    {pieza.foto ? (
-                      <CeldaFoto
-                        pieza={pieza}
-                        reposo={reposo}
-                        onAbrir={abrir}
-                        oculta={hueco?.pieza.id === pieza.id}
-                      />
-                    ) : (
-                      <Papel
-                        pieza={pieza}
-                        reposo={reposo}
-                        onAbrir={abrir}
-                        oculta={hueco?.pieza.id === pieza.id}
-                      />
-                    )}
+                    <Papel
+                      pieza={pieza}
+                      reposo={reposo}
+                      onAbrir={abrir}
+                      oculta={hueco?.pieza.id === pieza.id}
+                    />
                   </motion.div>
                 );
               })}

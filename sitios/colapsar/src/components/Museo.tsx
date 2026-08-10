@@ -13,7 +13,7 @@ import { type Origen } from "./fondo/origen";
 import { Mural } from "./mural/Mural";
 import { Sonido } from "./Sonido";
 import { barajar } from "@/content/coleccion";
-import { conFoto, esPieza, unir, type Pieza } from "@/content/pieza";
+import { conFoto, conTexto, esPieza, unir, type Pieza } from "@/content/pieza";
 import { site } from "@/content/site";
 import { useSonido } from "@/lib/useSonido";
 
@@ -72,14 +72,15 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
   // servidor y las dos copias se colapsan en una.
   const coleccion = useMemo(() => unir(mias, piezas), [mias, piezas]);
   const fotosDeLaColeccion = useMemo(() => conFoto(coleccion), [coleccion]);
+  const notasDeLaColeccion = useMemo(() => conTexto(coleccion), [coleccion]);
   const ultima = mias.at(-1);
 
-  // El mural va barajado y no en el orden en que llegan las piezas. Sin esto las
-  // notas salen todas primero y las fotos amontonadas al final, que es el orden
-  // en que se declaran las semillas: la rejilla se lee como dos bloques pegados
-  // en vez de como una colección. Lo suyo va delante, lo último arriba del todo.
+  // El mural es solo notas: las fotos se ven en los televisores y ahí se quedan.
+  // Va barajado y no en el orden en que llegan las piezas, para que las semillas
+  // no salgan siempre en el orden en que están escritas en `notas.ts`. Lo suyo va
+  // delante, lo último arriba del todo.
   const paraMural = useMemo(
-    () => unir([...mias].reverse(), barajar(piezas)),
+    () => conTexto(unir([...mias].reverse(), barajar(piezas))),
     [mias, piezas],
   );
 
@@ -227,7 +228,9 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
                 >
                   <Pregunta
                     onListo={preguntaLista}
-                    total={coleccion.length}
+                    // El recuento cuenta lo que hay dentro del mural, que es lo
+                    // que abre: notas. Las fotos no entran en la cifra.
+                    total={notasDeLaColeccion.length}
                     muralAbierto={mural}
                     onAbrirMural={() => setMural(true)}
                   />
