@@ -39,8 +39,10 @@ export const site = {
 
   portada: "/portada.jpg",
 
-  // 40s del master (0:50 → 1:30), en loop. Suena desde el primer gesto de la
+  // 40s del master (0:48 → 1:28), en loop. Suena desde el primer gesto de la
   // visita. Si el archivo no está, el control de sonido no se muestra.
+  // Recortado con: ffmpeg -ss 48 -t 40 -i Colapsar_MASTER_03.wav \
+  //   -ar 44100 -ac 2 -codec:a libmp3lame -b:a 160k public/audio/colapsar-40s.mp3
   audio: `/audio/colapsar-${ADELANTO}s.mp3`,
   adelanto: { segundos: ADELANTO, reloj: reloj(ADELANTO) },
 
