@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import { site } from "@/content/site";
+import { evento } from "@/lib/analitica";
 
 const SUAVE = [0.16, 1, 0.3, 1] as const;
 
@@ -26,6 +27,10 @@ export function CardSpotify({ emerge = false }: { emerge?: boolean }) {
       target="_blank"
       rel="noreferrer"
       className="relative block w-full max-w-[352px] focus:outline-none"
+      // El único click que la página pide de verdad. Autocapture también lo ve,
+      // pero con nombre propio entra en un embudo sin tener que filtrar por
+      // href entre todos los clicks del museo.
+      onClick={() => evento("spotify abierto")}
       initial={
         emerge
           ? { opacity: 0, y: 78, scale: 0.9, filter: "blur(22px)" }

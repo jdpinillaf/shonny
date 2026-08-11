@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Courier_Prime, Instrument_Serif } from "next/font/google";
+import { Analitica } from "@/components/Analitica";
 import { site } from "@/content/site";
 import "./globals.css";
 
@@ -54,7 +55,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className={`${instrument.variable} ${courier.variable} h-full`}>
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        <Analitica />
+        {children}
+      </body>
     </html>
   );
 }

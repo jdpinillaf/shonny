@@ -15,6 +15,7 @@ import { Sonido } from "./Sonido";
 import { barajar } from "@/content/coleccion";
 import { conFoto, conTexto, esPieza, unir, type Pieza } from "@/content/pieza";
 import { site } from "@/content/site";
+import { evento } from "@/lib/analitica";
 import { useSonido } from "@/lib/useSonido";
 
 type Acto = "pregunta" | "colapso" | "disco";
@@ -111,6 +112,13 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
     setCuantasNotas(cuenta("notas", NOTAS_MOVIL, TOPE_NOTAS));
   }, []);
 
+  // El embudo entero: pregunta → colapso → disco. Es lo único que autocapture
+  // no puede ver, porque los dos saltos que importan no los dispara un click
+  // sino el final de una animación.
+  useEffect(() => {
+    evento("acto visto", { acto });
+  }, [acto]);
+
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const leer = () => setQuieto(mq.matches);
@@ -128,6 +136,10 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
   const abrir = useCallback((origen: Origen) => {
     setAbierta(origen);
     setHueco(origen);
+    evento("pieza abierta", {
+      tipo: origen.pieza.foto ? "foto" : "nota",
+      pieza: origen.pieza.id,
+    });
   }, []);
 
   const volvioASuSitio = useCallback(() => {
@@ -151,6 +163,10 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
       return siguiente;
     });
     setActo("colapso");
+
+    // El texto no se manda: es de la persona y ya vive en la pared. Solo el
+    // largo, que es lo que dice si la caja invita a escribir o a despachar.
+    evento("respuesta enviada", { largo: texto.length });
 
     // Se manda y no se espera. La persona ya está viendo el colapso, y lo que
     // pase con la moderación no le cambia nada de lo que ve: su nota está en su
@@ -227,7 +243,12 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
                     // que abre: notas. Las fotos no entran en la cifra.
                     total={notasDeLaColeccion.length}
                     muralAbierto={mural}
-                    onAbrirMural={() => setMural(true)}
+                    onAbrirMural={() => {
+                      setMural(true);
+                      // El recuento no parece un botón a propósito. Este evento
+                      // es el que dice si aun así lo encuentran.
+                      evento("mural abierto", { piezas: notasDeLaColeccion.length });
+                    }}
                   />
                   {inputListo && <Respuesta onEnviar={enviar} />}
                 </motion.div>
