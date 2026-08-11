@@ -3,7 +3,7 @@
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pregunta } from "./acto1/Pregunta";
-import { Respuesta, type FotoLista } from "./acto1/Respuesta";
+import { Respuesta } from "./acto1/Respuesta";
 import { Colapso } from "./acto2/Colapso";
 import { Disco } from "./acto3/Disco";
 import { Canales, FOTOS_MOVIL, TOPE_FOTOS } from "./fondo/Canales";
@@ -138,7 +138,7 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
   // El audio no se toca acá: `useSonido` ya lo enciende con el primer gesto de
   // la visita, que siempre pasa antes de este envío. Volver a llamarlo acá le
   // reviviría la canción a quien la haya apagado a propósito.
-  const enviar = useCallback((texto: string, foto?: FotoLista) => {
+  const enviar = useCallback((texto: string) => {
     // El id lo pone el cliente para que, cuando la pieza vuelva aprobada desde
     // el servidor, se reconozca como la misma y no salga dos veces.
     const pieza: Pieza = { id: crypto.randomUUID(), texto, creado: Date.now() };
@@ -154,16 +154,11 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
 
     // Se manda y no se espera. La persona ya está viendo el colapso, y lo que
     // pase con la moderación no le cambia nada de lo que ve: su nota está en su
-    // pared pase lo que pase. Sin `keepalive`, que tope en 64 KB y no le cabe
-    // una foto.
+    // pared pase lo que pase. Sigue siendo `FormData` y no JSON porque es lo
+    // que lee la ruta, que todavía acepta foto para las piezas que ya existen.
     const cuerpo = new FormData();
     cuerpo.set("id", pieza.id);
     cuerpo.set("texto", texto);
-    if (foto) {
-      cuerpo.set("foto", foto.blob, "foto.jpg");
-      cuerpo.set("w", String(foto.w));
-      cuerpo.set("h", String(foto.h));
-    }
     void fetch("/api/piezas", { method: "POST", body: cuerpo }).catch(() => {});
   }, []);
 
