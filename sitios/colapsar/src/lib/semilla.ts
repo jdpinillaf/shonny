@@ -50,3 +50,29 @@ export function corrido(semilla: string, x: number, y: number) {
     y: `${(y + entre(semilla, -1.5, 1.5, 12)).toFixed(1)}%`,
   };
 }
+
+/**
+ * `corrido` con topes: la pieza queda entera dentro de la pantalla.
+ *
+ * Es para las notas. Un televisor recortado por el borde se lee como encuadre;
+ * media frase recortada se lee como error, así que los papeles sí tienen que
+ * caber enteros.
+ *
+ * `ancho` es lo que ocupa la nota a lo ancho, en % del viewport: de ahí sale el
+ * tope de la derecha. `margen` es el aire contra el borde — el papel va
+ * inclinado y su chinche sobresale, así que pegarlo al 0 lo recorta igual.
+ *
+ * El tope se aplica *después* del azar. Al revés no sirve de nada: el empujón
+ * devolvería al borde justo lo que el tope acababa de meter.
+ *
+ * En vertical no hay tope que calcular: el alto del papel depende de cuánto
+ * texto traiga y acá nadie sabe dónde termina. Por eso las de abajo se cuelgan
+ * del borde de abajo (`bottom` en vez de `top`, en `Nota`) y con el suelo basta.
+ */
+export function dentro(semilla: string, x: number, y: number, ancho: number, margen: number) {
+  const tope = (v: number, max: number) => Math.min(Math.max(v, margen), max);
+  return {
+    x: `${tope(x + entre(semilla, -2, 2, 11), 100 - ancho - margen).toFixed(1)}%`,
+    y: `${tope(y + entre(semilla, -1.5, 1.5, 12), 100).toFixed(1)}%`,
+  };
+}

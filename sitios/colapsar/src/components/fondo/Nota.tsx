@@ -6,7 +6,12 @@ import { entre } from "@/lib/semilla";
 import { Papel } from "./Papel";
 import { type Origen } from "./origen";
 
-export type Ranura = { x: string; y: string };
+/**
+ * Dónde cuelga el papel. `y` se mide desde arriba, salvo que `desdeAbajo` diga
+ * que se mide desde abajo: una nota del montón de abajo no puede colocarse por
+ * su borde de arriba sin saber cuánto mide, y cuánto mide depende del texto.
+ */
+export type Ranura = { x: string; y: string; desdeAbajo?: boolean };
 
 type Props = {
   pieza: Pieza;
@@ -40,7 +45,10 @@ export function Nota({
   return (
     <motion.div
       className="pointer-events-none absolute w-[42vw] max-w-[196px] md:w-[184px]"
-      style={{ left: ranura.x, top: ranura.y }}
+      style={{
+        left: ranura.x,
+        ...(ranura.desdeAbajo ? { bottom: ranura.y } : { top: ranura.y }),
+      }}
       initial={
         nueva
           ? { opacity: 0, scale: 0.82, x: "-50%", y: 90, filter: "blur(6px)" }
