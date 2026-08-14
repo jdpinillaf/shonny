@@ -4,8 +4,14 @@ import { useRef } from "react";
 import { type Pieza } from "@/content/pieza";
 import { medir, type Origen } from "./origen";
 
-/** El pie de museo. Lo comparten la pared, el mural y la pieza abierta. */
-export const PIE = "nos perdimos la oportunidad";
+/**
+ * El pie de museo. Lo comparten la pared, el mural y la pieza abierta.
+ *
+ * La firma va acá y no en `Pieza` porque no es un dato: todas las piezas son
+ * anónimas por diseño —no se pide nombre en ningún sitio— y el día que se pida,
+ * lo que cambia es el tipo, no esta constante.
+ */
+export const PIE = "Anónimo — nos perdimos la oportunidad";
 
 export const TINTA = {
   texto: "#22201c",
@@ -61,7 +67,9 @@ export function Papel({ pieza, reposo, onAbrir, oculta = false, className = "" }
     >
       <p className="text-[11.5px] leading-[1.5] md:text-[12px]">{pieza.texto}</p>
       <p
-        className="mt-2.5 border-t pt-1.5 text-[7px] tracking-[0.28em] uppercase"
+        // Tracking más corto que el del modal: acá el papel mide 184px y con
+        // 0.28em el pie se parte en tres líneas en vez de dos.
+        className="mt-2.5 border-t pt-1.5 text-[7px] tracking-[0.18em] uppercase"
         style={{ borderColor: TINTA.borde, color: TINTA.pie }}
       >
         {PIE}

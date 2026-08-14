@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type Pieza } from "@/content/pieza";
+import { useEscritorio } from "@/lib/useEscritorio";
 import { corrido, entre, indice } from "@/lib/semilla";
 import { cuadrosDeEstatica } from "./estatica";
 import { medir, type Origen } from "./origen";
@@ -24,12 +25,22 @@ import { medir, type Origen } from "./origen";
  */
 type Marco = { id: string; x: string; y: string; w: string; h: string };
 
+/**
+ * Los `id` son los mismos que los de móvil, y en el mismo orden, **a propósito**.
+ * El servidor pinta la maqueta de móvil (ver `useEscritorio`) y escritorio la
+ * cambia al hidratar: como cada marco conserva su `id`, y el `id` es la `key`,
+ * React reutiliza el mismo `<Canal>` en vez de desmontarlo y montar otro. Le
+ * cambia de sitio y de tamaño y nada más — el `id` también es lo que elige la
+ * foto (`indice(marco.id, …)`), así que la URL de la imagen tampoco cambia y no
+ * se pide ni un byte de más. Con ids distintos, escritorio bajaría cinco fotos
+ * para tirarlas y bajar otras cinco.
+ */
 const MARCOS_ESCRITORIO: Marco[] = [
-  { id: "a", x: "2%", y: "6%", w: "20vw", h: "30vh" },
-  { id: "b", x: "13%", y: "56%", w: "17vw", h: "27vh" },
-  { id: "c", x: "76%", y: "10%", w: "21vw", h: "32vh" },
-  { id: "d", x: "80%", y: "58%", w: "18vw", h: "28vh" },
-  { id: "f", x: "52%", y: "78%", w: "16vw", h: "24vh" },
+  { id: "m1", x: "2%", y: "6%", w: "20vw", h: "30vh" },
+  { id: "m2", x: "13%", y: "56%", w: "17vw", h: "27vh" },
+  { id: "m3", x: "76%", y: "10%", w: "21vw", h: "32vh" },
+  { id: "m4", x: "80%", y: "58%", w: "18vw", h: "28vh" },
+  { id: "m5", x: "52%", y: "78%", w: "16vw", h: "24vh" },
 ];
 
 /**
@@ -193,19 +204,38 @@ function Canal({
       type="button"
       onClick={abrir}
       aria-label={pieza.texto ? `Abrir pieza: ${pieza.texto}` : "Abrir foto del museo"}
-      className="scanlines pointer-events-auto absolute cursor-pointer overflow-hidden"
-      style={{
-        left: marco.x,
-        top: marco.y,
-        width: marco.w,
-        height: marco.h,
-        minWidth: 128,
-        minHeight: 168,
-        boxShadow: "0 0 0 1px rgba(242,240,234,0.07), 0 30px 90px rgba(0,0,0,0.6)",
-        // Igual que el papel: `opacity` y no `visibility`, para que el marco
-        // siga siendo enfocable y se le pueda devolver el foco al cerrar.
-        opacity: pieza.id === huecoId ? 0 : 1,
-      }}
+      className="canal scanlines pointer-events-auto absolute cursor-pointer overflow-hidden"
+      style={
+        {
+          left: marco.x,
+          top: marco.y,
+          width: marco.w,
+          height: marco.h,
+          minWidth: 128,
+          minHeight: 168,
+          boxShadow: "0 0 0 1px rgba(242,240,234,0.07), 0 30px 90px rgba(0,0,0,0.6)",
+          // Igual que el papel: `opacity` y no `visibility`, para que el marco
+          // siga siendo enfocable y se le pueda devolver el foco al cerrar.
+          //
+          // El relleno `backwards` de `.canal` manda sobre esto mientras el
+          // televisor se enciende, y al acabar suelta y vuelve a mandar el
+          // `huecoId`. Son los tres primeros segundos: para abrir una pieza hay
+          // que tocarla, y no da tiempo.
+          opacity: pieza.id === huecoId ? 0 : 1,
+          // Cuándo se enciende este televisor. Sale de la semilla de su `id`,
+          // igual que su deriva y su reloj de cortes, así que la misma pantalla
+          // se enciende siempre en el mismo orden.
+          //
+          // Los televisores van **primero y despacio**: son lo que emerge de la
+          // oscuridad, y todo lo demás está temporizado detrás de ellos (las
+          // notas en `Nota.tsx`, el recuento y el titular en `Pregunta.tsx`).
+          // Duran más que su propio retardo a propósito — el último acaba de
+          // encenderse pasados cuatro segundos, con la página ya legible, así que
+          // el fondo sigue moviéndose cuando ya se está leyendo.
+          "--canal-retardo": `${entre(marco.id, 0.25, 1.5, 8).toFixed(2)}s`,
+          "--canal-dur": `${entre(marco.id, 2, 2.8, 9).toFixed(2)}s`,
+        } as React.CSSProperties
+      }
     >
       <div
         aria-hidden
@@ -228,14 +258,22 @@ function Canal({
           src={pieza.foto.url}
           alt=""
           fill
-          sizes="(max-width: 767px) 55vw, 24vw"
+          // El marco de escritorio mide ~384px. Con `24vw` una pantalla de 1920
+          // resolvía a ~921px y el navegador pedía la variante de 1080w — un
+          // reescalado hacia arriba del original, para una caja de un tercio.
+          sizes="(max-width: 767px) 55vw, 400px"
+          // Van en gris, oscurecidas, bajo viñeta, grano y scanlines. A 50 no se
+          // distingue del default de 75 y pesan un tercio menos. La calidad hay
+          // que declararla en `next.config.ts`: Next 16 rechaza las que no estén.
+          quality={50}
           className="object-cover"
+          // El gris va también en el archivo de las fotos de semilla, pero el
+          // filtro se queda: por acá pasan además las fotos que sube la gente,
+          // que llegan a color desde Blob. Gris sobre gris no hace nada.
           style={{ filter: "grayscale(1) contrast(1.16) brightness(0.74)" }}
-          // Solo la primera de cada lista, para no precargar de más. El resto se
-          // queda en el `loading="lazy"` de next/image, que igual las pide todas
-          // enseguida: las dos listas se montan siempre (una la esconde el CSS)
-          // y el `display:none` no frena a un `<img>` lazy. Es el precio de
-          // tener dos maquetas hechas a mano en vez de una responsive.
+          // Solo la primera, para no precargar de más. Ahora sí sirve de algo:
+          // desde que `Canales` monta una sola maqueta, todas las que se piden
+          // son las que se ven.
           priority={primera}
         />
       </div>
@@ -271,7 +309,16 @@ export function Canales({
   onAbrir: (origen: Origen) => void;
   huecoId: string | null;
 }) {
+  const escritorio = useEscritorio();
+
   if (pool.length === 0) return null;
+
+  // En el servidor y en el primer render del cliente esto es `false`: se pinta la
+  // maqueta de móvil. Es lo que devuelve las fotos al HTML —y con la primera, su
+  // `<link rel=preload>`— para que empiecen a bajar con el documento en vez de
+  // después de hidratar. Escritorio las recoloca sin volver a pedirlas: los ids
+  // coinciden con los de móvil, así que son los mismos marcos cambiados de sitio.
+  const marcos = escritorio ? MARCOS_ESCRITORIO : MARCOS_MOVIL.slice(0, fotos);
 
   return (
     // El contenedor no puede llevar `aria-hidden`: dentro hay botones enfocables
@@ -281,22 +328,10 @@ export function Canales({
     // Sí sigue siendo `pointer-events-none`: ocupa la pantalla entera y sin eso
     // se comería los clicks de todo lo demás. Cada marco los reactiva.
     <div className="pointer-events-none fixed inset-0 z-0">
-      <div className="hidden md:block">
-        {MARCOS_ESCRITORIO.map((m, i) => (
-          <Canal
-            key={m.id}
-            marco={m}
-            pool={pool}
-            quieto={quieto}
-            primera={i === 0}
-            onAbrir={onAbrir}
-            huecoId={huecoId}
-          />
-        ))}
-      </div>
-
-      <div className="md:hidden" style={ATENUAR(apagado)}>
-        {MARCOS_MOVIL.slice(0, fotos).map((m, i) => (
+      {/* El atenuado es solo del collage de móvil: en escritorio los
+          televisores están lejos del contenido y no estorban. */}
+      <div style={escritorio ? undefined : ATENUAR(apagado)}>
+        {marcos.map((m, i) => (
           <Canal
             key={m.id}
             marco={m}

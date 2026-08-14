@@ -17,6 +17,14 @@ type Opciones = {
  * El jitter por caracter es lo que separa esto de una barra de progreso: una
  * máquina de escribir real no tiene cadencia constante, y las pausas caen más
  * largas después de coma y punto.
+ *
+ * **Solo para lo que aparece después del primer momento.** El titular del acto
+ * 1 se teclea con CSS (`.teclear` en `globals.css`) y no con esto, porque acá
+ * el texto arranca vacío y no existe hasta que el navegador hidrata: era el
+ * elemento del LCP saliendo en blanco del servidor. El acto 2 sí puede usarlo
+ * —para llegar ahí hay que haber enviado una respuesta, o sea que el JavaScript
+ * lleva rato corriendo— y a cambio conserva el jitter, que en CSS no hay forma
+ * de hacer.
  */
 export function useTypewriter(
   texto: string,

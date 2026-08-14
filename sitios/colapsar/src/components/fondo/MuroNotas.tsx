@@ -140,7 +140,6 @@ export function MuroNotas({
   piezas,
   ultima,
   quieto,
-  puntero,
   notas: cuantas,
   apagado,
   onAbrir,
@@ -151,7 +150,6 @@ export function MuroNotas({
   /** Lo que acaba de escribir la persona, si escribió algo en esta visita. */
   ultima: Pieza | undefined;
   quieto: boolean;
-  puntero: boolean;
   notas: number;
   apagado: boolean;
   onAbrir: (origen: Origen) => void;
@@ -188,7 +186,6 @@ export function MuroNotas({
               pieza={pieza}
               ranura={RANURAS_ESCRITORIO[i]}
               quieto={quieto}
-              puntero={puntero}
               onAbrir={onAbrir}
               oculta={huecoId === pieza.id}
             />
@@ -203,7 +200,6 @@ export function MuroNotas({
             pieza={pieza}
             ranura={RANURAS_MOVIL[i]}
             quieto={quieto}
-            puntero={puntero}
             onAbrir={onAbrir}
             oculta={huecoId === pieza.id}
           />
@@ -218,7 +214,6 @@ export function MuroNotas({
             ranura={RANURA_NUEVA}
             nueva
             quieto={quieto}
-            puntero={puntero}
             onAbrir={onAbrir}
             oculta={huecoId === ultima.id}
           />

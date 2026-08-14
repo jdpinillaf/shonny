@@ -53,7 +53,6 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
   const [inputListo, setInputListo] = useState(false);
   const [mias, setMias] = useState<Pieza[]>([]);
   const [quieto, setQuieto] = useState(false);
-  const [puntero, setPuntero] = useState(false);
   const [fotos, setFotos] = useState(FOTOS_MOVIL);
   const [cuantasNotas, setCuantasNotas] = useState(NOTAS_MOVIL);
   const [mural, setMural] = useState(false);
@@ -127,11 +126,10 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
     return () => mq.removeEventListener("change", leer);
   }, []);
 
-  // El hover de las notas solo se monta si hay un puntero de verdad: en táctil
-  // el toque cuenta como hover y se queda pegado.
-  useEffect(() => {
-    setPuntero(window.matchMedia("(hover: hover)").matches);
-  }, []);
+  // El hover de las notas lo decidía acá un `matchMedia("(hover: hover)")` que
+  // bajaba por props hasta `Nota`, porque en táctil el toque cuenta como hover y
+  // se queda pegado. Eso ahora es una media query de CSS en `.colgada`, que dice
+  // lo mismo sin estado, sin efecto y sin un render extra al montar.
 
   const abrir = useCallback((origen: Origen) => {
     setAbierta(origen);
@@ -203,7 +201,6 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
           piezas={coleccion}
           ultima={ultima}
           quieto={quieto}
-          puntero={puntero}
           notas={cuantasNotas}
           apagado={acto === "disco"}
           onAbrir={abrir}
@@ -213,16 +210,20 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
         {/* Rebaja lo que haya detrás justo donde va el texto. Sin esto, una nota
             o un canal claro pueden dejar la pregunta ilegible. Cuando entra el
             disco se afloja: ahí el centro ya no es texto sino la portada a
-            color, y el mismo velo que salvaba la lectura le apagaría el momento. */}
-        <motion.div
+            color, y el mismo velo que salvaba la lectura le apagaría el momento.
+
+            Era un `motion.div` para un solo cambio de opacidad entre dos
+            valores, que es exactamente lo que hace una `transition` de CSS sin
+            traerse nada. */}
+        <div
           aria-hidden
           className="pointer-events-none fixed inset-0 z-20"
           style={{
             background:
               "radial-gradient(58% 44% at 50% 50%, rgba(11,13,12,0.92) 0%, rgba(11,13,12,0.74) 45%, rgba(11,13,12,0) 100%)",
+            opacity: acto === "disco" ? 0.5 : 1,
+            transition: "opacity 1.4s ease-out",
           }}
-          animate={{ opacity: acto === "disco" ? 0.5 : 1 }}
-          transition={{ duration: 1.4, ease: "easeOut" }}
         />
 
         {/* La columna tapa la pantalla entera, así que sin esto se comería los
@@ -305,7 +306,16 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
 
         {sonido.hay && (
           <>
-            <audio ref={sonido.audio} src={site.audio} loop preload="auto" />
+            {/* `preload="none"`: son 480 KB y nadie los necesita hasta que haya
+                un gesto. Con `auto` bajaban durante la primera pintada, que es
+                justo cuando compiten con las fotos y la fuente. */}
+            <audio
+              ref={sonido.audio}
+              src={site.audio}
+              loop
+              preload="none"
+              onError={sonido.alFallar}
+            />
             <Sonido sonando={sonido.sonando} onAlternar={sonido.alternar} />
           </>
         )}

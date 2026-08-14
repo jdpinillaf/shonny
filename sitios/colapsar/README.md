@@ -169,8 +169,12 @@ desde otro punto:
 ```bash
 ffmpeg -y -ss 50 -t 40 -i Colapsar_MASTER.wav \
   -af "afade=t=in:st=0:d=0.25,afade=t=out:st=39.2:d=0.8,loudnorm=I=-16:TP=-1.5:LRA=11" \
-  -ar 44100 -ac 2 -codec:a libmp3lame -b:a 160k public/audio/colapsar-40s.mp3
+  -ar 44100 -ac 1 -codec:a libmp3lame -b:a 96k public/audio/colapsar-40s.mp3
 ```
+
+Mono y 96k: son 480 KB en vez de 800. Es música de fondo a volumen 0.4 debajo
+del grano y las scanlines, y el peso del archivo era el bloque más grande de la
+primera carga.
 
 La duración manda desde `ADELANTO`, en `src/content/site.ts`: de ahí salen el
 nombre del archivo, la barra de la card y su etiqueta. Estuvieron los tres
@@ -179,16 +183,24 @@ escritos a mano y se desincronizaron a la primera. Si cambias el `-t`, cambia
 
 La canción tiene que sonar apenas entran. Chrome y Safari **bloquean el audio
 con sonido hasta que la persona haga algún gesto en la página** y eso no se
-puede saltar: un `autoplay` a secas falla en silencio. Así que `useSonido`
-intenta arrancar al montar y, si lo rechazan, deja armado el primer gesto que
-llegue —click, tecla, dedo o rueda, en cualquier parte de la página— para
-encenderlo. En la práctica suena antes de que lleguen a escribir nada.
+puede saltar. Así que `useSonido` deja armado el primer gesto que llegue
+—click, tecla, dedo o rueda, en cualquier parte de la página— para encenderlo.
+En la práctica suena antes de que lleguen a escribir nada.
+
+**No hay intento de `play()` al montar, y no es un olvido.** El `<audio>` va con
+`preload="none"` para sacar el archivo del arranque, y un `play()` temprano
+dispara igual la descarga aunque el navegador rechace el autoplay: la spec dice
+que `play()` con `networkState` vacío arranca la carga del recurso. O sea, el
+intento costaba el archivo entero y casi nunca lo dejaban sonar — solo funciona
+con visitas que ya tengan mucho historial en el sitio.
 
 El botón de abajo a la derecha es para apagarla. Ojo con volver a llamar
 `encender()` desde otros lados (por ejemplo al enviar la respuesta): le
 revive la canción a quien la haya apagado a propósito.
 
-Si el mp3 no está, el control no se dibuja y no se rompe nada.
+Si el mp3 no está, el `onError` del `<audio>` apaga `hay` y el control
+desaparece. Antes eso se sabía con un `HEAD` al montar; ahora se sabe cuando el
+navegador intenta bajarlo de verdad, sin gastar una petición por visita.
 
 ---
 
@@ -304,12 +316,31 @@ ranuras de los papeles están puestas a mano encima de los marcos, uno a uno: si
 el número de marcos pasara a depender de cuántas fotos haya, el collage de móvil
 se deshace.
 
-Las de `public/fotos/` son derivadas a 1400px de originales de 4000×6000.
-Para regenerarlas desde una carpeta nueva:
+Las de `public/fotos/` son derivadas a **780×1170 y en gris** de originales de
+4000×6000. El gris va cocido en el archivo porque en pantalla se pintan siempre
+en gris: guardarlas a color era mandar el triple de bytes para tirarlos en CSS.
+El filtro `grayscale(1)` de `Canales` se queda igualmente — por ahí pasan además
+las fotos que sube la gente, que llegan a color desde Blob.
 
-```bash
-i=1; for f in "/ruta/a/fotos"/*.jpg; do
-  sips -s format jpeg -s formatOptions 72 -Z 1400 "$f" --out "public/fotos/$(printf %02d $i).jpg"
-  i=$((i+1))
-done
+El sufijo `-bn` no es decorativo: `images.minimumCacheTTL` está en un año, así
+que reusar un nombre de archivo deja la versión vieja pegada en caché. **Si se
+reprocesan, cambia el sufijo y con él `site.fotos` y `site.fotosTamano`** — el
+tamaño es el aspect-ratio con el que vuela la pieza al abrirse.
+
+Para regenerarlas desde una carpeta nueva (`sharp` ya es dependencia):
+
+```js
+// node fotos.mjs, desde la raíz del repo
+import sharp from "sharp";
+import { readdir } from "node:fs/promises";
+
+const ORIGEN = "/ruta/a/fotos";
+let i = 1;
+for (const f of (await readdir(ORIGEN)).sort()) {
+  await sharp(`${ORIGEN}/${f}`)
+    .grayscale()
+    .resize({ width: 780 })
+    .jpeg({ quality: 82, mozjpeg: true, progressive: true })
+    .toFile(`public/fotos/${String(i++).padStart(2, "0")}-bn.jpg`);
+}
 ```

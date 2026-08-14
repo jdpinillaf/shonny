@@ -87,7 +87,9 @@ export function CardSpotify({ emerge = false }: { emerge?: boolean }) {
               fill
               sizes="330px"
               className="object-cover"
-              priority
+              // Sin `priority`: la card vive en el acto 3, no en la primera
+              // pintada. Lo único que hacía era colarse en la cola de descargas
+              // por delante de las fotos que sí se están viendo.
             />
           </motion.div>
         </div>

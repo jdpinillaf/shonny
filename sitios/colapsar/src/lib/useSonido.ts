@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { site } from "@/content/site";
 
 /** Cualquiera de estos cuenta como gesto de usuario para el navegador. */
 const GESTOS = ["pointerdown", "keydown", "touchstart", "wheel"] as const;
@@ -10,31 +9,28 @@ const GESTOS = ["pointerdown", "keydown", "touchstart", "wheel"] as const;
 const VOLUMEN = 0.4;
 
 /**
- * El adelanto, en loop, sonando lo antes que el navegador deje.
+ * El adelanto, en loop, sonando al primer gesto que haga la persona.
  *
- * Chrome y Safari bloquean el audio con sonido hasta que la persona haga algún
- * gesto en la página; no hay forma de saltarse eso y un autoplay a secas falla
- * en silencio. Así que se intenta arrancar al montar y, si lo rechazan, queda
- * armado el primer toque —click, tecla, dedo o rueda, en cualquier parte— para
- * encenderlo. En la práctica suena antes de que lleguen a escribir nada.
+ * Chrome y Safari bloquean el audio con sonido hasta que haya un gesto en la
+ * página, así que se deja armado el primer toque —click, tecla, dedo o rueda,
+ * en cualquier parte— para encenderlo. En la práctica suena antes de que
+ * lleguen a escribir nada.
  *
- * Si el mp3 no está, `hay` queda en false y el control no se dibuja: mejor nada
- * que un botón que no hace ruido.
+ * No hay intento de `play()` al montar, y no es un olvido: el `<audio>` va con
+ * `preload="none"` para sacar 800 KB del arranque, y un `play()` temprano
+ * dispara igual la descarga aunque el navegador rechace el autoplay —lo manda
+ * la spec: `play()` con `networkState` vacío arranca la carga del recurso—.
+ * O sea, el intento nos costaba el archivo entero y casi nunca lo dejaban
+ * sonar: solo funciona con visitas que ya tengan mucho historial en el sitio.
+ *
+ * Si el mp3 no está, `alFallar` apaga `hay` y el control desaparece. Antes eso
+ * se sabía con un `HEAD` al montar; ahora se sabe cuando el navegador intenta
+ * bajarlo de verdad, que es lo mismo sin gastar una petición por visita.
  */
 export function useSonido() {
-  const [hay, setHay] = useState(false);
+  const [hay, setHay] = useState(true);
   const [sonando, setSonando] = useState(false);
   const audio = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    let vivo = true;
-    fetch(site.audio, { method: "HEAD" })
-      .then((r) => vivo && setHay(r.ok))
-      .catch(() => {});
-    return () => {
-      vivo = false;
-    };
-  }, []);
 
   const encender = useCallback(() => {
     const el = audio.current;
@@ -50,10 +46,6 @@ export function useSonido() {
 
   useEffect(() => {
     if (!hay) return;
-    const el = audio.current;
-    if (!el) return;
-
-    let vivo = true;
 
     const alGesto = () => {
       soltar();
@@ -63,21 +55,8 @@ export function useSonido() {
       for (const g of GESTOS) document.removeEventListener(g, alGesto);
     };
 
-    el.volume = VOLUMEN;
-    el.play().then(
-      () => {
-        if (vivo) setSonando(true);
-      },
-      () => {
-        // Bloqueado: esperamos al primer gesto, sea cual sea.
-        if (vivo) for (const g of GESTOS) document.addEventListener(g, alGesto);
-      },
-    );
-
-    return () => {
-      vivo = false;
-      soltar();
-    };
+    for (const g of GESTOS) document.addEventListener(g, alGesto);
+    return soltar;
   }, [hay, encender]);
 
   const alternar = useCallback(() => {
@@ -91,5 +70,11 @@ export function useSonido() {
     }
   }, [encender]);
 
-  return { hay, sonando, audio, encender, alternar };
+  /** El archivo no está o no se pudo decodificar: mejor nada que un botón mudo. */
+  const alFallar = useCallback(() => {
+    setHay(false);
+    setSonando(false);
+  }, []);
+
+  return { hay, sonando, audio, encender, alternar, alFallar };
 }

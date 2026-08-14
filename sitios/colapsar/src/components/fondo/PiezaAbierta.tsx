@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Chinche } from "./Chinche";
 import { PIE, TINTA } from "./Papel";
 import { type Origen } from "./origen";
 
@@ -82,14 +83,7 @@ export function PiezaAbierta({
   const cuerpo = (
     <>
       {/* El chinche viaja con ella: sigue siendo la misma pieza. */}
-      <div
-        aria-hidden
-        className="absolute left-1/2 top-0 h-[11px] w-[11px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{
-          background: "#8c8377",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.5)",
-        }}
-      />
+      <Chinche tamano={11} />
 
       <button
         ref={boton}
