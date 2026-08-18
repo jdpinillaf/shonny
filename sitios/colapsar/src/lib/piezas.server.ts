@@ -1,8 +1,9 @@
 import "server-only";
-import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
-import { unstable_cache } from "next/cache";
+import { del } from "@vercel/blob";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { esPieza, type Pieza } from "@/content/pieza";
+import { redis } from "@/lib/redis.server";
 
 const LISTA = "piezas";
 
@@ -36,26 +37,6 @@ const TOPE_DIARIO = 400;
  */
 const POR_IP = 3;
 const VENTANA_IP = "1 h" as const;
-
-let cliente: Redis | null = null;
-
-/**
- * Perezoso a propósito. Construirlo en el ámbito del módulo se ejecutaría
- * durante `next build`, y la landing entera dejaría de compilar por una
- * variable que todavía no está puesta.
- *
- * Y a mano en vez de con `Redis.fromEnv()`: cuando Upstash se provisiona desde
- * el marketplace de Vercel, las variables llegan como `KV_REST_API_*`, y
- * `fromEnv()` solo busca `UPSTASH_REDIS_REST_*`. Se aceptan las dos, que es lo
- * que hace que funcione igual si algún día se cambia el marketplace por una
- * cuenta propia de Upstash.
- */
-function redis(): Redis {
-  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) throw new Error("sin credenciales de Redis");
-  return (cliente ??= new Redis({ url, token }));
-}
 
 let limitador: Ratelimit | null = null;
 
@@ -98,6 +79,16 @@ export const leerPiezas = unstable_cache(traerPiezas, ["colapsar:piezas"], {
   tags: [TAG],
 });
 
+/**
+ * Lo mismo, sin caché. **Solo para el panel.**
+ *
+ * Moderar contra una lectura de hasta un minuto de antigüedad es enseñar una
+ * pared que ya no existe: borras algo, la lista lo sigue mostrando, lo vuelves
+ * a borrar y sale un 404. El panel lo ve una persona cada tanto, así que el
+ * comando de Redis por visita da igual acá.
+ */
+export const leerPiezasSinCache = traerPiezas;
+
 export async function guardarPieza(pieza: Pieza): Promise<void> {
   const r = redis();
   await r.lpush(LISTA, JSON.stringify(pieza));
@@ -110,6 +101,30 @@ export async function borrarPieza(id: string): Promise<Pieza | null> {
   const pieza = todas.find((p) => esPieza(p) && p.id === id) ?? null;
   if (!pieza) return null;
   await r.lrem(LISTA, 1, JSON.stringify(pieza));
+  return pieza;
+}
+
+/**
+ * Retirar una pieza del museo del todo: la lista, su foto y la caché.
+ *
+ * Vive acá y no en la ruta porque ahora hay dos puertas —el `curl` con el token
+ * y el panel— y las dos tienen que dejar exactamente el mismo rastro. Una de
+ * ellas olvidándose del blob es una foto borrada de la pared que sigue
+ * colgada en internet con su URL pública.
+ */
+export async function retirarPieza(id: string): Promise<Pieza | null> {
+  const pieza = await borrarPieza(id);
+  if (!pieza) return null;
+
+  // Si el blob ya no está, `del` no es problema: la pieza ya salió de la lista.
+  if (pieza.foto?.url) await del(pieza.foto.url).catch(() => {});
+
+  // Acá sí se expira de golpe, al revés que al publicar: cuando estás quitando
+  // algo de la pared no quieres que la siguiente visita todavía lo vea mientras
+  // se refresca por detrás. Que la próxima pague la espera.
+  revalidateTag(TAG, { expire: 0 });
+  revalidatePath("/");
+
   return pieza;
 }
 

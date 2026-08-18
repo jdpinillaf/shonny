@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { encender } from "@/lib/analitica";
 
@@ -15,7 +16,14 @@ import { encender } from "@/lib/analitica";
  * `requestIdleCallback`, y por si la página nunca queda ociosa.
  */
 export function Analitica() {
+  const ruta = usePathname();
+
   useEffect(() => {
+    // El panel no se mide. El replay graba el DOM entero y el DOM del panel es
+    // lo que ha escrito la gente junto al formulario del token: nada de eso
+    // tiene por qué salir del servidor.
+    if (ruta.startsWith("/admin")) return;
+
     const pedir = () => encender();
 
     if (typeof requestIdleCallback === "function") {
@@ -25,7 +33,7 @@ export function Analitica() {
 
     const id = setTimeout(pedir, 1500);
     return () => clearTimeout(id);
-  }, []);
+  }, [ruta]);
 
   return null;
 }
