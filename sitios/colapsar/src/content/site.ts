@@ -53,11 +53,17 @@ export const site = {
   // prueba con diez personas no apretó ninguna hasta que se le colgó una
   // etiqueta debajo diciendo qué era.
   //
+  // No dice "guardar" ni "pre-save" a propósito: recoge la frase que se acaba
+  // de teclear en el acto anterior —`invitacion`, ahí arriba— y le pone fecha.
+  // La persona lee "Ven, acompáñame a colapsar." letra a letra, y tres segundos
+  // después la card le contesta cuándo. Quien pulsa no está guardando un
+  // archivo, está diciendo que sí.
+  //
   // La fecha va escrita a mano y no calculada: formatearla en cliente y
   // servidor con locales distintos es hidratación rota, y esto cambia una vez.
   // **El 4 de septiembre de 2026 este rótulo deja de tener sentido — pasa a
   // "escúchala" o se quita. El smart link sí se voltea solo.**
-  guardar: "guárdala · sale el 4 sep",
+  guardar: "Acompáñame a colapsar el 4 de sep",
 
   portada: "/portada.jpg",
 

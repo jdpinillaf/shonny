@@ -166,10 +166,15 @@ export function CardSpotify({
       </div>
 
       {/* Cuelga de la card y va dentro del mismo `<a>`: si parece un botón, tiene
-          que responder como el resto de la card. Se queda fuera de la caja negra
-          —el `#181818` es territorio de Spotify— y toma prestado el lenguaje del
-          botón de "deja otra cosa": borde fino, mono diminuto, versalitas. */}
-      <span className="mt-3 block border border-tiza/45 bg-noche/70 px-4 py-2 text-center font-mono text-[9.5px] uppercase tracking-[0.24em] text-tiza transition-colors group-hover:border-tiza/75 group-focus:border-tiza/75">
+          que responder como el resto de la card. Se queda fuera de la caja negra,
+          que es territorio de Spotify.
+
+          En serif y en minúscula, no en las versalitas abiertas del botón de
+          "deja otra cosa": aquello es tipografía de placa de museo y suena
+          institucional, y esto es una invitación. El precio es que la letra sola
+          ya no se lee como pulsable, así que la señal la sostienen el borde de la
+          caja y el más verde justo encima. */}
+      <span className="glow-suave mt-3 block border border-tiza/45 bg-noche/70 px-4 py-2.5 text-center font-serif text-[clamp(0.95rem,3.6vw,1.1rem)] leading-snug text-tiza transition-colors group-hover:border-tiza/75 group-focus:border-tiza/75">
         {site.guardar}
       </span>
     </motion.a>
