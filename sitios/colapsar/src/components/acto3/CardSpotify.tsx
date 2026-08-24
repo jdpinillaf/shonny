@@ -37,7 +37,7 @@ export function CardSpotify({
       href={site.presave}
       target="_blank"
       rel="noreferrer"
-      className="group relative block w-full max-w-[352px] focus:outline-none"
+      className="relative block w-full max-w-[352px] focus:outline-none"
       // Dentro no hay una sola palabra que diga qué hace esto: un lector de
       // pantalla lee "Colapsar, Shonny, 0:00, adelanto 0:40" y un enlace.
       aria-label={`Guardar ${site.cancion}, de ${site.artista}`}
@@ -50,7 +50,7 @@ export function CardSpotify({
       // porque hasta hoy se disparaba sobre un `href="#"` — la serie entera son
       // clicks que no llevaban a ningún lado.
       onClick={(e) => {
-        evento("presave abierto");
+        evento("presave abierto", { desde: "card" });
         if (!onGuardar) return;
         e.preventDefault();
         onGuardar();
@@ -164,19 +164,6 @@ export function CardSpotify({
           <span>adelanto · {site.adelanto.reloj}</span>
         </div>
       </div>
-
-      {/* Cuelga de la card y va dentro del mismo `<a>`: si parece un botón, tiene
-          que responder como el resto de la card. Se queda fuera de la caja negra,
-          que es territorio de Spotify.
-
-          En serif y en minúscula, no en las versalitas abiertas del botón de
-          "deja otra cosa": aquello es tipografía de placa de museo y suena
-          institucional, y esto es una invitación. El precio es que la letra sola
-          ya no se lee como pulsable, así que la señal la sostienen el borde de la
-          caja y el más verde justo encima. */}
-      <span className="glow-suave mt-3 block border border-tiza/45 bg-noche/70 px-4 py-2.5 text-center font-serif text-[clamp(0.95rem,3.6vw,1.1rem)] leading-snug text-tiza transition-colors group-hover:border-tiza/75 group-focus:border-tiza/75">
-        {site.guardar}
-      </span>
     </motion.a>
   );
 }

@@ -47,23 +47,24 @@ export const site = {
   // que redesplegar nada ese día.
   presave: "https://sym.ffm.to/colapsar",
 
-  // El rótulo que cuelga bajo la card. Existe porque la card se lee como un
-  // reproductor —portada, círculo verde, barra que avanza— y nada decía que al
-  // pulsarla se guarda. Es el mismo problema del recuento del mural, que en una
-  // prueba con diez personas no apretó ninguna hasta que se le colgó una
-  // etiqueta debajo diciendo qué era.
+  // Lo que se lee entre la card y el título, y el botón que abre el smart link.
   //
-  // No dice "guardar" ni "pre-save" a propósito: recoge la frase que se acaba
-  // de teclear en el acto anterior —`invitacion`, ahí arriba— y le pone fecha.
-  // La persona lee "Ven, acompáñame a colapsar." letra a letra, y tres segundos
-  // después la card le contesta cuándo. Quien pulsa no está guardando un
-  // archivo, está diciendo que sí.
+  // Existen porque la card se lee como un reproductor —portada, círculo verde,
+  // barra que avanza— y nada decía que ahí hubiera algo que hacer. Es el mismo
+  // problema del recuento del mural, que en una prueba con diez personas no
+  // apretó ninguna hasta que se le puso una etiqueta debajo diciendo qué era.
+  //
+  // El reparto es a propósito: `anuncio` lleva la voz y va en serif, `llamada`
+  // se pulsa y va en las versalitas que dejó libre el botón de "deja otra cosa
+  // que nunca pasó". La frase emociona, el botón se aprieta.
   //
   // La fecha va escrita a mano y no calculada: formatearla en cliente y
   // servidor con locales distintos es hidratación rota, y esto cambia una vez.
-  // **El 4 de septiembre de 2026 este rótulo deja de tener sentido — pasa a
-  // "escúchala" o se quita. El smart link sí se voltea solo.**
-  guardar: "Acompáñame a colapsar el 4 de sep",
+  // **El 4 de septiembre de 2026 los dos caducan —el anuncio habla en futuro y
+  // "primero" ya no significa nada— y hay que reescribirlos a mano. El smart
+  // link sí se voltea solo.**
+  anuncio: "La canción de lo que nunca pasó sale el 4 de septiembre.",
+  llamada: "Escúchala primero",
 
   portada: "/portada.jpg",
 

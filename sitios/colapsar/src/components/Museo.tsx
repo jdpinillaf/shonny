@@ -178,11 +178,6 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
     void fetch("/api/piezas", { method: "POST", body: cuerpo }).catch(() => {});
   }, []);
 
-  const otraVez = useCallback(() => {
-    setInputListo(true);
-    setActo("pregunta");
-  }, []);
-
   const preguntaLista = useCallback(() => setInputListo(true), []);
 
   return (
@@ -269,7 +264,7 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
 
               {acto === "disco" && (
                 <motion.div key="disco" className="flex justify-center">
-                  <Disco onOtraVez={otraVez} onGuardar={() => setGuardar(true)} />
+                  <Disco onGuardar={() => setGuardar(true)} />
                 </motion.div>
               )}
             </AnimatePresence>
