@@ -47,6 +47,18 @@ export const site = {
   // que redesplegar nada ese día.
   presave: "https://sym.ffm.to/colapsar",
 
+  // El rótulo que cuelga bajo la card. Existe porque la card se lee como un
+  // reproductor —portada, círculo verde, barra que avanza— y nada decía que al
+  // pulsarla se guarda. Es el mismo problema del recuento del mural, que en una
+  // prueba con diez personas no apretó ninguna hasta que se le colgó una
+  // etiqueta debajo diciendo qué era.
+  //
+  // La fecha va escrita a mano y no calculada: formatearla en cliente y
+  // servidor con locales distintos es hidratación rota, y esto cambia una vez.
+  // **El 4 de septiembre de 2026 este rótulo deja de tener sentido — pasa a
+  // "escúchala" o se quita. El smart link sí se voltea solo.**
+  guardar: "guárdala · sale el 4 sep",
+
   portada: "/portada.jpg",
 
   // 40s del master (0:49 → 1:29), en loop. Suena desde el primer gesto de la

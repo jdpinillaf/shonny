@@ -37,7 +37,7 @@ export function CardSpotify({
       href={site.presave}
       target="_blank"
       rel="noreferrer"
-      className="relative block w-full max-w-[352px] focus:outline-none"
+      className="group relative block w-full max-w-[352px] focus:outline-none"
       // Dentro no hay una sola palabra que diga qué hace esto: un lector de
       // pantalla lee "Colapsar, Shonny, 0:00, adelanto 0:40" y un enlace.
       aria-label={`Guardar ${site.cancion}, de ${site.artista}`}
@@ -132,8 +132,12 @@ export function CardSpotify({
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
             style={{ background: "#1db954" }}
           >
-            <svg width="12" height="14" viewBox="0 0 12 14" aria-hidden>
-              <path d="M0 0.5 L12 7 L0 13.5 Z" fill="#000" />
+            {/* Un más y no el triángulo de play. El triángulo prometía que algo
+                iba a sonar; el más es el símbolo de "añadir a tu biblioteca",
+                que es literalmente lo que hace el pre-save. El círculo verde se
+                queda: es la lectura de Spotify y el único color de la página. */}
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
+              <path d="M6 0h2v6h6v2H8v6H6V8H0V6h6z" fill="#000" />
             </svg>
           </span>
         </div>
@@ -160,6 +164,14 @@ export function CardSpotify({
           <span>adelanto · {site.adelanto.reloj}</span>
         </div>
       </div>
+
+      {/* Cuelga de la card y va dentro del mismo `<a>`: si parece un botón, tiene
+          que responder como el resto de la card. Se queda fuera de la caja negra
+          —el `#181818` es territorio de Spotify— y toma prestado el lenguaje del
+          botón de "deja otra cosa": borde fino, mono diminuto, versalitas. */}
+      <span className="mt-3 block border border-tiza/45 bg-noche/70 px-4 py-2 text-center font-mono text-[9.5px] uppercase tracking-[0.24em] text-tiza transition-colors group-hover:border-tiza/75 group-focus:border-tiza/75">
+        {site.guardar}
+      </span>
     </motion.a>
   );
 }
