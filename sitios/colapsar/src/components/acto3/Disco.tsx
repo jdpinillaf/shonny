@@ -35,19 +35,14 @@ export function Disco({
       </motion.div>
 
       <motion.div
-        className="mt-6 flex flex-col items-center gap-5"
+        className="mt-6 flex flex-col items-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.9, delay: 1.25 }}
       >
-        <a
-          href={site.presave.apple}
-          target="_blank"
-          rel="noreferrer"
-          className="border-b border-humo/35 pb-0.5 font-mono text-[11px] text-humo transition-colors hover:border-tiza/60 hover:text-tiza"
-        >
-          también en Apple Music
-        </a>
+        {/* Acá colgaba un "también en Apple Music" que nunca llevó a ningún
+            lado. Ya no hace falta: la card abre el smart link y ahí están las
+            siete plataformas, Apple incluida. */}
 
         {/* Es la invitación a seguir dejando cosas, no una nota al pie: si va en
             gris de 8px sobre una pared llena de papeles, no la ve nadie. */}

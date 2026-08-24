@@ -37,11 +37,15 @@ export const site = {
   // Lo que se teclea al responder.
   invitacion: "Ven, acompáñame a colapsar.",
 
-  // Pre-save. Cambiar cuando exista la campaña (Feature.fm / Presave.io / Linkfire).
-  presave: {
-    spotify: "#",
-    apple: "#",
-  },
+  // El smart link de Feature.fm que monta Symphonic. Una sola URL para las siete
+  // plataformas y no una por servicio: los botones de ffm llevan un `cd` que se
+  // acuña en su servidor por visitante —lleva IP, user-agent y la sesión firmada—
+  // así que no existe enlace estable a "el pre-save de Spotify". La card es la
+  // puerta y ffm reparte.
+  //
+  // El 4 sep 2026 la misma URL se voltea sola de "pre-save" a "escuchar". No hay
+  // que redesplegar nada ese día.
+  presave: "https://sym.ffm.to/colapsar",
 
   portada: "/portada.jpg",
 

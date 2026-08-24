@@ -23,14 +23,22 @@ const SUAVE = [0.16, 1, 0.3, 1] as const;
 export function CardSpotify({ emerge = false }: { emerge?: boolean }) {
   return (
     <motion.a
-      href={site.presave.spotify}
+      href={site.presave}
       target="_blank"
       rel="noreferrer"
       className="relative block w-full max-w-[352px] focus:outline-none"
+      // Dentro no hay una sola palabra que diga qué hace esto: un lector de
+      // pantalla lee "Colapsar, Shonny, 0:00, adelanto 0:40" y un enlace.
+      aria-label={`Guardar ${site.cancion}, de ${site.artista}`}
       // El único click que la página pide de verdad. Autocapture también lo ve,
       // pero con nombre propio entra en un embudo sin tener que filtrar por
       // href entre todos los clicks del museo.
-      onClick={() => evento("spotify abierto")}
+      //
+      // Se llamaba "spotify abierto" y ya no dice el destino: la card lleva al
+      // smart link, que reparte a las siete. No se pierde nada al renombrarlo,
+      // porque hasta hoy se disparaba sobre un `href="#"` — la serie entera son
+      // clicks que no llevaban a ningún lado.
+      onClick={() => evento("presave abierto")}
       initial={
         emerge
           ? { opacity: 0, y: 78, scale: 0.9, filter: "blur(22px)" }
