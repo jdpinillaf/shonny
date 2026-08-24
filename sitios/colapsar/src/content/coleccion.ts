@@ -13,11 +13,16 @@ import { azar } from "@/lib/semilla";
  */
 const CREADO_SEMILLA = 0;
 
-export const PIEZAS_TEXTO: readonly Pieza[] = notas.map((texto, i) => ({
-  id: `s${String(i + 1).padStart(2, "0")}`,
+export const PIEZAS_TEXTO: readonly Pieza[] = notas.map(({ id, texto }) => ({
+  id,
   texto,
   creado: CREADO_SEMILLA,
 }));
+
+/** Las que salen siempre. Marcadas con `fija` en `notas.ts`. */
+const FIJAS: ReadonlySet<string> = new Set(
+  notas.filter((n) => n.fija).map((n) => n.id),
+);
 
 export const PIEZAS_FOTO: readonly Pieza[] = site.fotos.map((url, i) => ({
   id: `f${String(i + 1).padStart(2, "0")}`,
@@ -47,14 +52,36 @@ export function barajar(piezas: readonly Pieza[]): Pieza[] {
 }
 
 /**
- * Las tajadas de la pared. **No se pueden solapar**: las dos maquetas se montan
- * en el DOM (una la esconde el CSS), y si una pieza saliera en las dos, el
- * `oculta` de la pieza abierta casaría con ambas y abrir una apagaría la otra.
+ * Las tajadas de la pared, con las fijas por delante.
+ *
+ * Sin esto, qué notas salen lo decide entero la baraja, y una nota buena se cae
+ * de la pared en cuanto la gente deja suficientes cosas como para empujarla
+ * fuera de la rodaja. Las `fija` van primeras y por eso caen siempre en las
+ * ranuras que no llevan media query —las siete de base—, o sea que se ven hasta
+ * en la pantalla más chica.
+ *
+ * **Las dos tajadas se solapan solo en las fijas, y eso es deliberado.** Antes
+ * eran disjuntas del todo, porque las dos maquetas se montan en el DOM a la vez
+ * y una pieza repetida haría que el `oculta` de la pieza abierta casara con las
+ * dos. Sigue casando — pero la copia de la otra maqueta está dentro de un
+ * `display:none` (`hidden md:block` contra `md:hidden` en `MuroNotas`), así que
+ * apagar algo que ya nadie ve no se nota. El resto de la colección sigue sin
+ * repetirse entre las dos.
+ *
+ * Es la única forma de que una fija salga en escritorio **y** en móvil: siendo
+ * disjuntas, meterla en una era garantizar que no aparece en la otra.
  */
 export function tajadas(piezas: readonly Pieza[], escritorio: number, movil: number) {
   const baraja = barajar(piezas);
+  const fijas = baraja.filter((p) => FIJAS.has(p.id));
+  const resto = baraja.filter((p) => !FIJAS.has(p.id));
+
+  // El corte del resto se mide descontando las fijas, que ya ocupan sitio en las
+  // dos. Con el tope a cero por si algún día hay más fijas que ranuras.
+  const corte = Math.max(0, escritorio - fijas.length);
+
   return {
-    escritorio: baraja.slice(0, escritorio),
-    movil: baraja.slice(escritorio, escritorio + movil),
+    escritorio: [...fijas, ...resto].slice(0, escritorio),
+    movil: [...fijas, ...resto.slice(corte)].slice(0, movil),
   };
 }
