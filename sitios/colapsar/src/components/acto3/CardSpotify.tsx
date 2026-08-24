@@ -20,7 +20,18 @@ const SUAVE = [0.16, 1, 0.3, 1] as const;
  * Apagado por default a propósito — la landing #1 usa esta misma card y su
  * entrada ya está aprobada.
  */
-export function CardSpotify({ emerge = false }: { emerge?: boolean }) {
+export function CardSpotify({
+  emerge = false,
+  onGuardar,
+}: {
+  emerge?: boolean;
+  /**
+   * Si viene, el click abre la capa con el smart link dentro en vez de irse a
+   * otra pestaña. El `href` se queda igual a propósito: sin JS, o si la capa no
+   * llega a montar, esto sigue siendo un enlace que funciona.
+   */
+  onGuardar?: () => void;
+}) {
   return (
     <motion.a
       href={site.presave}
@@ -38,7 +49,12 @@ export function CardSpotify({ emerge = false }: { emerge?: boolean }) {
       // smart link, que reparte a las siete. No se pierde nada al renombrarlo,
       // porque hasta hoy se disparaba sobre un `href="#"` — la serie entera son
       // clicks que no llevaban a ningún lado.
-      onClick={() => evento("presave abierto")}
+      onClick={(e) => {
+        evento("presave abierto");
+        if (!onGuardar) return;
+        e.preventDefault();
+        onGuardar();
+      }}
       initial={
         emerge
           ? { opacity: 0, y: 78, scale: 0.9, filter: "blur(22px)" }

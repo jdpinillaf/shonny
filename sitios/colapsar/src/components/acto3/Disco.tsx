@@ -8,15 +8,18 @@ const SUAVE = [0.16, 1, 0.3, 1] as const;
 
 export function Disco({
   onOtraVez,
+  onGuardar,
   emerge = false,
 }: {
   onOtraVez: () => void;
+  /** Abre la capa del smart link. Lo dueña `Museo`, no esto: ver el porqué allá. */
+  onGuardar?: () => void;
   /** Lo enciende el río: la card sale del agua en vez de solo subir. */
   emerge?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center">
-      <CardSpotify emerge={emerge} />
+      <CardSpotify emerge={emerge} onGuardar={onGuardar} />
 
       <motion.div
         className="mt-8 text-center"

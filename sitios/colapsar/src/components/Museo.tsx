@@ -6,6 +6,7 @@ import { Pregunta } from "./acto1/Pregunta";
 import { Respuesta } from "./acto1/Respuesta";
 import { Colapso } from "./acto2/Colapso";
 import { Disco } from "./acto3/Disco";
+import { Guardar } from "./acto3/Guardar";
 import { Canales, FOTOS_MOVIL, TOPE_FOTOS } from "./fondo/Canales";
 import { MuroNotas, NOTAS_MOVIL, TOPE_NOTAS } from "./fondo/MuroNotas";
 import { PiezaAbierta } from "./fondo/PiezaAbierta";
@@ -56,6 +57,7 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
   const [fotos, setFotos] = useState(FOTOS_MOVIL);
   const [cuantasNotas, setCuantasNotas] = useState(NOTAS_MOVIL);
   const [mural, setMural] = useState(false);
+  const [guardar, setGuardar] = useState(false);
 
   // El par que abre cualquier pieza, viva donde viva. Vive acá y no en
   // `MuroNotas` porque ahora despegan también los televisores, que son hermanos
@@ -267,7 +269,7 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
 
               {acto === "disco" && (
                 <motion.div key="disco" className="flex justify-center">
-                  <Disco onOtraVez={otraVez} />
+                  <Disco onOtraVez={otraVez} onGuardar={() => setGuardar(true)} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -276,6 +278,14 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
 
         <AnimatePresence>
           {mural && <Mural piezas={paraMural} onCerrar={() => setMural(false)} />}
+        </AnimatePresence>
+
+        {/* Acá y no dentro de `Disco`: un ancestro con `transform` convierte un
+            `position: fixed` en `absolute`, y el árbol del disco está lleno de
+            transforms de motion. Colgando de la raíz, como el mural, no pasa.
+            El evento no se dispara acá — ya lo manda la card al pulsarla. */}
+        <AnimatePresence>
+          {guardar && <Guardar onCerrar={() => setGuardar(false)} />}
         </AnimatePresence>
 
         {/* Después del mural a propósito: los dos viven en z-[35] y entre
