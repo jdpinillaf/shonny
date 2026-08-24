@@ -218,6 +218,66 @@ body {
       forwards;
 }
 
+/* La espera mientras carga el smart link dentro de la capa.
+   Es la misma barra que lleva la card —3px, pista tenue, relleno en tiza con el
+   mismo halo que el cursor— pero sin destino: cruza y vuelve a empezar. Rima
+   con lo que la persona acaba de pulsar en vez de traer una rueda de otro sitio. */
+.cargando {
+  position: relative;
+  width: 132px;
+  height: 3px;
+  overflow: hidden;
+  background: rgba(242, 240, 234, 0.14);
+}
+
+.cargando::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 38%;
+  background: var(--color-tiza);
+  box-shadow: 0 0 14px rgba(242, 240, 234, 0.55);
+  animation: cargar 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* El recorrido no es de borde a borde. Con el 38% de ancho, salir entero por un
+   lado pide ir de -100% a 263%, y en ese viaje la pista se queda vacía un
+   instante en cada vuelta: se lee como un tartamudeo, no como algo cargando.
+   Recortado a -60% / 226%, siempre asoma un trozo por alguna punta. */
+@keyframes cargar {
+  from {
+    transform: translateX(-60%);
+  }
+  to {
+    transform: translateX(226%);
+  }
+}
+
+/* El texto va siempre en el DOM, porque una barra sola no le dice nada a un
+   lector de pantalla. Está oculto a la vista y reaparece con el movimiento
+   reducido, donde la barra se apaga: una barra congelada se lee como atascada. */
+.cargando-texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cargando {
+    display: none;
+  }
+
+  .cargando-texto {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+}
+
 /* Péndulo de las notas colgadas. */
 @keyframes colgar {
   0%,

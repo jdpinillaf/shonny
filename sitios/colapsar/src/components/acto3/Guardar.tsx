@@ -123,10 +123,10 @@ export function Guardar({ onCerrar }: { onCerrar: () => void }) {
                 {tarda ? (
                   "está tardando más de la cuenta —"
                 ) : (
-                  <span>
-                    abriendo
-                    <span className="cursor" aria-hidden />
-                  </span>
+                  <>
+                    <span className="cargando" aria-hidden />
+                    <span className="cargando-texto">abriendo</span>
+                  </>
                 )}
               </p>
             )}
