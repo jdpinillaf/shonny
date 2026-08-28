@@ -23,6 +23,19 @@ export type Pieza = {
   creado: number;
 };
 
+/**
+ * El pie de museo. Lo comparten la pared, el mural, la pieza abierta y la story.
+ *
+ * Vive acá y no en `Papel.tsx` desde que hay story: el generador corre en el
+ * servidor y `Papel` es un módulo "use client", del que no se pueden sacar
+ * constantes hacia el servidor.
+ *
+ * La firma va suelta y no dentro de `Pieza` porque no es un dato: todas las
+ * piezas son anónimas por diseño —no se pide nombre en ningún sitio— y el día
+ * que se pida, lo que cambia es el tipo, no esta constante.
+ */
+export const PIE = "Anónimo — nos perdimos la oportunidad";
+
 export const conTexto = (piezas: readonly Pieza[]) => piezas.filter((p) => p.texto);
 export const conFoto = (piezas: readonly Pieza[]) => piezas.filter((p) => p.foto);
 

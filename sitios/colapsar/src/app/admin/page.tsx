@@ -4,7 +4,8 @@ import { notas } from "@/content/notas";
 import type { Pieza } from "@/content/pieza";
 import { haySesion, hayPuerta } from "@/lib/admin.server";
 import { leerPiezasSinCache } from "@/lib/piezas.server";
-import { entrar, retirar, salir } from "./acciones";
+import { cupo, hayInstagram, publicadas, type Publicada } from "@/lib/story/instagram.server";
+import { entrar, publicar, retirar, salir } from "./acciones";
 
 export const metadata: Metadata = {
   title: "Panel — Colapsar",
@@ -36,7 +37,7 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
   // API: quien la busque no puede distinguir "no configurado" de "no está".
   if (!hayPuerta()) notFound();
 
-  const { mal, borrar } = await searchParams;
+  const { mal, borrar, ig } = await searchParams;
 
   if (!(await haySesion())) {
     return (
@@ -49,6 +50,13 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
   const piezas = await leerPiezasSinCache();
   const aConfirmar = typeof borrar === "string" ? borrar : undefined;
 
+  // Sin cuenta configurada el panel es exactamente el de antes: ni botón, ni
+  // cupo, ni una sola llamada a Meta.
+  const conIg = hayInstagram();
+  const [yaSalieron, hoy] = conIg
+    ? await Promise.all([publicadas(piezas.map((p) => p.id)), cupo()])
+    : [new Map<string, Publicada>(), null];
+
   return (
     <Marco>
       <header className="mb-8 flex items-baseline justify-between gap-4 border-b border-humo/25 pb-4">
@@ -60,6 +68,7 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
               : `${piezas.length} ${piezas.length === 1 ? "pieza" : "piezas"}`}
             {" · "}
             {notas.length} semillas fijas en el repo, esas no se tocan desde acá
+            {hoy && ` · ${hoy.usadas} de ${hoy.total} stories hoy`}
           </p>
         </div>
 
@@ -73,6 +82,18 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
         </form>
       </header>
 
+      {/* Lo que dijo Meta en el último intento. Sin esto, publicar y que falle
+          es un botón que no hace nada. */}
+      {typeof ig === "string" && (
+        <p
+          className={`mb-6 rounded-sm border px-3 py-2 text-xs ${
+            ig === "ok" ? "border-humo/35 text-humo" : "border-terracota/50 text-terracota"
+          }`}
+        >
+          {ig === "ok" ? "Publicada. La story ya está en la cuenta." : ig}
+        </p>
+      )}
+
       {piezas.length === 0 ? (
         <p className="text-sm text-humo">
           La pared está solo con sus semillas. Cuando alguien escriba algo y pase
@@ -85,6 +106,8 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
               key={pieza.id}
               pieza={pieza}
               confirmando={aConfirmar === pieza.id}
+              conIg={conIg}
+              publicada={yaSalieron.get(pieza.id)}
             />
           ))}
         </ul>
@@ -144,7 +167,17 @@ function Entrada({ mal }: { mal?: string }) {
   );
 }
 
-function Fila({ pieza, confirmando }: { pieza: Pieza; confirmando: boolean }) {
+function Fila({
+  pieza,
+  confirmando,
+  conIg,
+  publicada,
+}: {
+  pieza: Pieza;
+  confirmando: boolean;
+  conIg: boolean;
+  publicada?: Publicada;
+}) {
   return (
     <li className="rounded-sm border border-humo/25 p-4">
       <div className="flex items-baseline justify-between gap-4 text-[11px] text-humo">
@@ -189,12 +222,42 @@ function Fila({ pieza, confirmando }: { pieza: Pieza; confirmando: boolean }) {
         ) : (
           // Un enlace y no un botón: la confirmación es otra pantalla, no un
           // `confirm()`. Así un dedo torpe en el móvil no borra nada de golpe.
-          <a
-            href={`/admin?borrar=${pieza.id}`}
-            className="text-humo underline underline-offset-4 hover:text-terracota"
-          >
-            borrar
-          </a>
+          <>
+            <a
+              href={`/admin?borrar=${pieza.id}`}
+              className="text-humo underline underline-offset-4 hover:text-terracota"
+            >
+              borrar
+            </a>
+
+            {/* Sin texto no hay story: la ruta devuelve 404 para las piezas de
+                solo foto, así que el botón tampoco se ofrece. */}
+            {conIg &&
+              pieza.texto &&
+              (publicada ? (
+                <span className="text-humo">
+                  story del {FECHA.format(new Date(publicada.cuando))}
+                </span>
+              ) : (
+                <form action={publicar}>
+                  <input type="hidden" name="id" value={pieza.id} />
+                  <button type="submit" className="cursor-pointer text-humo underline underline-offset-4 hover:text-tiza">
+                    publicar story
+                  </button>
+                </form>
+              ))}
+
+            {pieza.texto && (
+              <a
+                href={`/api/story/${pieza.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-humo/70 underline underline-offset-4 hover:text-tiza"
+              >
+                ver story
+              </a>
+            )}
+          </>
         )}
       </div>
     </li>

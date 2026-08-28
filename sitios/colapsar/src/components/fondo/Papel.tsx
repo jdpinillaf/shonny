@@ -1,17 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import { type Pieza } from "@/content/pieza";
+import { PIE, type Pieza } from "@/content/pieza";
 import { medir, type Origen } from "./origen";
 
-/**
- * El pie de museo. Lo comparten la pared, el mural y la pieza abierta.
- *
- * La firma va acá y no en `Pieza` porque no es un dato: todas las piezas son
- * anónimas por diseño —no se pide nombre en ningún sitio— y el día que se pida,
- * lo que cambia es el tipo, no esta constante.
- */
-export const PIE = "Anónimo — nos perdimos la oportunidad";
+/** Reexportado: la constante vive en `content/pieza.ts`, que sí ve el servidor. */
+export { PIE };
 
 export const TINTA = {
   texto: "#22201c",

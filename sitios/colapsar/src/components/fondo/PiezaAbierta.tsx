@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Chinche } from "./Chinche";
+import { Compartir } from "./Compartir";
 import { PIE, TINTA } from "./Papel";
 import { type Origen } from "./origen";
 
@@ -121,12 +122,18 @@ export function PiezaAbierta({
 
       {pieza.texto && <p className="text-[17px] leading-[1.6] md:text-[19px]">{pieza.texto}</p>}
 
-      <p
-        className="mt-5 border-t pt-3 text-[8.5px] uppercase tracking-[0.28em]"
+      {/* El pie es ahora una fila: la firma y, si hay confesión que enseñar, el
+          botón de compartir. Vive acá y no en la pantalla final porque este
+          modal es el único sitio que sirve a la pared y al mural a la vez. */}
+      <div
+        className="mt-5 flex items-center justify-between gap-3 border-t pt-3 text-[8.5px] uppercase tracking-[0.28em]"
         style={{ borderColor: TINTA.borde, color: TINTA.pie }}
       >
-        {PIE}
-      </p>
+        <span>{PIE}</span>
+        {/* Sin texto no hay story: la composición entera es una frase en un
+            papel, y la ruta devuelve 404 para las piezas de solo foto. */}
+        {pieza.texto && <Compartir id={pieza.id} color={TINTA.pie} />}
+      </div>
     </>
   );
 
