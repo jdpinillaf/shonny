@@ -9,6 +9,10 @@ import { azar } from "@/lib/semilla";
  * `components/`: lo consume Satori a través de `ImageResponse`, que entiende un
  * subconjunto de CSS y nada de hooks. Montarlo en la página no funcionaría.
  *
+ * **Ni una gaussiana acá dentro.** Ni `filter: blur`, ni sombras difusas, ni el
+ * degradado de la penumbra: todo eso lo hace `sharp` después, donde cuesta
+ * milisegundos en vez de segundos. Ver `TINTA_LEJOS` para la medida.
+ *
  * **Lo que Satori no tiene, y que aquí se nota:** no hay pseudo-elementos —la
  * penumbra es un `<div>` de verdad, no un `::before`—, no hay `grid`, no hay
  * `inset` y `display` es siempre flex. Cambiar cualquiera de esas tres cosas por
@@ -18,10 +22,31 @@ import { azar } from "@/lib/semilla";
 export const ANCHO = 1080;
 export const ALTO = 1920;
 
+/**
+ * A cuánto se rasteriza, antes de que `sharp` lo suba a 1080x1920.
+ *
+ * El coste de resvg va con el área del lienzo, así que rasterizar a 3/4 cuesta
+ * poco más de la mitad. Ampliar después con lanczos son 15 ms y la diferencia
+ * en un móvil no existe: Instagram recomprime y reescala la imagen igualmente.
+ */
+export const ESCALA = 0.75;
+
 const NOCHE = "#0b0d0c";
 const PAPEL = "#d6d1c4";
 const TIZA = "#f2f0ea";
 const TINTA = "#22201c";
+/**
+ * La tinta de las notas del fondo.
+ *
+ * Aquí había un `filter: blur(3px)`, que es lo que pedía el boceto. Se cayó por
+ * medida, no por gusto: la gaussiana costaba 800 ms de los 1900 del render en
+ * esta máquina, y la función de Vercel es siete veces más lenta. Da igual que
+ * sean siete filtros pequeños o uno grande envolviéndolos —se probaron los
+ * dos—, porque el coste va con el área, no con el número.
+ *
+ * La profundidad la dan ahora el contraste y la penumbra que aplica `sharp`.
+ */
+const TINTA_LEJOS = "rgba(34,32,28,0.5)";
 const TINTA_PIE = "rgba(34,32,28,0.5)";
 const TINTA_BORDE = "rgba(34,32,28,0.22)";
 
@@ -108,30 +133,15 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
               color: TINTA,
               boxShadow: "3px 6px 0 rgba(0,0,0,0.42)",
               transform: `rotate(${hueco.giro}deg)`,
-              filter: "blur(3px)",
-              opacity: 0.72,
+              opacity: 0.34,
             }}
           >
-            <div style={{ fontSize: 27, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 27, lineHeight: 1.5, color: TINTA_LEJOS }}>
               {recortar(n.texto ?? "", CORTE_FONDO)}
             </div>
           </div>
         );
       })}
-
-      {/* La penumbra de la sala. Es lo que deja legible el centro sin tener que
-          apagar las de fuera del todo. */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: ANCHO,
-          height: ALTO,
-          backgroundImage:
-            "radial-gradient(circle at 50% 47%, rgba(11,13,12,0) 30%, rgba(11,13,12,0.74) 76%)",
-        }}
-      />
 
       <div
         style={{
@@ -142,7 +152,7 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
           padding: "78px 70px 58px",
           background: PAPEL,
           color: TINTA,
-          boxShadow: "6px 12px 0 rgba(0,0,0,0.42), 0 42px 90px rgba(0,0,0,0.6)",
+          boxShadow: "6px 12px 0 rgba(0,0,0,0.5)",
           transform: "rotate(-1.4deg)",
         }}
       >
@@ -192,7 +202,7 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
           alignItems: "center",
         }}
       >
-        <div style={{ width: ANCHO - 280, height: 1, background: "rgba(138,143,139,0.45)" }} />
+        <div style={{ width: ANCHO - 280, height: 2, background: "rgba(138,143,139,0.5)" }} />
         <div
           style={{
             marginTop: 40,
