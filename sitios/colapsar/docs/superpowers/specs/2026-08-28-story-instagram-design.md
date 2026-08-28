@@ -17,8 +17,8 @@ El diseño de la imagen vive en un solo sitio y los dos caminos comen de él.
 ## La composición: la pared entera
 
 La nota protagonista en foco, en su papel y con su chinche, ligeramente
-inclinada. Alrededor, siete papeles más de la colección, desenfocados y a media
-opacidad. Encima, una penumbra radial que apaga los bordes y deja legible solo
+inclinada. Alrededor, siete papeles más de la colección, apagados: papel al 34 %
+y tinta a media opacidad. Encima, una penumbra radial que apaga los bordes y deja legible solo
 el centro. Abajo, una regla fina y la dirección: `COLAPSAR.SHONNY.CO`.
 
 Elegida entre cinco por una razón concreta: **la colección se ve sin contarla**.
@@ -77,6 +77,36 @@ de React DOM y nadie debe poder montarlo en la página.
 3. **Dibuja** con `ImageResponse`.
 4. **Convierte** el PNG a JPEG con `sharp` — calidad 86, sRGB. Ronda los 300 KB,
    muy por debajo de los 8 MB que admite Meta.
+
+### Ni una gaussiana: la medida que cambió el diseño
+
+**El desenfoque del fondo se cayó.** Con él, la ruta tardaba **14 segundos en
+producción, en caliente y de forma constante**. Medido por partes: `sharp` eran
+18 ms y todo lo demás Satori. El `filter: blur(3px)` de las siete notas costaba
+800 ms de los 1900 de local, y da igual repartirlo en siete filtros pequeños que
+envolverlas en uno solo —se probaron los dos— porque el coste va con el área.
+La sombra difusa de 90 px del papel y el degradado de la penumbra a pantalla
+completa eran otros 500.
+
+Lo que las sustituye:
+
+- **La penumbra la compone `sharp`** desde un SVG rasterizado una vez por
+  instancia del proceso: 20 ms en vez de 500.
+- **La profundidad del fondo es contraste, no desenfoque.** Papel al 34 % y
+  tinta a media opacidad: se lee como textura, no como texto que compita con la
+  protagonista.
+- **La sombra difusa pasa a ser la misma sombra dura** que llevan las notas de
+  la pared. Lo que separa a la protagonista es que es la única a plena luz.
+
+Y **el lienzo se rasteriza a 3/4** (810×1440) y lo sube `sharp` con lanczos: son
+15 ms a cambio de casi la mitad del render, y la salida sigue siendo 1080×1920
+exactos, que es lo que pide Meta. La composición se sigue escribiendo en píxeles
+de 1080 dentro de un `transform: scale()`, así que no hay dos juegos de medidas.
+
+**Resultado: de 14 s a ~2 s** en producción, y luego caché.
+
+Un detalle que salió de esto: **la línea sobre la dirección tuvo que pasar a
+2 px.** A 1 px no sobrevivía al rasterizado a 3/4 y desaparecía entera.
 
 ### Límites de Satori que obligan a cambios
 
@@ -204,6 +234,13 @@ Las acciones del panel hoy redirigen a `/admin` a secas. La nueva redirige con
 `?ig=ok` o `?ig=<motivo>` y el panel lo pinta. Sin esto, un fallo de Meta es un
 botón que no hace nada.
 
+### Variables de entorno
+
+| Nombre | Para qué |
+|---|---|
+| `IG_USER_ID` | La cuenta. **Sin esto el panel es el de antes**: ni botón, ni cupo, ni una sola llamada a Meta. |
+| `IG_TOKEN_INICIAL` | Siembra el primer token. A partir de ahí manda Redis. |
+
 ### El trámite con Meta
 
 App de tipo Business, producto Instagram, Instagram Login, permisos
@@ -228,14 +265,17 @@ en pie en una tarde en vez de en dos semanas.
 - **Compartir desde la pantalla final.** El botón vive en la pieza abierta, que
   cubre pared y mural.
 
-## Riesgos abiertos
+## Riesgos, al cerrar
 
-1. **El trazado de las fuentes en el bundle de la función.** Lo primero a probar
-   en un deploy real, no en local.
-2. **El modo desarrollo de la app de Meta**, que decide si esto tarda una tarde
-   o dos semanas.
-3. **`NotAllowedError` en Safari real.** Las tres capas están diseñadas para
-   ello, pero solo un iPhone de verdad lo confirma.
+1. ~~**El trazado de las fuentes en el bundle de la función.**~~ **Resuelto.**
+   Turbopack se lleva el `.ttf` a `.next/server/assets/` y lo lista en el
+   `.nft.json` de la ruta. Comprobado en el build y en producción.
+2. ~~**El coste del render.**~~ **Resuelto, a costa del desenfoque.** Ver arriba.
+3. **El modo desarrollo de la app de Meta**, que decide si la mitad de `/admin`
+   tarda una tarde o dos semanas. **Sin resolver: es lo único que queda.**
+4. **`NotAllowedError` en Safari real.** Las tres capas están diseñadas para
+   ello, pero solo un iPhone de verdad lo confirma. El resto del botón sí está
+   verificado en la página publicada.
 
 ## Verificación
 
