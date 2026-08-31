@@ -33,7 +33,6 @@ export const ESCALA = 0.75;
 
 const NOCHE = "#0b0d0c";
 const PAPEL = "#d6d1c4";
-const TIZA = "#f2f0ea";
 const TINTA = "#22201c";
 /**
  * La tinta de las notas del fondo.
@@ -49,6 +48,16 @@ const TINTA = "#22201c";
 const TINTA_LEJOS = "rgba(34,32,28,0.5)";
 const TINTA_PIE = "rgba(34,32,28,0.5)";
 const TINTA_BORDE = "rgba(34,32,28,0.22)";
+
+/**
+ * Lo que mide el papel de la protagonista, y el chinche que lo cuelga.
+ *
+ * Van juntos y como constantes porque el chinche se centra con una resta: con
+ * el ancho escrito a mano en los dos sitios, tocar el tamaño del papel deja el
+ * chinche descolocado y no lo dice nadie.
+ */
+const ANCHO_PAPEL = 600;
+const CHINCHE = 46;
 
 /** Dónde cuelga cada nota del fondo. A mano: el azar acá no aporta nada. */
 const HUECOS = [
@@ -146,41 +155,41 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
       <div
         style={{
           position: "relative",
-          width: 720,
+          width: ANCHO_PAPEL,
           display: "flex",
           flexDirection: "column",
-          padding: "78px 70px 58px",
+          padding: "64px 58px 48px",
           background: PAPEL,
           color: TINTA,
           boxShadow: "6px 12px 0 rgba(0,0,0,0.5)",
           transform: "rotate(-1.4deg)",
         }}
       >
-        {/* El chinche. `left` a pelo y no `50%` + `translateX`: el papel mide 720
-            y el chinche 52, así que el centro es una resta, no una capa más de
-            transform que Satori tenga que componer con el giro. */}
+        {/* El chinche. `left` a pelo y no `50%` + `translateX`: el centro es una
+            resta, no una capa más de transform que Satori tenga que componer
+            con el giro del papel. */}
         <div
           style={{
             position: "absolute",
-            top: -26,
-            left: (720 - 52) / 2,
-            width: 52,
-            height: 52,
-            borderRadius: 26,
+            top: -CHINCHE / 2,
+            left: (ANCHO_PAPEL - CHINCHE) / 2,
+            width: CHINCHE,
+            height: CHINCHE,
+            borderRadius: CHINCHE / 2,
             backgroundImage:
               "radial-gradient(circle at 34% 30%, #d08a72 0%, #a8624a 46%, #6f3b2b 100%)",
             boxShadow: "0 6px 10px rgba(0,0,0,0.55)",
           }}
         />
 
-        <div style={{ fontSize: 48, lineHeight: 1.55 }}>{pieza.texto}</div>
+        <div style={{ fontSize: 40, lineHeight: 1.55 }}>{pieza.texto}</div>
 
         <div
           style={{
-            marginTop: 46,
-            paddingTop: 26,
+            marginTop: 38,
+            paddingTop: 22,
             borderTop: `1px solid ${TINTA_BORDE}`,
-            fontSize: 15,
+            fontSize: 13,
             letterSpacing: "0.2em",
             color: TINTA_PIE,
           }}
@@ -188,30 +197,6 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
           {/* En mayúsculas desde JS y no con `textTransform`: es una cadena fija,
               y hacerlo acá es una cosa menos que depende del CSS de Satori. */}
           {PIE.toUpperCase()}
-        </div>
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          bottom: 146,
-          left: 140,
-          width: ANCHO - 280,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ width: ANCHO - 280, height: 2, background: "rgba(138,143,139,0.5)" }} />
-        <div
-          style={{
-            marginTop: 40,
-            fontSize: 40,
-            letterSpacing: "0.2em",
-            color: TIZA,
-          }}
-        >
-          COLAPSAR.SHONNY.CO
         </div>
       </div>
     </div>
