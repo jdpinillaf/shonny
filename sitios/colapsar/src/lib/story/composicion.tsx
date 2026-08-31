@@ -1,23 +1,28 @@
 import { CHINCHE_COLOR, sombraChinche } from "@/components/fondo/Chinche";
-import { PIE } from "@/content/pieza";
-import { type Pieza } from "@/content/pieza";
-import { azar } from "@/lib/semilla";
+import { PIE, type Pieza } from "@/content/pieza";
+import { site } from "@/content/site";
 
 /**
- * La pared, dibujada para Instagram.
+ * La story de una pieza, dibujada para Instagram.
  *
  * Esto no es un componente de React DOM y por eso vive en `lib/` y no en
  * `components/`: lo consume Satori a través de `ImageResponse`, que entiende un
  * subconjunto de CSS y nada de hooks. Montarlo en la página no funcionaría.
  *
- * **Ni una gaussiana acá dentro.** Ni `filter: blur`, ni sombras difusas, ni el
- * degradado de la penumbra: todo eso lo hace `sharp` después, donde cuesta
- * milisegundos en vez de segundos. Ver `TINTA_LEJOS` para la medida.
+ * **El archivo se llamaba `pared.tsx` y dibujaba una pared**: la nota en foco
+ * rodeada de otras siete apagadas, con una penumbra radial encima. Se probaron
+ * las dos y ganó el negro plano; git guarda la otra. Con la pared se fueron la
+ * penumbra —sobre negro liso no apagaba nada y dejaba anillos de banda— y todo
+ * el reparto de notas de fondo.
  *
- * **Lo que Satori no tiene, y que aquí se nota:** no hay pseudo-elementos —la
- * penumbra es un `<div>` de verdad, no un `::before`—, no hay `grid`, no hay
- * `inset` y `display` es siempre flex. Cambiar cualquiera de esas tres cosas por
- * la versión "normal" de CSS no da error: dibuja mal y en silencio.
+ * **Ni una gaussiana acá dentro.** Ni `filter: blur` ni sombras difusas: en la
+ * función de Vercel costaban 14 segundos de render, catorce veces lo que cuesta
+ * ahora. Ver el spec para la medida completa.
+ *
+ * **Lo que Satori no tiene, y que aquí se nota:** no hay pseudo-elementos, no
+ * hay `grid`, no hay `inset` y `display` es siempre flex. Cambiar cualquiera de
+ * esas tres cosas por la versión "normal" de CSS no da error: dibuja mal y en
+ * silencio.
  */
 
 export const ANCHO = 1080;
@@ -32,32 +37,29 @@ export const ALTO = 1920;
  */
 export const ESCALA = 0.75;
 
+/**
+ * Lo que Instagram tapa arriba y abajo con su propia interfaz: el nombre de la
+ * cuenta por arriba, la barra de responder por abajo. Nada que haya que leer
+ * puede caer dentro de esos márgenes.
+ */
+const ZONA_IG = 300;
+
 const NOCHE = "#0b0d0c";
 const PAPEL = "#d6d1c4";
+const HUMO = "#8a8f8b";
 const TINTA = "#22201c";
-/**
- * La tinta de las notas del fondo.
- *
- * Aquí había un `filter: blur(3px)`, que es lo que pedía el boceto. Se cayó por
- * medida, no por gusto: la gaussiana costaba 800 ms de los 1900 del render en
- * esta máquina, y la función de Vercel es siete veces más lenta. Da igual que
- * sean siete filtros pequeños o uno grande envolviéndolos —se probaron los
- * dos—, porque el coste va con el área, no con el número.
- *
- * La profundidad la dan ahora el contraste y la penumbra que aplica `sharp`.
- */
-const TINTA_LEJOS = "rgba(34,32,28,0.5)";
 const TINTA_PIE = "rgba(34,32,28,0.5)";
 const TINTA_BORDE = "rgba(34,32,28,0.22)";
 
 /**
- * Lo que mide el papel de la protagonista, y el chinche que lo cuelga.
+ * Lo que mide el papel, y el chinche que lo cuelga.
  *
  * Van juntos y como constantes porque el chinche se centra con una resta: con
  * el ancho escrito a mano en los dos sitios, tocar el tamaño del papel deja el
  * chinche descolocado y no lo dice nadie.
  */
 const ANCHO_PAPEL = 600;
+const MARGEN_PAPEL = 58;
 const CHINCHE = 46;
 
 /**
@@ -71,30 +73,15 @@ const CHINCHE = 46;
  * y no como número suelto para que cambiar `ANCHO_PAPEL` no vuelva a
  * descuadrarlo: es lo mismo que le pasó al chinche.
  */
-const UTIL = ANCHO_PAPEL - 58 * 2;
+const UTIL = ANCHO_PAPEL - MARGEN_PAPEL * 2;
 const LETRA = Math.round(UTIL * 0.061);
 const LETRA_PIE = Math.round(UTIL * 0.0305);
-
-/** Dónde cuelga cada nota del fondo. A mano: el azar acá no aporta nada. */
-const HUECOS = [
-  { top: 128, left: 470, giro: 1.5 },
-  { top: 232, left: 74, giro: -4 },
-  { top: 356, left: 694, giro: 3 },
-  { top: 592, left: -36, giro: 2 },
-  { top: 1222, left: 712, giro: -3 },
-  { top: 1348, left: 96, giro: 3.5 },
-  { top: 1512, left: 540, giro: -1.5 },
-] as const;
-
-/** Lo que se ve de una nota del fondo antes de que el desenfoque la coma. */
-const CORTE_FONDO = 64;
 
 /**
  * Corta por la última palabra entera, no por el caracter n.
  *
- * Las del fondo están desenfocadas, pero no tanto: partir «desayu…» a la mitad
- * se lee como un fallo del generador, no como profundidad de campo. Y para el
- * texto principal es la red de seguridad de una semilla que se pase de 140.
+ * Es la red de seguridad de una semilla que se pase de `site.maxRespuesta`: lo
+ * que escribe la gente ya viene recortado desde la ruta que lo guarda.
  */
 export function recortar(texto: string, tope: number) {
   if (texto.length <= tope) return texto;
@@ -103,28 +90,7 @@ export function recortar(texto: string, tope: number) {
   return `${espacio > 0 ? corte.slice(0, espacio) : corte}…`;
 }
 
-/**
- * Las siete notas que rodean a la protagonista.
- *
- * **La semilla lleva dentro el id de la protagonista.** Sin eso, todas las
- * stories saldrían con la misma pared de fondo; con eso, cada pieza tiene su
- * pared y siempre la misma. Y como no hay `Math.random` de por medio, dos
- * peticiones de la misma story dan el mismo píxel, que es lo que deja cachearla.
- */
-export function paredDe(
-  id: string,
-  piezas: readonly Pieza[],
-  cuantas: number = HUECOS.length,
-): Pieza[] {
-  return piezas
-    .filter((p) => p.id !== id && p.texto)
-    .map((pieza) => ({ pieza, orden: azar(`pared-${id}-${pieza.id}`) }))
-    .sort((a, b) => a.orden - b.orden)
-    .slice(0, cuantas)
-    .map((n) => n.pieza);
-}
-
-export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] }) {
+export function Composicion({ pieza }: { pieza: Pieza }) {
   return (
     <div
       style={{
@@ -139,34 +105,27 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
         fontFamily: "Courier Prime",
       }}
     >
-      {/* El orden en el que van escritas es el orden en el que se pintan: Satori
-          no tiene z-index. Fondo, penumbra encima, y la protagonista al final. */}
-      {fondo.map((n, i) => {
-        const hueco = HUECOS[i];
-        if (!hueco) return null;
-        return (
-          <div
-            key={n.id}
-            style={{
-              position: "absolute",
-              top: hueco.top,
-              left: hueco.left,
-              width: 330,
-              display: "flex",
-              padding: "34px 30px 26px",
-              background: PAPEL,
-              color: TINTA,
-              boxShadow: "3px 6px 0 rgba(0,0,0,0.42)",
-              transform: `rotate(${hueco.giro}deg)`,
-              opacity: 0.34,
-            }}
-          >
-            <div style={{ fontSize: 27, lineHeight: 1.5, color: TINTA_LEJOS }}>
-              {recortar(n.texto ?? "", CORTE_FONDO)}
-            </div>
-          </div>
-        );
-      })}
+      {/* La placa, arriba, fuera de lo que tapa Instagram. Dice de qué es esto
+          antes de que se lea la confesión, que es lo que abajo no hacía: ahí
+          competía con la firma del propio papel, que ya dice «anónimo».
+
+          El texto sale de `site.placa`, el mismo de la página. Escribirlo acá a
+          mano era el cuarto sitio con la misma cadena copiada. */}
+      <div
+        style={{
+          position: "absolute",
+          top: ZONA_IG,
+          left: 0,
+          width: ANCHO,
+          display: "flex",
+          justifyContent: "center",
+          fontSize: 26,
+          letterSpacing: "0.34em",
+          color: HUMO,
+        }}
+      >
+        {site.placa.toUpperCase()}
+      </div>
 
       <div
         style={{
@@ -174,7 +133,7 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
           width: ANCHO_PAPEL,
           display: "flex",
           flexDirection: "column",
-          padding: "64px 58px 48px",
+          padding: `64px ${MARGEN_PAPEL}px 48px`,
           background: PAPEL,
           color: TINTA,
           boxShadow: "6px 12px 0 rgba(0,0,0,0.5)",

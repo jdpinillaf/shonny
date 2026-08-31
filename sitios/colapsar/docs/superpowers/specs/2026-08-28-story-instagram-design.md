@@ -57,15 +57,16 @@ navegador del visitante: no hay que subir nada a Blob ni duplicar el diseño.
 | Archivo | Qué es |
 |---|---|
 | `src/app/api/story/[id]/route.tsx` | La ruta. Busca la pieza, dibuja, devuelve JPEG. |
-| `src/lib/story/pared.tsx` | El JSX de la composición. |
+| `src/lib/story/composicion.tsx` | El JSX de la composición. |
 | `src/lib/story/fuentes.ts` + dos `.ttf` | Carga de fuentes para Satori. |
 | `src/components/fondo/PiezaAbierta.tsx` | Se le añade la fila del pie con el botón. |
 | `src/app/admin/acciones.ts` | Server action `publicar`. |
 | `src/app/admin/page.tsx` | Botón por pieza, estado y cupo. |
 | `src/lib/story/instagram.server.ts` | Las dos llamadas a Meta y el token. |
 
-`pared.tsx` va en `lib/` y no en `components/` a propósito: no es un componente
-de React DOM y nadie debe poder montarlo en la página.
+`composicion.tsx` va en `lib/` y no en `components/` a propósito: no es un
+componente de React DOM y nadie debe poder montarlo en la página. Se llamó
+`pared.tsx` mientras dibujaba una pared.
 
 ## El generador
 
@@ -90,20 +91,19 @@ completa eran otros 500.
 
 Lo que las sustituye:
 
-- **La penumbra la compone `sharp`** desde un SVG rasterizado una vez por
-  instancia del proceso: 20 ms en vez de 500.
-- **La profundidad del fondo es contraste, no desenfoque.** Papel al 34 % y
-  tinta a media opacidad: se lee como textura, no como texto que compita con la
-  protagonista.
-- **La sombra difusa pasa a ser la misma sombra dura** que llevan las notas de
-  la pared. Lo que separa a la protagonista es que es la única a plena luz.
+- **La sombra difusa pasó a ser una sombra dura.**
+- La penumbra se movió a `sharp` (un SVG rasterizado una vez por instancia,
+  20 ms en vez de 500) y **después se quitó del todo** al desaparecer la pared.
+- La profundidad del fondo pasó a ser contraste en vez de desenfoque, y luego
+  dejó de hacer falta: no hay fondo.
 
 Y **el lienzo se rasteriza a 3/4** (810×1440) y lo sube `sharp` con lanczos: son
 15 ms a cambio de casi la mitad del render, y la salida sigue siendo 1080×1920
 exactos, que es lo que pide Meta. La composición se sigue escribiendo en píxeles
 de 1080 dentro de un `transform: scale()`, así que no hay dos juegos de medidas.
 
-**Resultado: de 14 s a ~2 s** en producción, y luego caché.
+**Resultado: de 14 s a ~2 s** en producción, y luego caché. Con la pared fuera,
+el render local bajó además de 535 ms a **168**.
 
 Un detalle que salió de esto: **la línea sobre la dirección tuvo que pasar a
 2 px.** A 1 px no sobrevivía al rasterizado a 3/4 y desaparecía entera.
@@ -297,6 +297,5 @@ No hay framework de test en el repo y no se monta uno para esto. Abrir
 - publicar desde `/admin` y ver la story en la cuenta
 - doble toque en el botón de publicar → una sola story
 
-Dos funciones salen puras y aisladas por si luego se quieren cubrir:
-`paredDe(id, piezas)` —las siete del fondo, deterministas— y la validación del
-id, que es la única puerta entre la URL y Redis.
+Lo que sale puro y aislado por si luego se quiere cubrir: `recortar(texto, tope)`
+y la validación del id, que es la única puerta entre la URL y Redis.
