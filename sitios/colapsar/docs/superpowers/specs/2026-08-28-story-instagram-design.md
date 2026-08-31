@@ -128,10 +128,9 @@ Verificados contra las docs de `vercel/satori`, no de memoria:
 
 ### El texto
 
-`site.maxRespuesta` son 140 caracteres, así que el peor caso está acotado: 7
-líneas a 48 px, papel de ~760 px de alto, centrado en 1920. Cabe con margen
-sobre el bloque de la dirección. **Un solo tamaño de letra; el papel crece hacia
-abajo.** El generador recorta a 140 igualmente, por si una semilla se pasa.
+`site.maxRespuesta` son 140 caracteres, así que el peor caso está acotado: 8
+líneas a 40 px en un papel de 600 de ancho, ~700 px de alto, centrado en 1920.
+Cabe con margen. **Un solo tamaño de letra; el papel crece hacia abajo.** El generador recorta a 140 igualmente, por si una semilla se pasa.
 
 **Piezas con foto.** El tipo `Pieza` admite foto y existen las `f01…` de la
 colección, aunque el formulario ya no la pide. Si la pieza trae foto, va dentro
@@ -257,8 +256,10 @@ en pie en una tarde en vez de en dos semanas.
   interactive stickers like polls, links, or locations is not available"*. Y
   desde el navegador tampoco se le puede adjuntar uno a lo que comparte el
   visitante — el flujo `instagram-stories://` con `contentURL` solo funciona
-  desde apps nativas con App ID de Facebook. **La dirección va escrita en los
-  píxeles.** El sticker se lo pones tú a mano en la app después de publicar.
+  desde apps nativas con App ID de Facebook. La dirección llegó a ir escrita en
+  los píxeles y **se quitó después**: la imagen ya no dice de dónde salió, y el
+  único camino de vuelta es el sticker de enlace que se le pone a mano en la app
+  al publicar.
 - **Formato 4:5 de feed.** Solo story 9:16. Es un parámetro de la misma
   plantilla el día que se quiera, no otra plantilla.
 - **Cron ni cola.** Se publica a dedo, pieza a pieza.

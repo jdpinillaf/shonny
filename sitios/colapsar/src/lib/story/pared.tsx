@@ -1,3 +1,4 @@
+import { CHINCHE_COLOR, sombraChinche } from "@/components/fondo/Chinche";
 import { PIE } from "@/content/pieza";
 import { type Pieza } from "@/content/pieza";
 import { azar } from "@/lib/semilla";
@@ -176,9 +177,11 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
             width: CHINCHE,
             height: CHINCHE,
             borderRadius: CHINCHE / 2,
-            backgroundImage:
-              "radial-gradient(circle at 34% 30%, #d08a72 0%, #a8624a 46%, #6f3b2b 100%)",
-            boxShadow: "0 6px 10px rgba(0,0,0,0.55)",
+            background: CHINCHE_COLOR,
+            // El brillo va a 4 y no a 1: la fórmula está pensada para un chinche
+            // de 7 a 11 px en pantalla, y acá mide 46 sobre un lienzo de 1080.
+            // Con 1px el reflejo metálico desaparece del todo.
+            boxShadow: sombraChinche(CHINCHE, 4),
           }}
         />
 
