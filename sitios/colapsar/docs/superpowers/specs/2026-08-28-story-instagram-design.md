@@ -128,9 +128,15 @@ Verificados contra las docs de `vercel/satori`, no de memoria:
 
 ### El texto
 
-`site.maxRespuesta` son 140 caracteres, así que el peor caso está acotado: 8
-líneas a 40 px en un papel de 600 de ancho, ~700 px de alto, centrado en 1920.
-Cabe con margen. **Un solo tamaño de letra; el papel crece hacia abajo.** El generador recorta a 140 igualmente, por si una semilla se pasa.
+**El tamaño de letra está calcado del modal en un móvil**, medido en la página y
+no estimado: en un viewport de 390 el papel de la pieza abierta mide 335 con 28
+de margen a cada lado —279 útiles— y la nota va a 17 px. Eso es el 6,1 % del
+ancho útil, y el pie el 3,05 %. En la story el papel deja 484 útiles, así que
+salen 30 y 15. Va escrito como proporción y no como número suelto, para que
+tocar `ANCHO_PAPEL` no vuelva a descuadrarlo.
+
+`site.maxRespuesta` son 140 caracteres, así que el peor caso está acotado y cabe
+con margen de sobra. **Un solo tamaño de letra; el papel crece hacia abajo.** El generador recorta a 140 igualmente, por si una semilla se pasa.
 
 **Piezas con foto.** El tipo `Pieza` admite foto y existen las `f01…` de la
 colección, aunque el formulario ya no la pide. Si la pieza trae foto, va dentro

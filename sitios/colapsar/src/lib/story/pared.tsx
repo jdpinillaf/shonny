@@ -60,6 +60,21 @@ const TINTA_BORDE = "rgba(34,32,28,0.22)";
 const ANCHO_PAPEL = 600;
 const CHINCHE = 46;
 
+/**
+ * La letra, calcada del modal en un móvil.
+ *
+ * Medido en la página, no estimado: en un viewport de 390, el papel de la pieza
+ * abierta mide 335 con 28 de margen a cada lado —279 útiles— y la nota va a
+ * 17px. Eso es el **6,1 % del ancho útil**, y el pie el 3,05 %.
+ *
+ * Acá el papel deja 484 útiles, así que salen 30 y 15. Escrito como proporción
+ * y no como número suelto para que cambiar `ANCHO_PAPEL` no vuelva a
+ * descuadrarlo: es lo mismo que le pasó al chinche.
+ */
+const UTIL = ANCHO_PAPEL - 58 * 2;
+const LETRA = Math.round(UTIL * 0.061);
+const LETRA_PIE = Math.round(UTIL * 0.0305);
+
 /** Dónde cuelga cada nota del fondo. A mano: el azar acá no aporta nada. */
 const HUECOS = [
   { top: 128, left: 470, giro: 1.5 },
@@ -185,14 +200,14 @@ export function Pared({ pieza, fondo }: { pieza: Pieza; fondo: readonly Pieza[] 
           }}
         />
 
-        <div style={{ fontSize: 40, lineHeight: 1.55 }}>{pieza.texto}</div>
+        <div style={{ fontSize: LETRA, lineHeight: 1.6 }}>{pieza.texto}</div>
 
         <div
           style={{
             marginTop: 38,
             paddingTop: 22,
             borderTop: `1px solid ${TINTA_BORDE}`,
-            fontSize: 13,
+            fontSize: LETRA_PIE,
             letterSpacing: "0.2em",
             color: TINTA_PIE,
           }}
