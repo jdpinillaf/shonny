@@ -3,28 +3,30 @@
 import { motion } from "motion/react";
 import { site } from "@/content/site";
 import { evento } from "@/lib/analitica";
-import { CardSpotify } from "./CardSpotify";
+import { Reproductor } from "./Reproductor";
 
 export function Disco({
   onGuardar,
+  onSuena,
   emerge = false,
 }: {
   /** Abre la capa del smart link. Lo dueña `Museo`, no esto: ver el porqué allá. */
   onGuardar?: () => void;
-  /** Lo enciende el río: la card sale del agua en vez de solo subir. */
+  /** Calla el adelanto de la casa cuando arranca Spotify. También lo dueña `Museo`. */
+  onSuena?: () => void;
+  /** Lo enciende el río: el reproductor sale del agua en vez de solo subir. */
   emerge?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center">
-      <CardSpotify emerge={emerge} onGuardar={onGuardar} />
+      <Reproductor emerge={emerge} onSuena={onSuena} />
 
-      {/* Frase y botón van acá y no dentro del `<a>` de la card: ese enlace lleva
-          un `aria-label`, y un `aria-label` tapa todo el texto que haya dentro.
-          La frase, que es la que explica de qué va esto, sería invisible para un
-          lector de pantalla justo por estar donde parecía que tocaba.
+      {/* El título grande COLAPSAR / SHONNY que iba acá se quitó hace tiempo: el
+          reproductor ya dice las dos cosas justo encima.
 
-          El título grande COLAPSAR / SHONNY que iba debajo se quitó: la card ya
-          dice las dos cosas justo encima. */}
+          La frase y el botón siguen siendo hermanos del reproductor y no hijos
+          suyos: el embed es un iframe de Spotify y nada nuestro puede vivir
+          dentro. */}
       <motion.div
         className="mt-4 flex w-full max-w-[352px] flex-col items-center"
         initial={{ opacity: 0 }}
@@ -48,10 +50,10 @@ export function Disco({
             e.preventDefault();
             onGuardar();
           }}
-          // Borde a 45 y texto en tiza, no el 25 apagado que llevaba "deja otra
-          // cosa que nunca pasó": aquello era la acción secundaria y esta es la
-          // única que queda en la pantalla.
-          className="mt-5 border border-tiza/45 bg-noche/90 px-5 py-2.5 font-mono text-[9.5px] uppercase tracking-[0.24em] text-tiza transition-colors hover:border-tiza/75"
+          // Borde a 25 y no a 45: dejó de ser la única acción de la pantalla. El
+          // play del reproductor es lo que se aprieta ahora, y esto es la puerta
+          // a las otras seis plataformas — secundario, y se tiene que ver así.
+          className="mt-5 border border-tiza/25 bg-noche/90 px-5 py-2.5 font-mono text-[9.5px] uppercase tracking-[0.24em] text-tiza transition-colors hover:border-tiza/60"
         >
           {site.llamada}
         </a>

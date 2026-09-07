@@ -59,6 +59,21 @@ export function useSonido() {
     return soltar;
   }, [hay, encender]);
 
+  /**
+   * Callar sin tocar el botón de la esquina. Lo usa el reproductor de Spotify
+   * del acto 3: en cuanto la persona toca ese marco, lo nuestro sobra — dos
+   * canciones a la vez no es un fondo, es ruido.
+   *
+   * No pone `hay` en falso: el control de la esquina sigue ahí para volver a
+   * encenderlo si le da la gana.
+   */
+  const apagar = useCallback(() => {
+    const el = audio.current;
+    if (!el || el.paused) return;
+    el.pause();
+    setSonando(false);
+  }, []);
+
   const alternar = useCallback(() => {
     const el = audio.current;
     if (!el) return;
@@ -76,5 +91,5 @@ export function useSonido() {
     setSonando(false);
   }, []);
 
-  return { hay, sonando, audio, encender, alternar, alFallar };
+  return { hay, sonando, audio, encender, apagar, alternar, alFallar };
 }

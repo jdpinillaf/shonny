@@ -9,6 +9,14 @@
  */
 const ADELANTO = 40;
 
+/**
+ * El track publicado en Spotify. De acá salen el embed del acto 3 y el enlace
+ * directo. Es el id del track y no el del single (`3uzlJt4c4RJFKDJjMgerZt`):
+ * el embed de un álbum pinta una lista de una sola fila y gasta 352px de alto
+ * para decir exactamente lo mismo.
+ */
+const TRACK = "6a2fZAHDcC4MBCceSnMX6I";
+
 /** 40 → "0:40". Local por lo mismo que `conMiles` en `Odometro`: formato, no dato. */
 function reloj(segundos: number) {
   return `${Math.floor(segundos / 60)}:${String(segundos % 60).padStart(2, "0")}`;
@@ -47,6 +55,20 @@ export const site = {
   // que redesplegar nada ese día.
   presave: "https://sym.ffm.to/colapsar",
 
+  // La canción ya salió, así que el acto 3 la reproduce en vez de prometerla.
+  //
+  // Lo que oye la persona depende de si tiene sesión de Spotify en ese
+  // navegador: sin sesión son **20s** de adelanto —los que reparte Spotify, no
+  // los 40 nuestros— y con sesión abierta suena entera. No hay forma de elegir:
+  // lo decide su cookie de `open.spotify.com`, no nosotros.
+  //
+  // `theme=0` es el fondo neutro. Sin el parámetro, Spotify tiñe la caja con el
+  // color dominante de la portada y el acto 3 deja de ser gris con un verde.
+  spotify: {
+    embed: `https://open.spotify.com/embed/track/${TRACK}?theme=0`,
+    pagina: `https://open.spotify.com/track/${TRACK}`,
+  },
+
   // Lo que se lee entre la card y el título, y el botón que abre el smart link.
   //
   // Existen porque la card se lee como un reproductor —portada, círculo verde,
@@ -58,13 +80,12 @@ export const site = {
   // se pulsa y va en las versalitas que dejó libre el botón de "deja otra cosa
   // que nunca pasó". La frase emociona, el botón se aprieta.
   //
-  // La fecha va escrita a mano y no calculada: formatearla en cliente y
-  // servidor con locales distintos es hidratación rota, y esto cambia una vez.
-  // **El 4 de septiembre de 2026 los dos caducan —el anuncio habla en futuro y
-  // "primero" ya no significa nada— y hay que reescribirlos a mano. El smart
-  // link sí se voltea solo.**
-  anuncio: "La canción de lo que nunca pasó sale el 4 de septiembre.",
-  llamada: "Escúchala primero",
+  // Ya no hay fecha que caduque: la canción salió el 4 de septiembre de 2026 y
+  // el anuncio pasó a presente. La llamada tampoco dice "escúchala": eso ya lo
+  // hace el reproductor que tiene encima, y el botón es la puerta a las otras
+  // seis plataformas que reparte ffm.
+  anuncio: "La canción de lo que nunca pasó ya está afuera.",
+  llamada: "En todas las plataformas",
 
   portada: "/portada.jpg",
 

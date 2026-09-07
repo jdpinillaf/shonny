@@ -264,7 +264,13 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
 
               {acto === "disco" && (
                 <motion.div key="disco" className="flex justify-center">
-                  <Disco onGuardar={() => setGuardar(true)} />
+                  <Disco
+                    onGuardar={() => setGuardar(true)}
+                    // Callar el adelanto en cuanto tocan el marco de Spotify.
+                    // Dos canciones a la vez no es un fondo, es ruido — y la
+                    // que gana es la de verdad, no el loop de 40s.
+                    onSuena={sonido.apagar}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -321,7 +327,14 @@ export function Museo({ piezas }: { piezas: readonly Pieza[] }) {
               preload="none"
               onError={sonido.alFallar}
             />
-            <Sonido sonando={sonido.sonando} onAlternar={sonido.alternar} />
+            {/* El control desaparece en el acto 3. Ahí la canción de verdad
+                está a un play de distancia, y dejar el botón del adelanto es
+                dejar en pantalla dos maneras de poner música encima de la
+                otra. El `<audio>` se queda montado: lo que se va es el botón,
+                no la posibilidad de que suene el fondo en los actos previos. */}
+            {acto !== "disco" && (
+              <Sonido sonando={sonido.sonando} onAlternar={sonido.alternar} />
+            )}
           </>
         )}
       </main>
