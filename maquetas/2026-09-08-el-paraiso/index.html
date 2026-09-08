@@ -246,17 +246,36 @@
     font-size: .7rem; letter-spacing: .22em; text-transform: uppercase;
   }
 
-  /* ── La tienda ─────────────────────────────────────────────────────────────
-     Sin tarjetas: foto, nombre, precio. Una tarjeta con sombra convierte una
-     prenda en un resultado de búsqueda. */
-  .tienda { display: grid; gap: clamp(1.6rem, 3.5vw, 3rem); }
-  @media (min-width: 760px) { .tienda { grid-template-columns: repeat(3, 1fr); } }
-  .prenda { display: grid; gap: .8rem; text-decoration: none; }
-  .prenda .foto { aspect-ratio: 1; overflow: hidden; background: color-mix(in oklab, var(--color-arcilla) 18%, var(--color-rosa)); }
-  .prenda img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
-  .prenda:hover img { transform: scale(1.03); }
-  .precio { display: flex; gap: .7rem; align-items: baseline; }
-  .precio s { color: var(--color-tinta-suave); }
+  /* ── La tienda ────────────────────────────────────────────────────────────
+     Era una rejilla de tres prendas con foto, nombre y precio: 665px de home
+     para mostrar un catálogo que ya existe, completo y con carrito, en Wix.
+     Mantener dos vitrinas significa que un día los precios no van a coincidir.
+
+     Ahora es una franja: qué hay, desde cuánto, y tres miniaturas que se abren
+     en la tienda de verdad. El menú tampoco baja hasta acá — "Tienda" sale
+     derecho a Wix. */
+  .vitrina {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 1.4rem clamp(1.5rem, 4vw, 3.5rem);
+    padding-block: clamp(2rem, 4vw, 3rem);
+    border-block: 1px solid color-mix(in oklab, var(--color-tinta) 12%, transparent);
+  }
+  .vitrina h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: .5rem 0 0; }
+  .vitrina .desde { margin: .3rem 0 0; color: var(--color-tinta-suave); font-size: .9rem; }
+  .vitrina .boton { margin-left: auto; }
+
+  /* Las tres miniaturas montadas una sobre otra, como fotos sobre una mesa. Se
+     abren al pasar el mouse: la sección entera es un enlace, y el gesto lo
+     anuncia sin escribir "ver más". */
+  .pilas { display: flex; text-decoration: none; }
+  .pilas img {
+    width: clamp(64px, 8vw, 92px); aspect-ratio: 1; object-fit: cover; display: block;
+    box-shadow: 0 8px 24px -12px color-mix(in oklab, var(--color-tierra) 70%, transparent);
+    transition: transform .6s cubic-bezier(.16,1,.3,1);
+  }
+  .pilas img + img { margin-left: -1.6rem; }
+  .pilas:hover img + img { margin-left: -.4rem; }
+  .pilas img + img { transition: margin-left .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
+  .pilas:hover img { transform: translateY(-3px); }
 
   /* ── En vivo ───────────────────────────────────────────────────────────────
      Un vacío que enseña a dónde ir, no un vacío que informa que no hay nada.
@@ -272,6 +291,12 @@
   }
   .vivo h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: 0; flex: 1 1 14ch; }
   .vivo .boton { margin: 0; }
+  /* En una pantalla angosta las tres piezas no caben en una línea y el titular
+     se le montaba encima al rótulo. Apiladas y alineadas a la izquierda. */
+  @media (max-width: 700px) {
+    .vivo, .vitrina { flex-direction: column; align-items: flex-start; }
+    .vitrina .boton { margin-left: 0; }
+  }
   .vivo::before {
     content: ""; position: absolute; inset: 0; z-index: -1;
     background: url("../fotos/ola-gasa.jpg") center 30% / cover;
@@ -397,7 +422,7 @@
   <nav>
     <a href="#suena">Música</a>
     <a href="#universo">Universo</a>
-    <a href="#tienda">Tienda</a>
+    <a href="https://www.shonny.co/shop">Tienda</a>
     <a href="#vivo">En vivo</a>
     <a href="#paraiso">El Paraíso</a>
     <span class="redes">
@@ -505,29 +530,22 @@
 
   </section>
 
-  <!-- ── LA TIENDA ───────────────────────────────────────────────────────── -->
-  <section id="tienda">
-    <p class="rotulo">La tienda · Colección Renacer · pre-order</p>
-
-    <div class="tienda">
-      <a class="prenda" href="https://www.shonny.co/shop">
-        <div class="foto"><img src="../fotos/estudio-bota.jpg" alt="Bandana Renacer"></div>
-        <h3>Bandana Renacer</h3>
-        <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
-      </a>
-      <a class="prenda" href="https://www.shonny.co/shop">
-        <div class="foto"><img src="../fotos/estudio-red.jpg" alt="Bandana Ser"></div>
-        <h3>Bandana Ser</h3>
-        <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
-      </a>
-      <a class="prenda" href="https://www.shonny.co/shop">
-        <div class="foto"><img src="../fotos/vivo-humo.jpg" alt="Maxi Renacer"></div>
-        <h3>Maxi Renacer</h3>
-        <p class="precio"><strong>COP 140.000</strong> <s>160.000</s></p>
-      </a>
+  <!-- ── LA TIENDA (vitrina) ────────────────────────────────────────────── -->
+  <section id="tienda" class="vitrina">
+    <div>
+      <p class="rotulo">La tienda · Colección Renacer</p>
+      <h2>Bandanas y maxis, en pre-order</h2>
+      <p class="desde">Desde COP 66.000</p>
     </div>
-  </section>
 
+    <a class="pilas" href="https://www.shonny.co/shop" aria-label="Ver la tienda">
+      <img src="../fotos/estudio-bota.jpg" alt="">
+      <img src="../fotos/estudio-red.jpg" alt="">
+      <img src="../fotos/vivo-humo.jpg" alt="">
+    </a>
+
+    <a class="boton boton--linea" href="https://www.shonny.co/shop">Ver la tienda</a>
+  </section>
 
   <!-- ── EN VIVO ─────────────────────────────────────────────────────────── -->
   <section id="vivo" class="vivo">
