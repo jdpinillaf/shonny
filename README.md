@@ -21,7 +21,13 @@ docs/           specs, decisiones, y el reparto de qué manda el código y qué 
 ```bash
 npm install            # una sola vez, desde la raíz
 npm run colapsar       # el museo en http://localhost:3000
+npm run ver-maquetas   # las maquetas del home en http://localhost:8811
+npm run maquetas       # recompila el CSS de las maquetas y se queda mirando
 ```
+
+Las maquetas se sirven por HTTP en vez de abrirse con doble clic porque la página
+de comparación las muestra dentro de iframes, y un navegador no deja que un
+archivo `file://` cargue a otro.
 
 Cada sitio necesita su `.env.local`, que **no** está en git. El de colapsar lleva
 los tokens de Upstash Redis, Vercel Blob y el `ADMIN_TOKEN` del panel de moderación.
