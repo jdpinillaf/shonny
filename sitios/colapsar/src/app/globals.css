@@ -1,16 +1,13 @@
 @import "tailwindcss";
 
-@theme {
-  --color-noche: #0b0d0c;
-  --color-verde: #2e4440;
-  --color-tiza: #f2f0ea;
-  --color-papel: #d6d1c4;
-  --color-humo: #8a8f8b;
-  --color-terracota: #a8624a;
+/* El tema (colores y familias) vive en el paquete: es lo único que tiene que
+   decir lo mismo en todos los sitios de Shonny. */
+@import "@shonny/escenografia/estilos/tema.css";
 
-  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
-  --font-mono: var(--font-courier), ui-monospace, "Courier New", monospace;
-}
+/* Tailwind no escanea `node_modules`, así que sin esta línea cualquier clase que
+   solo se use dentro del paquete desaparece del CSS de producción — y en dev
+   sigue funcionando, que es lo que lo hace difícil de atribuir. */
+@source "../../../../node_modules/@shonny/escenografia";
 
 html,
 body {

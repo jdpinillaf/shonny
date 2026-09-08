@@ -4,7 +4,7 @@ import { AnimatePresence } from "motion/react";
 import { useMemo } from "react";
 import { tajadas } from "@/content/coleccion";
 import { conTexto, type Pieza } from "@/content/pieza";
-import { dentro } from "@/lib/semilla";
+import { dentro } from "@shonny/escenografia";
 import { ATENUAR } from "./Canales";
 import { Nota, type Ranura } from "./Nota";
 import { type Origen } from "./origen";

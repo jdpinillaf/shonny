@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type Pieza } from "@/content/pieza";
 import { useEscritorio } from "@/lib/useEscritorio";
-import { corrido, entre, indice } from "@/lib/semilla";
+import { corrido, entre, indice } from "@shonny/escenografia";
 import { cuadrosDeEstatica } from "./estatica";
 import { medir, type Origen } from "./origen";
 

@@ -1,0 +1,33 @@
+/**
+ * El tema: los colores y las dos familias tipográficas de Shonny.
+ *
+ * Vive acá y no en el CSS de cada sitio porque es lo único que TIENE que decir
+ * lo mismo en todas partes. Un token que se copia y pega deriva: el día que el
+ * gris de las placas cambie, el sitio que tenga la copia se queda con el viejo
+ * y nadie lo nota hasta que se ven las dos páginas juntas.
+ *
+ * Tailwind v4 no tiene config de JavaScript: el tema es CSS. Por eso esto es un
+ * archivo importable y no un objeto exportado.
+ *
+ * **`@import "tailwindcss"` no va acá.** Lo pone cada sitio. Si lo pusiera el
+ * paquete, el preflight entraría dos veces en cualquier sitio que también lo
+ * importe.
+ */
+
+@theme {
+  /* El negro no es negro: es el gris de un televisor apagado. */
+  --color-noche: #0b0d0c;
+  --color-verde: #2e4440;
+  --color-tiza: #f2f0ea;
+  --color-papel: #d6d1c4;
+  --color-humo: #8a8f8b;
+  /* El único acento cálido. Hoy solo lo usa el panel de moderación. */
+  --color-terracota: #a8624a;
+
+  /* Las variables `--font-instrument` y `--font-courier` las inyecta
+     `next/font` desde el layout de cada sitio, con los nombres que fija
+     `src/fuentes.ts`. Si un sitio carga las fuentes por su cuenta con otros
+     nombres, esto se cae a las familias de reserva sin avisar. */
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-mono: var(--font-courier), ui-monospace, "Courier New", monospace;
+}

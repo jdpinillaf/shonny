@@ -8,6 +8,10 @@ import type { NextConfig } from "next";
 const BLOB = process.env.NEXT_PUBLIC_BLOB_HOST ?? "*.public.blob.vercel-storage.com";
 
 const nextConfig: NextConfig = {
+  // `@shonny/escenografia` no tiene paso de build: manda TypeScript crudo, y
+  // `next/font` dentro del paquete se resuelve en el build de este sitio.
+  transpilePackages: ["@shonny/escenografia"],
+
   images: {
     // `images.domains` está deprecado en Next 16. Y el `pathname` no es adorno:
     // acota el proxy a las fotos del museo y nada más.

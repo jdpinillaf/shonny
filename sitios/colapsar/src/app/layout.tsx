@@ -1,22 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Courier_Prime, Instrument_Serif } from "next/font/google";
+import { instrument, courier } from "@shonny/escenografia/fuentes";
 import { Analitica } from "@/components/Analitica";
 import { site } from "@/content/site";
 import "./globals.css";
 
-const instrument = Instrument_Serif({
-  variable: "--font-instrument",
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
-
-const courier = Courier_Prime({
-  variable: "--font-courier",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "swap",
-});
 
 const titulo = `${site.cancion} — ${site.artista}`;
 const descripcion = "Museo de cosas que nunca pasaron.";

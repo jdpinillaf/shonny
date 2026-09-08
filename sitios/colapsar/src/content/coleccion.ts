@@ -1,7 +1,7 @@
 import { notas } from "@/content/notas";
 import { type Pieza } from "@/content/pieza";
 import { site } from "@/content/site";
-import { azar } from "@/lib/semilla";
+import { azar } from "@shonny/escenografia";
 
 /**
  * Con qué arranca el museo el día que nadie ha dejado nada todavía.

@@ -1,0 +1,11 @@
+{
+  "name": "@shonny/escenografia",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/indice.ts",
+    "./fuentes": "./src/fuentes.ts",
+    "./estilos/*": "./estilos/*"
+  }
+}

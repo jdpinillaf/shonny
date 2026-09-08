@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { type Pieza } from "@/content/pieza";
-import { entre } from "@/lib/semilla";
+import { entre } from "@shonny/escenografia";
 import { Chinche } from "./Chinche";
 import { Papel } from "./Papel";
 import { type Origen } from "./origen";

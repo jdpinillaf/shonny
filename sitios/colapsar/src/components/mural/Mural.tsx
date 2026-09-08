@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { type Pieza } from "@/content/pieza";
 import { site } from "@/content/site";
-import { entre } from "@/lib/semilla";
+import { entre } from "@shonny/escenografia";
 import { Papel } from "../fondo/Papel";
 import { PiezaAbierta } from "../fondo/PiezaAbierta";
 import { type Origen } from "../fondo/origen";
