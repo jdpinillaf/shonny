@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta · El Paraíso, artística — shonny.co</title>
+
+<!--
+  MAQUETA 05 — "El Paraíso, artística"
+
+  Es la 04 llevada al extremo que pidió la investigación de sitios de artista y el
+  propio ADN. Qué cambió y por qué:
+
+  1. LA FOTO ES LA PÁGINA, no un rectángulo al lado del texto. La portada ocupa la
+     pantalla entera y las fotos se cruzan lento, como cambia la luz. En todos los
+     referentes que funcionan (The Marías, Elena Rose) la imagen manda y el texto
+     es poco.
+
+  2. MENOS INTERFAZ. Nav en minúsculas, sin píldoras ni sombras, un solo botón en
+     toda la portada. The Marías resuelve su home con 785px de alto y cuatro
+     enlaces; la sofisticación que pide el ADN se ve más en lo que se quita.
+
+  3. TIPOGRAFÍA EDITORIAL. Bodoni Moda —didone, contraste altísimo, cursiva de
+     revista de moda— para lo que emociona, y Jost callada para lo que informa. Es
+     el cambio que más "eleva el estatus del artista por medio de su imagen", que
+     es objetivo escrito del ADN.
+
+  4. EL RITUAL. El ADN nombra "magia / misticismo / ritual — tarot, astrología,
+     simbolismos" como su primer territorio, y dice que sus canciones funcionan
+     como mantras. Ningún referente tiene algo así. Acá es una carta que se voltea
+     y entrega un verso: el único momento interactivo del sitio, y el que hace que
+     alguien vuelva.
+
+  5. AIRE Y SILENCIO. Sale la mitad del texto de la 04. Un sitio de artista no
+     explica: muestra.
+
+  Lo que NO cambió: la paleta del ADN, la regla de que el sitio es de la artista y
+  no de un single, y que la tienda y las reservas se quedan en Wix.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../estilos.css">
+
+<style>
+  :root {
+    --font-instrument: "Bodoni Moda";
+    --font-jost: "Jost";
+    --aire: clamp(6rem, 14vw, 14rem);
+    --margen: clamp(1.4rem, 5vw, 5rem);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--color-rosa);
+    color: var(--color-tinta);
+    font-family: var(--font-texto);
+    font-weight: 300; line-height: 1.8;
+    font-size: clamp(.95rem, 1vw, 1.02rem);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Grano de película en color: calienta, no ensucia. */
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: 80; pointer-events: none;
+    opacity: .32; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='.13'/%3E%3C/svg%3E");
+  }
+
+  .rotulo { font-size: .64rem; letter-spacing: .34em; text-transform: uppercase; color: var(--color-tinta-suave); }
+
+  h1, h2, h3, .serif { font-family: var(--font-display); font-weight: 400; margin: 0; }
+  em { font-style: italic; }
+
+  /* ── La marca ──────────────────────────────────────────────────────────────
+     La flor dibujada, no la foto: tres pétalos abiertos desde una vaina. Es el
+     ave del paraíso reducida a lo mínimo que todavía se reconoce, para que
+     funcione a 18px en una pestaña y a 400px en una camiseta. */
+  .flor { display: block; overflow: visible; }
+  .flor path, .flor line { stroke: currentColor; fill: none; stroke-width: 1.1; stroke-linecap: round; }
+
+  /* ── Cabecera ──────────────────────────────────────────────────────────────
+     Se apoya sobre la foto sin caja ni sombra. `mix-blend-mode: difference` la
+     mantiene legible tanto sobre la piel como sobre el fondo claro, sin tener que
+     ponerle un velo negro encima a la fotografía. */
+  header {
+    position: fixed; inset: 0 0 auto; z-index: 60;
+    display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+    padding: 1.6rem var(--margen);
+    color: var(--color-bruma);
+    transition: color .6s cubic-bezier(.16,1,.3,1);
+  }
+  /* Pasada la portada, el fondo es rosa claro y el blanco desaparece. */
+  header.en-tierra { color: var(--color-tinta); }
+  /* La cabecera iba con `mix-blend-mode: difference` para no tener que oscurecer
+     la foto. Sobre el rosa claro de este retrato, la diferencia daba un verde
+     apagado y el menú desaparecía. Ahora el velo de la portada baja también desde
+     arriba —apenas un 18%— y el texto va en blanco liso. */
+  .marca { display: flex; align-items: center; gap: .7rem; text-decoration: none; color: inherit; }
+  .marca span { font-family: var(--font-display); font-size: 1.15rem; letter-spacing: .22em; text-transform: uppercase; }
+  header nav { display: flex; gap: clamp(1rem, 2.2vw, 2.2rem); }
+  header nav a { color: inherit; text-decoration: none; font-size: .72rem; letter-spacing: .2em; }
+  header nav a:hover { text-decoration: underline; text-underline-offset: .5em; }
+  /* En móvil el menú baja al pie de la pantalla en vez de desaparecer. La
+     primera versión lo escondía con `display: none` y no ponía nada en su
+     lugar: el sitio se quedaba literalmente sin navegación en el 90% del
+     tráfico, que llega del link en la bio de Instagram.
+
+     Barra abajo y no hamburguesa: son cuatro destinos, caben; y una hamburguesa
+     esconde el sitio detrás de un gesto que hay que adivinar. */
+  @media (max-width: 760px) {
+    header nav {
+      position: fixed; inset: auto 0 0 0; z-index: 60;
+      justify-content: space-around; gap: .4rem;
+      padding: .9rem .8rem calc(.9rem + env(safe-area-inset-bottom));
+      background: color-mix(in oklab, var(--color-noche-tibia) 88%, transparent);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      color: var(--color-bruma);
+    }
+    header nav a { font-size: .62rem; letter-spacing: .12em; }
+    /* El pie del sitio no puede quedar debajo de la barra. */
+    footer { padding-bottom: 6rem; }
+  }
+
+  /* ── Portada ───────────────────────────────────────────────────────────────
+     Pantalla entera. Las tres fotos se cruzan cada 21 segundos con un
+     `animation-delay` distinto: no es un carrusel, es una luz que cambia. Nadie
+     tiene que apretar nada para verlo. */
+  /* `align-content` y no `align-items`: con una sola fila automática, la fila mide
+     lo mismo que el contenido, así que alinear el ítem DENTRO de su fila no mueve
+     nada. Lo que hay que mover es la fila. Con `align-items: end` el titular
+     quedaba flotando a media pantalla y sobraban 200px abajo. */
+  .portada { position: relative; height: 100svh; overflow: hidden; }
+  .cielo { position: absolute; inset: 0; }
+  .cielo img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; animation: cruzar 21s ease-in-out infinite;
+  }
+  .cielo img:nth-child(1) { animation-delay: 0s; }
+  .cielo img:nth-child(2) { animation-delay: 7s; }
+  .cielo img:nth-child(3) { animation-delay: 14s; }
+  @keyframes cruzar {
+    0%, 28% { opacity: 1; }
+    38%, 95% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  /* El velo que sostiene el texto. Cae solo abajo: tapar la foto entera para
+     poder escribir encima es matar la foto. */
+  .cielo::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(28,16,32,.42) 0%, transparent 18%),
+      linear-gradient(to top, rgba(28,16,32,.82) 0%, rgba(28,16,32,.28) 38%, transparent 68%);
+  }
+
+  /* Anclado abajo con `position: absolute` y no con alineación de grid. Con
+     `align-items: end` no se movía nada —la fila mide lo mismo que el contenido,
+     así que alinear dentro de la fila no hace nada— y con `align-content: end`
+     seguía quedando a media pantalla. Un `bottom: 0` no admite interpretación. */
+  .titular {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 0 var(--margen) clamp(3rem, 8vh, 6rem);
+    color: var(--color-bruma);
+  }
+  .titular h1 {
+    font-size: clamp(4.5rem, 19vw, 17rem); line-height: .82;
+    font-style: italic; letter-spacing: -.02em;
+    text-shadow: 0 2px 40px rgba(28,16,32,.35);
+  }
+  .titular .bajo {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 1rem 2.4rem;
+    margin-top: 1.6rem;
+  }
+  .titular p { margin: 0; max-width: 34ch; color: color-mix(in oklab, var(--color-bruma) 88%, transparent); }
+  .escuchar {
+    display: inline-flex; align-items: center; gap: .8rem; text-decoration: none;
+    color: var(--color-bruma); font-size: .72rem; letter-spacing: .26em; text-transform: uppercase;
+    padding-bottom: .4rem; border-bottom: 1px solid color-mix(in oklab, var(--color-bruma) 45%, transparent);
+    transition: border-color .5s cubic-bezier(.16,1,.3,1), gap .5s cubic-bezier(.16,1,.3,1);
+  }
+  .escuchar:hover { border-color: var(--color-bruma); gap: 1.3rem; }
+
+  section { padding: var(--aire) var(--margen); position: relative; overflow-x: clip; }
+
+  /* ── Versos sensoriales ────────────────────────────────────────────────────
+     Los renglones del universo sensorial del ADN, servidos como respiración
+     entre secciones. No son decoración: son la voz de la marca dicha en primera
+     persona, y son lo que hace que el sitio se lea como una obra y no como un
+     menú. */
+  .verso {
+    padding: clamp(4rem, 9vw, 8rem) var(--margen);
+    display: grid; justify-items: center; text-align: center;
+  }
+  .verso p {
+    font-family: var(--font-display); font-style: italic;
+    font-size: clamp(1.7rem, 4.4vw, 3.4rem); line-height: 1.24;
+    max-width: 20ch; margin: 0; color: var(--color-tierra);
+  }
+
+  /* ── Lo que suena ──────────────────────────────────────────────────────────
+     La lista es enorme y el resto desaparece. La portada del disco entra al
+     pasar el mouse por encima del título: la información aparece cuando se la
+     busca, no antes. */
+  .lista { list-style: none; margin: clamp(2rem,5vw,4rem) 0 0; padding: 0; }
+  .lista li { border-top: 1px solid color-mix(in oklab, var(--color-tinta) 15%, transparent); }
+  .lista li:last-child { border-bottom: 1px solid color-mix(in oklab, var(--color-tinta) 15%, transparent); }
+  .lista a {
+    display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; align-items: baseline;
+    padding: clamp(1.1rem, 2.4vw, 2rem) 0; text-decoration: none; color: inherit;
+    transition: padding-left .6s cubic-bezier(.16,1,.3,1), color .5s;
+  }
+  .lista a:hover { padding-left: clamp(.6rem, 1.6vw, 1.6rem); color: var(--color-naranja); }
+  .lista .nombre { font-family: var(--font-display); font-size: clamp(2rem, 5.4vw, 4.2rem); line-height: 1; }
+  .lista .anio { font-size: .68rem; letter-spacing: .24em; color: var(--color-tinta-suave); }
+  /* La tapa es HERMANA de la lista, no su hija: si el selector pide
+     `.lista .tapa` no casa con nada, la regla entera se ignora —incluido el
+     `opacity: 0`— y la portada del disco aparece a tamaño natural en medio de la
+     página. Pasó exactamente eso. */
+  .tapa {
+    position: absolute; width: 13rem; aspect-ratio: 1; pointer-events: none;
+    opacity: 0; transform: translate(-50%, -50%) scale(.94) rotate(-3deg);
+    transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
+    box-shadow: 0 30px 70px -25px color-mix(in oklab, var(--color-tierra) 70%, transparent);
+    z-index: 5;
+  }
+  .tapa.viva { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-3deg); }
+  @media (max-width: 760px) { .tapa { display: none; } }
+
+  /* ── El universo ───────────────────────────────────────────────────────────
+     Tres imágenes a sangre, de alturas distintas, cada una con una sola línea.
+     Es la sala que el ADN pide (danza, audiovisual) y la que ningún referente
+     tiene resuelta. */
+  .universo { display: grid; gap: clamp(1rem, 2vw, 1.6rem); margin-top: clamp(2rem,5vw,4rem); }
+  @media (min-width: 900px) { .universo { grid-template-columns: 1.3fr .7fr; align-items: end; } }
+  .lamina { position: relative; margin: 0; overflow: hidden; }
+  .lamina img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.8s cubic-bezier(.16,1,.3,1); }
+  .lamina:hover img { transform: scale(1.03); }
+  .lamina--alta { aspect-ratio: 4/5; }
+  .lamina--par { display: grid; gap: clamp(1rem, 2vw, 1.6rem); }
+  .lamina--par figure { margin: 0; overflow: hidden; aspect-ratio: 4/3; }
+  .lamina figcaption {
+    position: absolute; left: 0; bottom: 0; padding: 1.4rem;
+    color: var(--color-bruma); font-size: .64rem; letter-spacing: .28em; text-transform: uppercase;
+    text-shadow: 0 1px 12px rgba(28,16,32,.6);
+  }
+
+  /* ── El mantra ─────────────────────────────────────────────────────────────
+     Una carta que se voltea. El ADN dice que sus canciones funcionan como mantras
+     para rituales personales, y nombra el tarot como territorio. Esto es las dos
+     cosas a la vez, y es el único motivo real para volver al sitio un martes.
+
+     El giro es 3D con `backface-visibility`, no dos capas con opacidad: una carta
+     que se desvanece no se siente como una carta. */
+  .altar { display: grid; justify-items: center; text-align: center; gap: 1.6rem; background: var(--color-noche-tibia); color: var(--color-bruma); }
+  .altar::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(60% 50% at 50% 30%, color-mix(in oklab, var(--color-vino) 55%, transparent), transparent 72%);
+  }
+  .altar > * { position: relative; }
+  .altar .rotulo { color: color-mix(in oklab, var(--color-bruma) 65%, transparent); }
+
+  /* `display: block` en los tres: la carta se armó con <span>, que son inline,
+     y un inline ignora width, height y aspect-ratio. La carta salía del tamaño
+     de su texto —unos 60px— con la flor desbordando por arriba. */
+  .carta { display: block; width: min(21rem, 78vw); aspect-ratio: 5/8; perspective: 1400px; background: none; border: 0; padding: 0; cursor: pointer; }
+  .carta-cara { display: block; position: relative; width: 100%; height: 100%; transition: transform 1.1s cubic-bezier(.16,1,.3,1); transform-style: preserve-3d; }
+  .carta[aria-pressed="true"] .carta-cara { transform: rotateY(180deg); }
+  .carta-lado {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: grid; place-content: center; gap: 1.4rem; padding: 2rem;
+    border: 1px solid color-mix(in oklab, var(--color-bruma) 30%, transparent);
+  }
+  .carta-lado--dorso { background: color-mix(in oklab, var(--color-vino) 30%, var(--color-noche-tibia)); color: var(--color-bruma); }
+  .carta-lado--frente {
+    transform: rotateY(180deg);
+    background: var(--color-bruma); color: var(--color-tinta);
+  }
+  .carta-lado--frente p { font-family: var(--font-display); font-style: italic; font-size: clamp(1.3rem, 3vw, 1.9rem); line-height: 1.3; margin: 0; }
+  .carta-lado--frente .rotulo { color: var(--color-tinta-suave); }
+  .pista { font-size: .64rem; letter-spacing: .28em; text-transform: uppercase; color: color-mix(in oklab, var(--color-bruma) 60%, transparent); }
+
+  /* ── El Paraíso ────────────────────────────────────────────────────────────
+     Pantalla propia, como la página de "love letters" de The Marías. La comunidad
+     no se pide en un pie de página. */
+  .paraiso { min-height: 82svh; display: grid; align-content: center; gap: 1.4rem; }
+  .paraiso h2 { font-size: clamp(2.6rem, 8vw, 6.5rem); font-style: italic; line-height: .95; max-width: 14ch; }
+  .paraiso p { max-width: 40ch; }
+  .puerta {
+    justify-self: start; margin-top: 1.4rem;
+    display: inline-flex; align-items: center; gap: .9rem; text-decoration: none;
+    padding: 1rem 2.2rem; border-radius: 999px;
+    background: var(--color-tierra); color: var(--color-bruma);
+    font-size: .7rem; letter-spacing: .24em; text-transform: uppercase;
+    transition: background-color .5s cubic-bezier(.16,1,.3,1);
+  }
+  .puerta:hover { background: var(--color-naranja); }
+
+  /* ── En vivo y pie ─────────────────────────────────────────────────────────
+     Una línea cada uno. Todo lo que hoy no existe no se disfraza de que existe. */
+  .franja { display: grid; gap: .8rem; }
+  .franja h2 { font-size: clamp(1.8rem, 4vw, 3rem); font-style: italic; }
+
+  footer { padding: clamp(3rem,6vw,5rem) var(--margen) 3rem; display: grid; gap: 2.5rem; border-top: 1px solid color-mix(in oklab, var(--color-tinta) 12%, transparent); }
+  @media (min-width: 820px) { footer { grid-template-columns: 1fr 1fr 1fr; } }
+  footer ul { list-style: none; margin: .9rem 0 0; padding: 0; display: grid; gap: .5rem; }
+  footer a { color: var(--color-tinta-suave); text-decoration: none; }
+  footer a:hover { color: var(--color-tierra); }
+
+  .entra { animation: subir 1.3s cubic-bezier(.16,1,.3,1) backwards; animation-delay: var(--retardo, 0s); }
+  @keyframes subir { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+    .cielo img { opacity: 1; }
+    .cielo img:not(:first-child) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="marca" href="#">
+    <svg class="flor" width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+      <!-- Tres pétalos abiertos desde la vaina, y el tallo. -->
+      <path d="M13 15 L6.5 5.5"></path>
+      <path d="M13 15 L13 3.5"></path>
+      <path d="M13 15 L19.5 6"></path>
+      <path d="M5 16.5 Q13 12.5 21 16"></path>
+      <line x1="13" y1="15" x2="13" y2="23"></line>
+    </svg>
+    <span>Shonny</span>
+  </a>
+  <nav>
+    <a href="#suena">música</a>
+    <a href="#universo">universo</a>
+    <a href="#mantra">el mantra</a>
+    <a href="#paraiso">el paraíso</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ── PORTADA ─────────────────────────────────────────────────────────── -->
+  <section class="portada">
+    <div class="cielo" aria-hidden="true">
+      <img src="../fotos/ave-del-paraiso.jpg" alt="">
+      <img src="../fotos/ola-gasa.jpg" alt="">
+      <img src="../fotos/estudio-red.jpg" alt="">
+    </div>
+
+    <div class="titular">
+      <h1 class="entra" style="--retardo:.1s">Shonny</h1>
+      <div class="bajo entra" style="--retardo:.4s">
+        <p>Pop con consciencia desde el Caribe. Lo cotidiano también es sagrado.</p>
+        <a class="escuchar" href="https://sym.ffm.to/colapsar">
+          Colapsar · ya está afuera <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VERSO ───────────────────────────────────────────────────────────── -->
+  <div class="verso"><p>El romper de las olas, voces celestiales, murmullos.</p></div>
+
+  <!-- ── LO QUE SUENA ────────────────────────────────────────────────────── -->
+  <section id="suena">
+    <p class="rotulo">Lo que suena</p>
+    <img class="tapa" id="tapa" src="https://colapsar.shonny.co/portada.jpg" alt="" aria-hidden="true">
+    <ol class="lista">
+      <li><a href="https://sym.ffm.to/colapsar" data-tapa="https://colapsar.shonny.co/portada.jpg">
+        <span class="nombre">Colapsar</span><span class="anio">2026</span></a></li>
+      <li><a href="https://ffm.to/b87oerw" data-tapa="../fotos/estudio-red.jpg">
+        <span class="nombre">Pausa</span><span class="anio">2026</span></a></li>
+      <li><a href="https://open.spotify.com/intl-es/artist/70axD2kGUWcyWjZAGAtgft" data-tapa="../fotos/estudio-bota.jpg">
+        <span class="nombre">Renacer</span><span class="anio">2025</span></a></li>
+      <li><a href="https://infoshonny.systeme.io/elparaiso" data-tapa="../fotos/ola-gasa.jpg">
+        <span class="nombre" style="color:var(--color-tinta-suave)">Lo próximo</span><span class="anio">Sin fecha</span></a></li>
+    </ol>
+    <p class="rotulo" style="margin-top:1.6rem">Pendiente · la discografía real y en orden</p>
+  </section>
+
+  <!-- ── EL UNIVERSO ─────────────────────────────────────────────────────── -->
+  <section id="universo">
+    <p class="rotulo">Más allá de la canción</p>
+    <h2 style="font-style:italic; font-size:clamp(2.4rem,6vw,4.6rem); margin-top:.8rem">El universo</h2>
+
+    <div class="universo">
+      <figure class="lamina lamina--alta">
+        <img src="../fotos/vivo-brazo.jpg" alt="Shonny en vivo">
+        <figcaption>En vivo · el cuerpo como instrumento</figcaption>
+      </figure>
+      <div class="lamina--par">
+        <figure class="lamina"><img src="../fotos/estudio-bota.jpg" alt="Retrato"><figcaption>Dirección de arte</figcaption></figure>
+        <figure class="lamina"><img src="../fotos/vivo-humo.jpg" alt="En vivo"><figcaption>Danza y movimiento</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VERSO ───────────────────────────────────────────────────────────── -->
+  <div class="verso"><p>Una seda, la tela mojada pegada a la piel, viento entre el cuerpo y la ropa.</p></div>
+
+  <!-- ── EL MANTRA ───────────────────────────────────────────────────────── -->
+  <section id="mantra" class="altar">
+    <p class="rotulo">El mantra</p>
+    <button class="carta" id="carta" type="button" aria-pressed="false">
+      <span class="carta-cara">
+        <span class="carta-lado carta-lado--dorso">
+          <svg class="flor" width="66" height="66" viewBox="0 0 26 26" aria-hidden="true" style="margin:0 auto">
+            <path d="M13 15 L6.5 5.5"></path><path d="M13 15 L13 3.5"></path><path d="M13 15 L19.5 6"></path>
+            <path d="M5 16.5 Q13 12.5 21 16"></path><line x1="13" y1="15" x2="13" y2="23"></line>
+          </svg>
+          <span class="pista">Tomá una carta</span>
+        </span>
+        <span class="carta-lado carta-lado--frente">
+          <span class="rotulo" id="carta-de">De Colapsar</span>
+          <p id="carta-verso">Ven, acompáñame a colapsar.</p>
+        </span>
+      </span>
+    </button>
+    <p style="max-width:34ch; color:color-mix(in oklab, var(--color-bruma) 78%, transparent)">
+      Un verso para hoy. Cantalo hasta que se te vuelva cierto.
+    </p>
+  </section>
+
+  <!-- ── EN VIVO ─────────────────────────────────────────────────────────── -->
+  <section class="franja">
+    <p class="rotulo">En vivo</p>
+    <h2>Todavía no hay fechas.</h2>
+    <p style="max-width:38ch">Se anuncian primero adentro del Paraíso.</p>
+  </section>
+
+  <!-- ── EL PARAÍSO ──────────────────────────────────────────────────────── -->
+  <section id="paraiso" class="paraiso">
+    <p class="rotulo">El Paraíso · grupo privado</p>
+    <h2>Quiero que estemos más cerca.</h2>
+    <p>
+      Voice notes, demos, errores. Se enteran primero y me ayudan a decidir.
+      Todo lo lindo, pa' mis aves del paraíso.
+    </p>
+    <a class="puerta" href="https://infoshonny.systeme.io/elparaiso">Unirme <span aria-hidden="true">→</span></a>
+  </section>
+
+</main>
+
+<footer>
+  <div>
+    <p class="rotulo">Escuchar</p>
+    <ul>
+      <li><a href="https://open.spotify.com/intl-es/artist/70axD2kGUWcyWjZAGAtgft">Spotify</a></li>
+      <li><a href="https://music.apple.com/us/artist/shonny/1677008444">Apple Music</a></li>
+      <li><a href="https://www.youtube.com/@ShonnyLaMusa">YouTube</a></li>
+    </ul>
+  </div>
+  <div>
+    <p class="rotulo">Seguir</p>
+    <ul>
+      <li><a href="https://www.instagram.com/shonny___/">Instagram</a></li>
+      <li><a href="https://www.tiktok.com/@shonny_____">TikTok</a></li>
+      <li><a href="https://www.shonny.co/shop">Tienda</a></li>
+    </ul>
+  </div>
+  <div>
+    <p class="rotulo">Prensa y booking</p>
+    <ul>
+      <li><a href="#">Fotos en alta</a></li>
+      <li><a href="#">Bio</a></li>
+      <li><a href="#">Contacto</a></li>
+    </ul>
+    <p class="rotulo" style="margin-top:1.6rem">© 2026</p>
+  </div>
+</footer>
+
+<script>
+  /**
+   * Dos gestos, nada más. Un sitio de artista con mucho JavaScript deja de
+   * parecer una obra y empieza a parecer una aplicación.
+   */
+
+  // 1) La tapa del disco sigue al cursor por la lista. Se dibuja solo cuando hay
+  //    mouse: en un teléfono no existe el hover y la imagen sobra.
+  const tapa = document.getElementById("tapa");
+  const lista = document.querySelector(".lista");
+  if (matchMedia("(hover: hover)").matches) {
+    lista.addEventListener("pointermove", (e) => {
+      const enlace = e.target.closest("a[data-tapa]");
+      if (!enlace) return;
+      tapa.src = enlace.dataset.tapa;
+      tapa.style.left = e.clientX + window.scrollX + "px";
+      tapa.style.top = e.clientY + window.scrollY + "px";
+      tapa.classList.add("viva");
+    });
+    lista.addEventListener("pointerleave", () => tapa.classList.remove("viva"));
+  }
+
+  // 2) La carta. Los versos son de sus letras; el día decide cuál sale, así que
+  //    entre visitas del mismo día es el mismo y al día siguiente cambia — es un
+  //    ritual, no una máquina de azar.
+  const VERSOS = [
+    ["Ven, acompáñame a colapsar.", "De Colapsar"],
+    ["Lo cotidiano también es sagrado.", "Del universo"],
+    ["Nada es tan casual.", "Del universo"],
+    ["Todo lo lindo, pa' mis aves del paraíso.", "De ella"],
+  ];
+  const dia = Math.floor(Date.now() / 86400000);
+  const [verso, de] = VERSOS[dia % VERSOS.length];
+  document.getElementById("carta-verso").textContent = verso;
+  document.getElementById("carta-de").textContent = de;
+
+  // 3) La cabecera vive sobre dos fondos: la foto oscura de la portada y el rosa
+  //    claro del resto. Un IntersectionObserver sobre la portada es más barato
+  //    que escuchar el scroll, y no se equivoca al redimensionar.
+  const cabecera = document.querySelector("header");
+  new IntersectionObserver(
+    ([e]) => cabecera.classList.toggle("en-tierra", !e.isIntersecting),
+    { rootMargin: "-70px 0px 0px 0px" },
+  ).observe(document.querySelector(".portada"));
+
+  const carta = document.getElementById("carta");
+  carta.addEventListener("click", () => {
+    carta.setAttribute("aria-pressed", carta.getAttribute("aria-pressed") === "false");
+  });
+</script>
+
+</body>
+</html>

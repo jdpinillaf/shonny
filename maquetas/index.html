@@ -40,9 +40,17 @@
   }
   .aviso strong { font-weight: 500; }
 
-  .mesa { display: grid; gap: clamp(2rem, 4vw, 3rem); margin-top: clamp(3rem, 7vw, 5rem); }
-  @media (min-width: 760px)  { .mesa { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1180px) { .mesa { grid-template-columns: repeat(4, 1fr); } }
+  .mesa { display: grid; gap: clamp(2rem, 4vw, 3rem); margin-top: clamp(2.5rem, 5vw, 4rem); }
+  @media (min-width: 860px) { .mesa { grid-template-columns: repeat(2, 1fr); } }
+
+  /* Las descartadas van abajo, más chicas y en tres columnas: siguen estando —son
+     el registro de por qué no— pero no compiten de igual a igual con las que sí
+     cumplen el ADN. */
+  .mesa--fuera { margin-top: clamp(2rem, 4vw, 3rem); }
+  @media (min-width: 860px) { .mesa--fuera { grid-template-columns: repeat(3, 1fr); } }
+  .mesa--fuera h2 { font-size: 1.3rem; }
+  .mesa--fuera p { font-size: .8rem; }
+  .division { margin-top: clamp(4rem, 8vw, 6rem); padding-top: 1.4rem; border-top: 1px solid color-mix(in oklab, var(--color-tinta) 14%, transparent); }
 
   .ficha { display: grid; gap: .9rem; align-content: start; text-decoration: none; color: inherit; }
   .ficha .marco {
@@ -77,12 +85,12 @@
 <body>
 
 <p class="rotulo">Shonny · 8 sep 2026 · exploración de diseño</p>
-<h1>Cuatro maneras<br>de armar el home</h1>
+<h1>Cinco maneras<br>de armar el home</h1>
 
 <p class="intro">
-  Las tres primeras se hicieron antes de leer el ADN de marca y hablan el idioma de
-  <em>Colapsar</em>: blanco y negro de televisor, museo, papel colgado. La cuarta
-  habla el idioma de la artista.
+  Las tres últimas se hicieron antes de leer el ADN de marca y hablan el idioma de
+  <em>Colapsar</em>: blanco y negro de televisor, museo, papel colgado. Las dos
+  primeras hablan el idioma de la artista, y la 05 es la que se propone.
 </p>
 
 <div class="aviso">
@@ -97,21 +105,35 @@
 
 <div class="mesa">
 
-  <a class="ficha ficha--elegida" href="2026-09-08-el-paraiso/">
+  <a class="ficha ficha--elegida" href="2026-09-08-paraiso-artistico/">
+    <div class="marco"><iframe src="2026-09-08-paraiso-artistico/" title="El Paraíso, artística" scrolling="no" loading="lazy"></iframe></div>
+    <p class="rotulo">Maqueta 05 · la propuesta</p>
+    <h2>El Paraíso, artística</h2>
+    <p>La foto ocupa la pantalla entera y se cruza sola, como cambia la luz. Bodoni cursiva enorme, casi nada de interfaz. Y una carta que se voltea y da un verso para hoy — el territorio de ritual del ADN, que ningún referente usa.</p>
+    <p class="contra">A revisar: el símbolo de la flor está dibujado a mano alzada y pide un logo de verdad.</p>
+    <span class="abrir">Abrir →</span>
+  </a>
+
+  <a class="ficha" href="2026-09-08-el-paraiso/">
     <div class="marco"><iframe src="2026-09-08-el-paraiso/" title="El Paraíso" scrolling="no" loading="lazy"></iframe></div>
     <p class="rotulo">Maqueta 04 · dentro del ADN</p>
     <h2>El Paraíso</h2>
-    <p>Rosa polvo, arcilla y el naranja de la flor. El nombre grande es el de ella y el lanzamiento es una línea que se cambia. Tiene sala de universo audiovisual y la comunidad cierra el sitio.</p>
-    <p class="contra">A revisar: es la única con fotos de verdad, así que parte con ventaja injusta sobre las otras tres.</p>
+    <p>La misma paleta y la misma idea, pero más explicada y más convencional: retrato al lado del texto, secciones con título y bajada.</p>
+    <p class="contra">Más segura y más tibia. Es un buen sitio; no es una obra.</p>
     <span class="abrir">Abrir →</span>
   </a>
+
+</div>
+
+<p class="rotulo division">Descartadas · hablan el idioma de un single, no el de la artista</p>
+
+<div class="mesa mesa--fuera">
 
   <a class="ficha ficha--fuera" href="2026-09-08-museo-permanente/">
     <div class="marco"><iframe src="2026-09-08-museo-permanente/" title="Museo permanente" scrolling="no" loading="lazy"></iframe></div>
     <p class="sello">Fuera del ADN</p>
     <h2>Museo permanente</h2>
-    <p>El sitio como la sala grande del museo. Secciones numeradas con su cartela.</p>
-    <p class="contra">Un museo se mira despacio; una artista de pop necesita que aprieten cosas.</p>
+    <p>El sitio como la sala grande del museo, con secciones numeradas y su cartela.</p>
     <span class="abrir">Abrir →</span>
   </a>
 
@@ -119,8 +141,7 @@
     <div class="marco"><iframe src="2026-09-08-cartelera/" title="Cartelera" scrolling="no" loading="lazy"></iframe></div>
     <p class="sello">Fuera del ADN</p>
     <h2>Cartelera</h2>
-    <p>Una pared de papeles con chinche. Cada anuncio es una nota que cuelga.</p>
-    <p class="contra">Mucha nota junta es ruido, y el papel es lo único que rompe el gris.</p>
+    <p>Una pared de papeles con chinche; cada anuncio es una nota que cuelga.</p>
     <span class="abrir">Abrir →</span>
   </a>
 
@@ -128,8 +149,7 @@
     <div class="marco"><iframe src="2026-09-08-senal/" title="Señal" scrolling="no" loading="lazy"></iframe></div>
     <p class="sello">Fuera del ADN</p>
     <h2>Señal</h2>
-    <p>No se recorre: se sintoniza. Una pantalla, cinco canales, estática entre uno y otro.</p>
-    <p class="contra">Sin scroll no hay página larga que indexar, y la tienda queda detrás de un número.</p>
+    <p>No se recorre: se sintoniza. Cinco canales y estática entre uno y otro.</p>
     <span class="abrir">Abrir →</span>
   </a>
 
