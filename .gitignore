@@ -1,0 +1,29 @@
+# Ver https://help.github.com/articles/ignoring-files/
+
+# dependencias
+node_modules
+.pnp
+.pnp.*
+
+# next.js
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# entorno — nunca. La llave de Wix es de dueño de la cuenta y el token del
+# museo abre Redis y Blob. Un `git add -A` distraído no puede llevárselos.
+.env*
+
+# vercel: el enlace del proyecto es de cada máquina
+.vercel
+
+# maquetas: el CSS se compila, no se versiona
+maquetas/estilos.css
+
+# varios
+.DS_Store
+*.pem
+npm-debug.log*
+.gstack/

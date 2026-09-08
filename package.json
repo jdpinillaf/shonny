@@ -1,0 +1,16 @@
+{
+  "name": "shonny",
+  "private": true,
+  "workspaces": [
+    "sitios/*",
+    "paquetes/*",
+    "datos"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "colapsar": "npm run dev -w colapsar",
+    "maquetas": "npx @tailwindcss/cli -i maquetas/entrada.css -o maquetas/estilos.css --watch"
+  }
+}
