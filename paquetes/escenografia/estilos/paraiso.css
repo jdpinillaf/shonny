@@ -59,10 +59,16 @@
   --color-gasa: #d1cfca;
 
   /* ── Tipografía ──────────────────────────────────────────────────────────
-     Instrument Serif se queda: es la voz que emociona y da continuidad con lo
-     que ya existe. Lo que cambia es la voz que informa — Courier era el rótulo
-     de un museo, y este sitio no es un museo. Jost es geométrica, elegante y
-     no está en todas partes. */
-  --font-display: var(--font-instrument), ui-serif, Georgia, serif;
-  --font-texto: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+     Tres roles, y cada sitio decide con qué familia los cubre. Los nombres son
+     del rol y no de la fuente a propósito: cambiar de tipografía no puede
+     obligar a tocar cada archivo que la usa.
+
+     Para el sitio de la artista, las familias salen de shonny.co: **Work Sans
+     ExtraLight** manda (66 usos en su HTML) y **Futura LT Light** es el acento
+     (7). No hay ninguna serif en su sitio. Futura es de pago y Wix la licencia;
+     el equivalente libre es Jost, que se dibujó justamente como sustituta de
+     Futura. */
+  --font-display: var(--font-titular), ui-sans-serif, system-ui, sans-serif;
+  --font-texto: var(--font-cuerpo), ui-sans-serif, system-ui, sans-serif;
+  --font-rotulo: var(--font-geometrica), ui-sans-serif, system-ui, sans-serif;
 }
