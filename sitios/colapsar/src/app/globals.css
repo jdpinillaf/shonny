@@ -1,0 +1,584 @@
+@import "tailwindcss";
+
+@theme {
+  --color-noche: #0b0d0c;
+  --color-verde: #2e4440;
+  --color-tiza: #f2f0ea;
+  --color-papel: #d6d1c4;
+  --color-humo: #8a8f8b;
+  --color-terracota: #a8624a;
+
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-mono: var(--font-courier), ui-monospace, "Courier New", monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-noche);
+  color: var(--color-tiza);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* El glow del artwork: tres capas, de duro a difuso. */
+.glow {
+  text-shadow:
+    0 0 1px rgba(242, 240, 234, 0.85),
+    0 0 16px rgba(242, 240, 234, 0.42),
+    0 0 52px rgba(242, 240, 234, 0.2);
+}
+
+.glow-suave {
+  text-shadow:
+    0 0 10px rgba(242, 240, 234, 0.26),
+    0 0 34px rgba(242, 240, 234, 0.12);
+}
+
+/* Placa de museo. */
+.placa {
+  font-family: var(--font-mono);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--color-humo);
+}
+
+/* Líneas de barrido del televisor. */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.38) 3px,
+    rgba(0, 0, 0, 0.38) 4px
+  );
+  opacity: 0.5;
+}
+
+/* Entrada de lo que se ve al abrir la página.
+   =============================================================================
+   Esto vive en CSS y no en motion, y el motivo es la razón de ser del bloque:
+   el `initial` de motion **se serializa como estilo inline en el HTML del
+   servidor**. La página llegaba entera —las notas, la placa, el botón— y toda
+   con `opacity:0`, así que el primer fotograma era negro y no aparecía nada
+   hasta que bajaban, se parseaban y se ejecutaban 231 KB de JavaScript. En un
+   celular por datos eso son varios segundos de pantalla vacía con la rueda del
+   navegador girando.
+
+   Una animación CSS no necesita nada de eso: el navegador la corre en cuanto
+   tiene el HTML y la hoja de estilos.
+
+   `backwards` y no `both` a propósito. Con `backwards` el elemento usa el
+   fotograma inicial durante el retardo —o sea, sigue invisible hasta que le
+   toca— pero al terminar suelta las propiedades y vuelven a mandar las reglas
+   normales. Con `both` la animación las retiene para siempre y el `:hover` de
+   la nota dejaría de poder tocar `transform` u `opacity`. */
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(var(--entrada-desde, 8px));
+  }
+}
+
+.entra {
+  animation: entrar var(--entrada-dur, 1.2s) cubic-bezier(0.16, 1, 0.3, 1)
+    var(--entrada-retardo, 0s) backwards;
+}
+
+/* La máquina de escribir, sin JavaScript.
+   =============================================================================
+   Antes esto lo hacía `useTypewriter`: `useState(0)` y un `setTimeout` por
+   carácter. O sea que el `<h1>` salía **vacío** del servidor y el titular no
+   existía hasta después de hidratar, y solo entonces empezaban los 0.9s de
+   espera más 1.3s de tecleo. Era el elemento del LCP.
+
+   Ahora el texto va completo en el HTML y lo que se anima es cuánto se ve.
+
+   El fantasma es el mismo truco de `.odometro-caja` de más abajo: una copia
+   invisible del texto que ocupa el sitio y presta la caja. El que se ve va
+   encima en absoluto y se descubre recortándolo, en tantos pasos como letras
+   haya.
+
+   El recorte es un `clip-path: inset()` y no un `overflow: hidden` con el ancho
+   animado, y la diferencia no es de estilo. En `inset()` los porcentajes se
+   miden **sobre la caja del propio elemento**, así que un `right` que va del
+   100% al 0% descubre exactamente la misma fracción de texto que recorre el
+   cursor con su `left` del 0% al 100%: los dos van pegados. Con el ancho hacía
+   falta sumarle aire para que el `overflow` no le comiera el halo a la última
+   letra, y ese aire entraba en la cuenta de la animación — medido, el primer
+   cuarto no descubría nada y el cursor se iba por delante del texto.
+
+   Los `-2em` de los otros tres lados son sitio para el halo: `.glow` son tres
+   sombras de hasta 52px y el recorte se las comería. Van en `em` y no en px
+   porque el cuerpo es un `clamp()`, y a 1.9rem hacen falta esos 2em para
+   cubrirlos. Por la derecha el halo no aparece hasta el final, con
+   `soltar-recorte`: mientras se escribe, el texto tiene que acabar en seco
+   donde está el cursor y no desvanecerse un poco más allá. */
+.teclear {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.teclear-fantasma {
+  visibility: hidden;
+}
+
+.teclear-visible {
+  position: absolute;
+  inset: 0 auto 0 0;
+  animation:
+    teclear var(--teclear-dur) steps(var(--teclear-letras))
+      var(--teclear-demora) both,
+    soltar-recorte 1ms linear calc(var(--teclear-demora) + var(--teclear-dur))
+      forwards;
+}
+
+@keyframes teclear {
+  from {
+    clip-path: inset(-2em 100% -2em -2em);
+  }
+  to {
+    clip-path: inset(-2em 0% -2em -2em);
+  }
+}
+
+/* Acabado de escribir se suelta el borde derecho, y la última letra recupera su
+   halo. Va el último de la lista para ganarle el `clip-path` al relleno de
+   `teclear`, igual que hace `apagar-cursor` con el parpadeo. */
+@keyframes soltar-recorte {
+  to {
+    clip-path: inset(-2em -2em -2em -2em);
+  }
+}
+
+/* El cursor de la máquina de escribir.
+   Va suelto y en absoluto, con `left` de 0 a 100% en los mismos pasos y con el
+   mismo retardo que el texto, así que avanza pegado a la letra que aparece. No
+   puede ir dentro de `.teclear-visible`: lo recortaría su propio `overflow`. */
+@keyframes parpadeo {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  49%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes correr-cursor {
+  from {
+    left: 0;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+/* Al acabar de escribir el cursor se va. Antes lo quitaba el `!listo` del JSX.
+   Va el último de la lista de animaciones porque entre varias que tocan la
+   misma propiedad manda la última, y esta tiene que ganarle el `opacity` al
+   parpadeo. */
+@keyframes apagar-cursor {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.4em;
+  height: 0.78em;
+  margin-left: 0.1em;
+  background: var(--color-tiza);
+  box-shadow: 0 0 14px rgba(242, 240, 234, 0.55);
+  animation: parpadeo 1.06s steps(1) infinite;
+}
+
+.teclear .cursor {
+  position: absolute;
+  bottom: 0.2em;
+  margin-left: 0;
+  animation:
+    parpadeo 1.06s steps(1) infinite,
+    correr-cursor var(--teclear-dur) steps(var(--teclear-letras))
+      var(--teclear-demora) both,
+    apagar-cursor 1ms linear calc(var(--teclear-demora) + var(--teclear-dur))
+      forwards;
+}
+
+/* La espera mientras carga el smart link dentro de la capa.
+   Es la misma barra que lleva la card —3px, pista tenue, relleno en tiza con el
+   mismo halo que el cursor— pero sin destino: cruza y vuelve a empezar. Rima
+   con lo que la persona acaba de pulsar en vez de traer una rueda de otro sitio. */
+.cargando {
+  position: relative;
+  width: 132px;
+  height: 3px;
+  overflow: hidden;
+  background: rgba(242, 240, 234, 0.14);
+}
+
+.cargando::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 38%;
+  background: var(--color-tiza);
+  box-shadow: 0 0 14px rgba(242, 240, 234, 0.55);
+  animation: cargar 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* El recorrido no es de borde a borde. Con el 38% de ancho, salir entero por un
+   lado pide ir de -100% a 263%, y en ese viaje la pista se queda vacía un
+   instante en cada vuelta: se lee como un tartamudeo, no como algo cargando.
+   Recortado a -60% / 226%, siempre asoma un trozo por alguna punta. */
+@keyframes cargar {
+  from {
+    transform: translateX(-60%);
+  }
+  to {
+    transform: translateX(226%);
+  }
+}
+
+/* El texto va siempre en el DOM, porque una barra sola no le dice nada a un
+   lector de pantalla. Está oculto a la vista y reaparece con el movimiento
+   reducido, donde la barra se apaga: una barra congelada se lee como atascada. */
+.cargando-texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cargando {
+    display: none;
+  }
+
+  .cargando-texto {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+}
+
+/* Péndulo de las notas colgadas. */
+@keyframes colgar {
+  0%,
+  100% {
+    transform: rotate(calc(var(--reposo) - var(--vaiven)));
+  }
+  50% {
+    transform: rotate(calc(var(--reposo) + var(--vaiven)));
+  }
+}
+
+.nota {
+  transform-origin: 50% 2px;
+  animation: colgar var(--dur) ease-in-out var(--retardo) infinite;
+}
+
+/* La nota vista desde fuera: su opacidad de reposo y su hover.
+   Las dos las llevaba motion (`animate={{opacity: 0.74}}` y `whileHover`), y el
+   hover encima dependía de un prop `puntero` que `Museo` calculaba con
+   `matchMedia("(hover: hover)")` — en táctil el toque cuenta como hover y se
+   queda pegado. `@media (hover: hover)` dice justo eso, sin JavaScript y sin
+   pasar el dato por tres componentes. */
+.colgada {
+  opacity: 0.74;
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
+}
+
+@media (hover: hover) {
+  .colgada:hover {
+    opacity: 1;
+    transform: scale(1.035);
+  }
+}
+
+/* La luz que recorre la cifra. Es el mismo barrido del televisor, pero recortado
+   contra el texto: el degradado se mueve y `background-clip: text` lo enmascara.
+   Sin animación se queda en su posición inicial, que ya es legible. */
+@keyframes barrido-cifra {
+  from {
+    background-position: 220% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+.cifra {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-humo) 38%,
+    var(--color-tiza) 50%,
+    var(--color-humo) 62%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: barrido-cifra 6.5s linear 1.2s infinite;
+}
+
+/* El papelito que abre el mural.
+
+   Antes acá vivía un rótulo con cuatro esquinas de visor. La cifra sola no se
+   leía como botón —en una prueba con diez personas no la apretó ninguna— y de
+   nueve tratamientos ganó este: un papel colgado de un chinche, el mismo objeto
+   que puebla la pared. Es lo único claro en el centro oscuro, así que no hay
+   forma de no verlo.
+
+   Tiene que ser un elemento aparte de `.cifra` y no la misma caja: `.cifra` pone
+   `background-clip: text` + `color: transparent`, así que cualquier fondo que se
+   le ponga encima se recorta contra las letras y no se ve.
+
+   El fondo, la tinta y la sombra son los de `Papel.tsx` (`--color-papel`,
+   `TINTA.texto`, `SOMBRA_PARED`). Están repetidos acá y no importados porque
+   esto es CSS y aquello es JS; si cambia uno hay que cambiar el otro. Sin
+   `border-radius`: las notas de la pared tienen esquinas vivas. */
+.papelito {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  /* Holgado por dentro: el papel tiene que leerse como objeto, no como etiqueta.
+     Deja el alto por encima de los 44px que pide un dedo. */
+  padding: 1.15rem 1.5rem 1.05rem;
+  background: var(--color-papel);
+  color: #22201c;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  box-shadow:
+    2px 4px 0 rgba(0, 0, 0, 0.42),
+    0 14px 30px rgba(0, 0, 0, 0.45);
+  transform: rotate(-1.4deg);
+  /* El chinche es el eje, igual que en `.nota`. */
+  transform-origin: 50% 2px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Al pasar por encima se endereza y se despega de la pared. */
+.grupo-mural:hover .papelito,
+.grupo-mural:focus-visible .papelito {
+  transform: rotate(-0.4deg) translateY(-2px);
+}
+
+/* Papel claro sobre fondo negro: el foco necesita anillo propio, porque el
+   botón lleva `focus:outline-none` para no dibujar dos. */
+.grupo-mural:focus-visible .papelito {
+  outline: 1px solid var(--color-tiza);
+  outline-offset: 4px;
+}
+
+.papelito-flecha {
+  color: rgba(34, 32, 28, 0.5);
+  transition:
+    transform 0.35s ease,
+    color 0.35s ease;
+}
+
+.grupo-mural:hover .papelito-flecha,
+.grupo-mural:focus-visible .papelito-flecha {
+  transform: translateX(3px);
+  color: #22201c;
+}
+
+/* El empujón: si a los cinco segundos nadie lo ha tocado, el papel se balancea
+   dos veces sobre su chinche. Es lo que queda de que en móvil no hay hover que
+   descubra nada, y un papel colgado no parpadea: se mueve. */
+@keyframes latido-papel {
+  0%,
+  100% {
+    transform: rotate(-1.4deg);
+  }
+  30% {
+    transform: rotate(1.7deg) translateY(-3px);
+  }
+  65% {
+    transform: rotate(-2.8deg);
+  }
+}
+
+.papelito--llama {
+  animation: latido-papel 1.6s ease-in-out 2;
+}
+
+/* El recuento subiendo desde cero. Ver `Odometro.tsx` para el porqué de cada
+   pieza; lo que importa acá es que **el degradado va en la celda y no en el
+   contenedor**. `.cifra` recorta el suyo con `background-clip: text`, y un
+   descendiente con `transform` abre un contexto de apilamiento y deja de recibir
+   ese recorte: los dígitos saldrían invisibles. */
+.odometro-caja {
+  position: relative;
+  display: inline-block;
+}
+
+/* Ocupa el sitio y presta la línea base; no se ve. */
+.odometro-fantasma {
+  visibility: hidden;
+}
+
+/* Encima del fantasma y con su misma caja: cada celda mide 1em igual que la
+   línea del fantasma, así que el dígito que aterriza cae justo donde estaba el
+   del texto plano y el relevo no mueve nada. */
+.odometro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* El tracking que llevaba la cifra. En un contenedor flex el `letter-spacing`
+   no separa los hijos, así que va como margen entre rodillos. */
+.rodillo + .rodillo {
+  margin-left: -0.02em;
+}
+
+.rodillo {
+  display: block;
+  height: 1em;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+/* El rodaje.
+   Lo hacía motion, y su `initial` se serializaba como un `translateY(-96.4%)`
+   en el HTML: sin JavaScript la tira se quedaba clavada arriba y el recuento
+   mostraba **"00"** en vez del número real. Peor que no mostrarlo.
+
+   En CSS sale gratis porque la tira ya está montada al revés: la celda de
+   arriba es el dígito que toca y la de abajo el 0 (ver `Odometro.tsx`). O sea
+   que **su posición de reposo ya es la buena**, y solo hay que empujarla desde
+   arriba. Con `backwards` se queda en el 0 durante el retardo y aterriza en su
+   dígito aunque el JavaScript no llegue nunca. */
+.rodillo-tira {
+  display: block;
+  animation: rodar var(--rodar-dur) cubic-bezier(0.16, 1, 0.3, 1)
+    var(--rodar-arranque) backwards;
+}
+
+@keyframes rodar {
+  from {
+    transform: translateY(var(--rodar-desde));
+  }
+}
+
+.rodillo-celda {
+  display: block;
+  height: 1em;
+  line-height: 1;
+  text-align: center;
+  /* El degradado de `.cifra`, quieto en su posición de arranque. Sin el barrido:
+     no da tiempo a verlo en 0.9s, y serían cuarenta elementos repintándose. */
+  background-image: linear-gradient(
+    100deg,
+    var(--color-humo) 38%,
+    var(--color-tiza) 50%,
+    var(--color-humo) 62%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.odometro-punto {
+  /* El separador de miles no rueda, pero tiene que alinear con lo que rueda. */
+  display: block;
+  height: 1em;
+  line-height: 1;
+}
+
+/* Deriva ken-burns de cada canal. */
+@keyframes deriva {
+  from {
+    transform: scale(1.08) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.22) translate3d(var(--dx), var(--dy), 0);
+  }
+}
+
+.canal-img {
+  animation: deriva var(--dur) ease-in-out var(--retardo) infinite alternate;
+}
+
+/* Los televisores encendiéndose, uno a uno.
+   =============================================================================
+   Esto **existía y no estaba escrito en ninguna parte**: las fotos no aparecían
+   hasta que el navegador acababa de ejecutar el JavaScript, así que emergían
+   solas de la oscuridad al rato de abrir la página. Era lo que le daba el
+   misterio del arranque. Pero era un accidente, y por eso salía distinto en cada
+   teléfono: un segundo en uno rápido, siete en uno lento, y a veces la rueda del
+   navegador girando sobre una pantalla negra.
+
+   Ahora las fotos van en el HTML y llegan en 19ms, o sea de golpe. Así que la
+   espera se escribe: cada marco tiene su retardo, sacado de la semilla de su
+   `id` en `Canales.tsx` como todo lo demás que "parece azar" acá.
+
+   Solo `opacity`, que es lo único que el compositor mueve sin repintar. Las
+   fotos ya están descargadas y decodificadas para cuando esto corre — el efecto
+   no cuesta ni un byte ni una petición, al contrario que antes. */
+@keyframes encender-canal {
+  from {
+    opacity: 0;
+  }
+}
+
+.canal {
+  animation: encender-canal var(--canal-dur) ease-out var(--canal-retardo) backwards;
+}
+
+/* Grano fino sobre todo. */
+.grano {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nota,
+  .canal-img,
+  .cursor,
+  .cifra,
+  .papelito--llama,
+  /* Todo lo que antes desarmaba `MotionConfig reducedMotion="user"` y ahora es
+     CSS. Al quitarles la animación se quedan en su valor de reposo, que en todos
+     los casos es el estado final: la entrada visible, el televisor encendido, el
+     texto entero y el rodillo en su dígito. */
+  .entra,
+  .canal,
+  .teclear-visible,
+  .rodillo-tira {
+    animation: none !important;
+  }
+
+  /* Sin animación no hay nada que acompañar, y el `useTypewriter` de antes
+     tampoco lo pintaba: con movimiento reducido escribía el texto de golpe y
+     `listo` salía true, así que el cursor no llegaba a existir. */
+  .teclear .cursor {
+    display: none;
+  }
+}
