@@ -197,11 +197,51 @@
   }
   .boton--linea:hover { background: color-mix(in oklab, var(--color-arcilla) 22%, transparent); }
 
+  /* ── Lo nuevo ──────────────────────────────────────────────────────────────
+     La sección que hay que poder cambiar en cinco minutos cada vez que sale una
+     canción, y la única del sitio donde se puede escuchar sin irse. El reproductor
+     es el embed de Spotify con `theme=0`: sin ese parámetro, Spotify tiñe la caja
+     con el color dominante de la portada y la franja deja de pertenecer a la
+     página.
+
+     Va sobre el rosa hondo para que se despegue del resto sin pedir un color
+     nuevo, y arriba de todo lo demás porque es lo que se vino a ver. */
+  .destacado {
+    /* El rosa hondo solo no alcanzaba para despegarla: la luz de la página ya es
+       rosada y la franja se perdía. Con las dos líneas se lee como una pieza
+       aparte sin meter un color que no existe en la paleta. */
+    background: var(--color-rosa-hondo);
+    border-block: 1px solid color-mix(in oklab, var(--color-tierra) 22%, transparent);
+    padding-block: clamp(2.2rem, 4.5vw, 3.4rem);
+    display: grid; gap: clamp(1.6rem, 4vw, 3rem); align-items: center;
+  }
+  @media (min-width: 860px) { .destacado { grid-template-columns: 18rem 1fr; } }
+  .destacado .tapa { position: relative; width: 100%; max-width: 18rem; aspect-ratio: 1; }
+  .destacado .tapa img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; }
+  /* El halo: copia desenfocada y saturada de la portada. Sin la máscara radial se
+     lee como un panel gris detrás del cuadrado en vez de como luz. */
+  .destacado .tapa::before {
+    content: ""; position: absolute; inset: -14%;
+    background: url("https://colapsar.shonny.co/portada.jpg") center/cover;
+    filter: blur(48px) saturate(2.2) brightness(1.15);
+    -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+  }
+  .destacado h2 { font-size: clamp(2.6rem, 6.5vw, 4.6rem); line-height: .95; margin: .4rem 0 0; }
+  .destacado .frase { margin: .8rem 0 0; max-width: 34ch; }
+  .destacado iframe { border: 0; border-radius: 10px; width: min(100%, 34rem); margin-top: 1.3rem; display: block; }
+  .destacado .secundario { display: inline-flex; gap: .5rem; margin-top: 1rem; font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--color-tinta-suave); text-decoration: none; }
+  .destacado .secundario:hover { color: var(--color-tierra); }
+
   /* ── Lo que suena ──────────────────────────────────────────────────────────
      La portada del disco es la única imagen cuadrada y con borde duro de todo el
      sitio: un disco es un objeto, no es atmósfera. */
   .suena { display: grid; gap: clamp(2rem, 5vw, 4rem); }
-  @media (min-width: 880px) { .suena { grid-template-columns: 15rem 1fr; align-items: start; } }
+  /* La carátula se fue a la franja de arriba, así que la lista ocupa el ancho
+     entero. La figura sigue en el HTML con `hidden` a propósito: es el bloque
+     que hay que devolver acá el día que la franja destaque un álbum y no una
+     canción suelta. */
+  @media (min-width: 880px) { .suena { grid-template-columns: 1fr; } }
   .disco img { width: 100%; display: block; box-shadow: 0 24px 60px -20px color-mix(in oklab, var(--color-tierra) 55%, transparent); }
   .disco figcaption { margin-top: 1rem; }
 
@@ -247,35 +287,38 @@
   }
 
   /* ── La tienda ────────────────────────────────────────────────────────────
-     Era una rejilla de tres prendas con foto, nombre y precio: 665px de home
-     para mostrar un catálogo que ya existe, completo y con carrito, en Wix.
-     Mantener dos vitrinas significa que un día los precios no van a coincidir.
+     Un preview que no deja ver el producto no es un preview: es un cartel. Estas
+     son las fotos reales de la tienda de Wix —bajadas de las mismas fichas de
+     producto— con su nombre y su precio, como en cualquier tienda que uno
+     entiende de un vistazo.
 
-     Ahora es una franja: qué hay, desde cuánto, y tres miniaturas que se abren
-     en la tienda de verdad. El menú tampoco baja hasta acá — "Tienda" sale
-     derecho a Wix. */
-  .vitrina {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 1.4rem clamp(1.5rem, 4vw, 3.5rem);
-    padding-block: clamp(2rem, 4vw, 3rem);
-    border-block: 1px solid color-mix(in oklab, var(--color-tinta) 12%, transparent);
-  }
-  .vitrina h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: .5rem 0 0; }
-  .vitrina .desde { margin: .3rem 0 0; color: var(--color-tinta-suave); font-size: .9rem; }
-  .vitrina .boton { margin-left: auto; }
+     Lo que NO se hace acá es carrito. Cada tarjeta abre su ficha en Wix, que es
+     donde vive el catálogo completo, el stock y el cobro. Una sola fuente de
+     verdad: el día que cambie un precio, cambia en un solo lado. */
+  .vitrina { display: grid; gap: clamp(1.4rem, 3vw, 2.4rem); }
+  @media (min-width: 760px) { .vitrina { grid-template-columns: repeat(3, 1fr); } }
 
-  /* Las tres miniaturas montadas una sobre otra, como fotos sobre una mesa. Se
-     abren al pasar el mouse: la sección entera es un enlace, y el gesto lo
-     anuncia sin escribir "ver más". */
-  .pilas { display: flex; text-decoration: none; }
-  .pilas img {
-    width: clamp(64px, 8vw, 92px); aspect-ratio: 1; object-fit: cover; display: block;
-    box-shadow: 0 8px 24px -12px color-mix(in oklab, var(--color-tierra) 70%, transparent);
-    transition: transform .6s cubic-bezier(.16,1,.3,1);
+  .prenda { display: grid; gap: .7rem; text-decoration: none; color: inherit; align-content: start; }
+  .prenda .foto {
+    aspect-ratio: 1; overflow: hidden;
+    background: color-mix(in oklab, var(--color-arcilla) 14%, var(--color-bruma));
   }
-  .pilas img + img { margin-left: -1.6rem; }
-  .pilas:hover img + img { margin-left: -.4rem; }
-  .pilas img + img { transition: margin-left .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
-  .pilas:hover img { transform: translateY(-3px); }
+  .prenda img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
+  .prenda:hover img { transform: scale(1.04); }
+  .prenda h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; margin: .3rem 0 0; }
+  .prenda .precio { display: flex; gap: .6rem; align-items: baseline; margin: 0; font-size: .95rem; }
+  .prenda .precio s { color: var(--color-tinta-suave); font-size: .85rem; }
+  /* El botón es de línea y no sólido: son tres seguidos, y tres botones llenos
+     en fila compiten entre ellos y con el de El Paraíso, que es el que importa. */
+  .prenda .comprar {
+    justify-self: start; margin-top: .5rem; padding: .6rem 1.4rem; border-radius: 999px;
+    font-size: .64rem; letter-spacing: .2em; text-transform: uppercase;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-tinta) 24%, transparent);
+    transition: background-color .45s cubic-bezier(.16,1,.3,1), box-shadow .45s;
+  }
+  .prenda:hover .comprar { background: var(--color-tierra); color: var(--color-bruma); box-shadow: inset 0 0 0 1px var(--color-tierra); }
+
+  .tienda-pie { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .8rem; margin-top: clamp(1.4rem, 3vw, 2rem); }
 
   /* ── En vivo ───────────────────────────────────────────────────────────────
      Un vacío que enseña a dónde ir, no un vacío que informa que no hay nada.
@@ -294,8 +337,9 @@
   /* En una pantalla angosta las tres piezas no caben en una línea y el titular
      se le montaba encima al rótulo. Apiladas y alineadas a la izquierda. */
   @media (max-width: 700px) {
-    .vivo, .vitrina { flex-direction: column; align-items: flex-start; }
-    .vitrina .boton { margin-left: 0; }
+    /* La vitrina ya no es una fila flex sino una rejilla de productos, así que
+       acá solo queda la franja de en vivo. */
+    .vivo { flex-direction: column; align-items: flex-start; }
   }
   .vivo::before {
     content: ""; position: absolute; inset: 0; z-index: -1;
@@ -381,14 +425,14 @@
      con su padding para que la primera arranque alineada al texto pero la tira
      llegue al borde de la pantalla: cortarla en el margen se lee como un error. */
   @media (max-width: 819px) {
-    .universo, .tienda {
+    .universo, .vitrina {
       display: flex; gap: .8rem;
       overflow-x: auto; scroll-snap-type: x mandatory;
       margin-inline: calc(var(--margen) * -1); padding-inline: var(--margen);
       scrollbar-width: none;
     }
-    .universo::-webkit-scrollbar, .tienda::-webkit-scrollbar { display: none; }
-    .universo > *, .tienda > * { flex: 0 0 72vw; scroll-snap-align: start; }
+    .universo::-webkit-scrollbar, .vitrina::-webkit-scrollbar { display: none; }
+    .universo > *, .vitrina > * { flex: 0 0 72vw; scroll-snap-align: start; }
   }
 
   .entra { animation: subir 1.1s cubic-bezier(.16,1,.3,1) backwards; animation-delay: var(--retardo, 0s); }
@@ -466,6 +510,24 @@
   </section>
 
 
+  <!-- ── LO NUEVO ───────────────────────────────────────────────────────── -->
+  <section id="nuevo" class="destacado">
+    <figure class="tapa" style="margin:0">
+      <img src="https://colapsar.shonny.co/portada.jpg" alt="Portada de Colapsar">
+    </figure>
+
+    <div>
+      <p class="rotulo">Lo nuevo · single · 4 sep 2026</p>
+      <h2>Colapsar</h2>
+      <p class="frase">Un corazón roto por algo que nunca pasó.</p>
+      <iframe
+        src="https://open.spotify.com/embed/track/6a2fZAHDcC4MBCceSnMX6I?theme=0"
+        height="152" loading="lazy" title="Colapsar en Spotify"
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"></iframe>
+      <a class="secundario" href="https://colapsar.shonny.co">Entrar al museo del single <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
   <!-- ── CINTA ───────────────────────────────────────────────────────────── -->
   <div class="cinta" aria-label="El universo sensorial">
     <ul>
@@ -482,7 +544,7 @@
     <h2 style="margin:.6rem 0 clamp(1.4rem,3vw,2.2rem); max-width:16ch">La música</h2>
 
     <div class="suena">
-      <figure class="disco" style="margin:0">
+      <figure class="disco" hidden style="margin:0">
         <img src="https://colapsar.shonny.co/portada.jpg" alt="Portada de Colapsar">
         <figcaption>
           <p class="rotulo">Single · 4 sep 2026</p>
@@ -530,21 +592,35 @@
 
   </section>
 
-  <!-- ── LA TIENDA (vitrina) ────────────────────────────────────────────── -->
-  <section id="tienda" class="vitrina">
-    <div>
-      <p class="rotulo">La tienda · Colección Renacer</p>
-      <h2>Bandanas y maxis, en pre-order</h2>
-      <p class="desde">Desde COP 66.000</p>
+  <!-- ── LA TIENDA ──────────────────────────────────────────────────────── -->
+  <section id="tienda">
+    <p class="rotulo">La tienda · Colección Renacer · pre-order</p>
+
+    <div class="vitrina" style="margin-top:clamp(1.2rem,2.5vw,1.8rem)">
+      <a class="prenda" href="https://www.shonny.co/product-page/bandana-jugando-con-el-viento">
+        <div class="foto"><img src="../fotos/tienda/bandana-renacer.jpg" alt="Bandana Renacer"></div>
+        <h3>Bandana Renacer</h3>
+        <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
+        <span class="comprar">Comprar</span>
+      </a>
+      <a class="prenda" href="https://www.shonny.co/product-page/bandana-azul-jugando-con-el-viento">
+        <div class="foto"><img src="../fotos/tienda/bandana-ser.jpg" alt="Bandana Ser"></div>
+        <h3>Bandana Ser</h3>
+        <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
+        <span class="comprar">Comprar</span>
+      </a>
+      <a class="prenda" href="https://www.shonny.co/product-page/maxi-renacer">
+        <div class="foto"><img src="../fotos/tienda/maxi-renacer.jpg" alt="Maxi Renacer"></div>
+        <h3>Maxi Renacer</h3>
+        <p class="precio"><strong>COP 140.000</strong> <s>160.000</s></p>
+        <span class="comprar">Comprar</span>
+      </a>
     </div>
 
-    <a class="pilas" href="https://www.shonny.co/shop" aria-label="Ver la tienda">
-      <img src="../fotos/estudio-bota.jpg" alt="">
-      <img src="../fotos/estudio-red.jpg" alt="">
-      <img src="../fotos/vivo-humo.jpg" alt="">
-    </a>
-
-    <a class="boton boton--linea" href="https://www.shonny.co/shop">Ver la tienda</a>
+    <div class="tienda-pie">
+      <p class="rotulo">Los envíos y el pago se hacen en la tienda</p>
+      <a class="boton boton--linea" href="https://www.shonny.co/shop">Ver la tienda completa</a>
+    </div>
   </section>
 
   <!-- ── EN VIVO ─────────────────────────────────────────────────────────── -->
