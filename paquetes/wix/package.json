@@ -1,0 +1,9 @@
+{
+  "name": "@shonny/wix",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "auditar": "node guiones/auditar.mjs"
+  }
+}
