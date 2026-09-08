@@ -6,96 +6,150 @@
 <title>Maquetas del home — shonny.co</title>
 
 <!--
-  La mesa donde se comparan las tres. Existe para que la decisión se tome viendo,
-  no leyendo: cada maqueta se abre entera en su pestaña, y acá quedan juntas la
-  apuesta de cada una y el motivo por el que podría no funcionar.
+  La mesa donde se comparan. Existe para que la decisión se tome viendo, no
+  leyendo.
 
-  Las tres hablan el mismo idioma —el blanco y negro de televisor de Colapsar— y
-  se diferencian en la estructura, que es lo que hay que elegir. Ninguna es un
-  punto de partida "seguro": si las tres gustan a medias, la respuesta correcta
-  es mezclarlas, no promediarlas.
+  Las tres primeras se hicieron antes de tener el ADN de marca y hablan el idioma
+  de Colapsar. El ADN prohíbe ese idioma para la marca en dos renglones textuales,
+  así que se quedan acá marcadas y no se borran: son el registro de lo que pasa
+  cuando el sitio se viste con la ropa de un single.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Jost:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilos.css">
 
 <style>
-  :root { --font-instrument: "Instrument Serif"; --font-courier: "Courier Prime"; }
+  :root { --font-instrument: "Instrument Serif"; --font-jost: "Jost"; }
   * { box-sizing: border-box; }
   body {
-    margin: 0; background: var(--color-noche); color: var(--color-tiza);
-    font-family: var(--font-mono); -webkit-font-smoothing: antialiased;
-    padding: clamp(2rem, 6vw, 5rem) clamp(1.2rem, 5vw, 4rem) 6rem;
+    margin: 0; background: var(--color-rosa); color: var(--color-tinta);
+    font-family: var(--font-texto); font-weight: 300; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.4rem, 5vw, 4rem) 6rem;
   }
-  .cartela { font-size: .58rem; letter-spacing: .34em; text-transform: uppercase; color: var(--color-humo); }
-  h1 { font-family: var(--font-serif); font-size: clamp(2.6rem, 7vw, 5rem); line-height: .95; margin: .5rem 0 0; font-weight: 400; }
-  .intro { max-width: 58ch; line-height: 1.75; margin: 1.6rem 0 0; color: color-mix(in oklab, var(--color-tiza) 78%, var(--color-noche)); }
+  .rotulo { font-size: .66rem; letter-spacing: .3em; text-transform: uppercase; color: var(--color-tinta-suave); }
+  h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 7vw, 5rem); line-height: .95; margin: .6rem 0 0; }
+  .intro { max-width: 62ch; margin: 1.8rem 0 0; }
+
+  .aviso {
+    max-width: 62ch; margin: 2.5rem 0 0; padding: 1.4rem 1.6rem;
+    background: color-mix(in oklab, var(--color-arcilla) 16%, transparent);
+    border-left: 2px solid var(--color-naranja);
+  }
+  .aviso strong { font-weight: 500; }
 
   .mesa { display: grid; gap: clamp(2rem, 4vw, 3rem); margin-top: clamp(3rem, 7vw, 5rem); }
-  @media (min-width: 900px) { .mesa { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 760px)  { .mesa { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1180px) { .mesa { grid-template-columns: repeat(4, 1fr); } }
 
-  .ficha { display: grid; gap: 1rem; align-content: start; text-decoration: none; color: inherit; }
+  .ficha { display: grid; gap: .9rem; align-content: start; text-decoration: none; color: inherit; }
   .ficha .marco {
     aspect-ratio: 16/11; overflow: hidden; position: relative;
-    border: 1px solid color-mix(in oklab, var(--color-tiza) 14%, transparent);
-    background: #101211;
+    background: color-mix(in oklab, var(--color-arcilla) 12%, var(--color-rosa));
+    box-shadow: 0 18px 40px -22px color-mix(in oklab, var(--color-tierra) 60%, transparent);
   }
+  /* El iframe se dibuja a 1440 de ancho —la maqueta es de escritorio— y se
+     encoge hasta el ancho del marco. La escala la mide el JS de abajo: en CSS no
+     se puede, porque `calc(100cqw / 1440)` divide una longitud por un número y
+     devuelve una longitud, y `scale()` quiere un número pelado. Con un `.28`
+     fijo la vista previa se cortaba por la derecha en cuanto la rejilla pasaba
+     de tres columnas a cuatro. */
   .ficha iframe {
-    width: 1440px; height: 990px; border: 0; transform-origin: 0 0;
+    width: 1440px; height: 990px; border: 0;
+    transform: scale(var(--escala, .28)); transform-origin: 0 0;
     position: absolute; top: 0; left: 0; pointer-events: none;
   }
-  .ficha h2 { font-family: var(--font-serif); font-weight: 400; font-size: 1.9rem; margin: 0; }
-  .ficha p { margin: 0; line-height: 1.65; font-size: .85rem; color: color-mix(in oklab, var(--color-tiza) 76%, var(--color-noche)); }
-  .ficha .contra { color: var(--color-terracota); }
-  .ficha .abrir { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: var(--color-humo); }
-  .ficha:hover .abrir { color: var(--color-tiza); }
-  .ficha:hover .marco { border-color: color-mix(in oklab, var(--color-tiza) 40%, transparent); }
+  .ficha h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.75rem; margin: 0; }
+  .ficha p { margin: 0; font-size: .86rem; }
+  .ficha .contra { color: var(--color-tinta-suave); }
+  .ficha .abrir { font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--color-naranja); }
+
+  /* Las que quedaron fuera del ADN se ven de lejos: en gris y con el sello. Se
+     conservan, pero no compiten en igualdad de condiciones con la que sí cumple. */
+  .ficha--fuera .marco { filter: grayscale(.75); opacity: .62; }
+  .ficha--fuera:hover .marco { filter: none; opacity: 1; }
+  .sello { font-size: .6rem; letter-spacing: .18em; text-transform: uppercase; color: var(--color-naranja); }
+  .ficha--elegida .marco { box-shadow: 0 0 0 2px var(--color-naranja), 0 22px 50px -22px color-mix(in oklab, var(--color-tierra) 65%, transparent); }
 </style>
 </head>
 <body>
 
-<p class="cartela">Shonny · 8 sep 2026 · exploración de diseño</p>
-<h1>Tres maneras<br>de armar el home</h1>
+<p class="rotulo">Shonny · 8 sep 2026 · exploración de diseño</p>
+<h1>Cuatro maneras<br>de armar el home</h1>
+
 <p class="intro">
-  Las tres hablan el idioma que ya existe en colapsar.shonny.co: blanco y negro de
-  televisor, Courier para informar, Instrument Serif para emocionar, y el color
-  reservado para una sola cosa — la portada del disco, que es lo único que sí
-  existe. Lo que cambia entre ellas es la estructura, que es lo que hay que
-  decidir. Abrí cada una entera; acá está el argumento y la objeción de cada cual.
+  Las tres primeras se hicieron antes de leer el ADN de marca y hablan el idioma de
+  <em>Colapsar</em>: blanco y negro de televisor, museo, papel colgado. La cuarta
+  habla el idioma de la artista.
 </p>
+
+<div class="aviso">
+  <p style="margin:0">
+    <strong>El ADN prohíbe el camino de las tres primeras</strong>, textual, en su
+    página de límites: <em>«Nada demasiado oscuro, gótico»</em> y <em>«Nada
+    deprimente, mood de la Sad Girl»</em>. Se quedan acá como registro, no como
+    opción. El museo blanco y negro sigue siendo el lugar correcto para
+    <em>Colapsar</em> — pero es una exposición temporal, no la casa.
+  </p>
+</div>
 
 <div class="mesa">
 
-  <a class="ficha" href="2026-09-08-museo-permanente/">
-    <div class="marco"><iframe src="2026-09-08-museo-permanente/" title="Museo permanente" style="transform:scale(.32)" scrolling="no" loading="lazy"></iframe></div>
-    <p class="cartela">Maqueta 01</p>
+  <a class="ficha ficha--elegida" href="2026-09-08-el-paraiso/">
+    <div class="marco"><iframe src="2026-09-08-el-paraiso/" title="El Paraíso" scrolling="no" loading="lazy"></iframe></div>
+    <p class="rotulo">Maqueta 04 · dentro del ADN</p>
+    <h2>El Paraíso</h2>
+    <p>Rosa polvo, arcilla y el naranja de la flor. El nombre grande es el de ella y el lanzamiento es una línea que se cambia. Tiene sala de universo audiovisual y la comunidad cierra el sitio.</p>
+    <p class="contra">A revisar: es la única con fotos de verdad, así que parte con ventaja injusta sobre las otras tres.</p>
+    <span class="abrir">Abrir →</span>
+  </a>
+
+  <a class="ficha ficha--fuera" href="2026-09-08-museo-permanente/">
+    <div class="marco"><iframe src="2026-09-08-museo-permanente/" title="Museo permanente" scrolling="no" loading="lazy"></iframe></div>
+    <p class="sello">Fuera del ADN</p>
     <h2>Museo permanente</h2>
-    <p>El sitio es la sala grande del mismo museo. Cada sección es una sala numerada, con su cartela. Se recorre bajando.</p>
-    <p class="contra">Riesgo: un museo se mira despacio, y una artista de pop necesita que aprieten cosas.</p>
+    <p>El sitio como la sala grande del museo. Secciones numeradas con su cartela.</p>
+    <p class="contra">Un museo se mira despacio; una artista de pop necesita que aprieten cosas.</p>
     <span class="abrir">Abrir →</span>
   </a>
 
-  <a class="ficha" href="2026-09-08-cartelera/">
-    <div class="marco"><iframe src="2026-09-08-cartelera/" title="Cartelera" style="transform:scale(.32)" scrolling="no" loading="lazy"></iframe></div>
-    <p class="cartela">Maqueta 02</p>
+  <a class="ficha ficha--fuera" href="2026-09-08-cartelera/">
+    <div class="marco"><iframe src="2026-09-08-cartelera/" title="Cartelera" scrolling="no" loading="lazy"></iframe></div>
+    <p class="sello">Fuera del ADN</p>
     <h2>Cartelera</h2>
-    <p>Una pared de papeles con chinche. Cada cosa que anunciar es una nota colgada, y cuelgan más a medida que hay más.</p>
-    <p class="contra">Riesgo: mucha nota junta es ruido, y el papel es lo único que rompe el blanco y negro.</p>
+    <p>Una pared de papeles con chinche. Cada anuncio es una nota que cuelga.</p>
+    <p class="contra">Mucha nota junta es ruido, y el papel es lo único que rompe el gris.</p>
     <span class="abrir">Abrir →</span>
   </a>
 
-  <a class="ficha" href="2026-09-08-senal/">
-    <div class="marco"><iframe src="2026-09-08-senal/" title="Señal" style="transform:scale(.32)" scrolling="no" loading="lazy"></iframe></div>
-    <p class="cartela">Maqueta 03</p>
+  <a class="ficha ficha--fuera" href="2026-09-08-senal/">
+    <div class="marco"><iframe src="2026-09-08-senal/" title="Señal" scrolling="no" loading="lazy"></iframe></div>
+    <p class="sello">Fuera del ADN</p>
     <h2>Señal</h2>
-    <p>No se recorre: se sintoniza. Una pantalla, cinco canales, estática entre uno y otro. Lo más memorable de las tres.</p>
-    <p class="contra">Riesgo: sin scroll no hay SEO de página larga, y la tienda queda detrás de un número.</p>
+    <p>No se recorre: se sintoniza. Una pantalla, cinco canales, estática entre uno y otro.</p>
+    <p class="contra">Sin scroll no hay página larga que indexar, y la tienda queda detrás de un número.</p>
     <span class="abrir">Abrir →</span>
   </a>
 
 </div>
+
+<script>
+  /**
+   * Ajusta la escala de cada vista previa al ancho real de su marco.
+   *
+   * Un ResizeObserver y no un listener de `resize` porque el ancho del marco
+   * cambia también cuando cambia la rejilla, no solo cuando cambia la ventana.
+   */
+  const ancho = 1440;
+  const ojo = new ResizeObserver((entradas) => {
+    for (const e of entradas) {
+      e.target.style.setProperty("--escala", e.contentRect.width / ancho);
+    }
+  });
+  for (const marco of document.querySelectorAll(".marco")) ojo.observe(marco);
+</script>
 
 </body>
 </html>

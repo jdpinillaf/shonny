@@ -1,0 +1,68 @@
+/**
+ * El Paraíso: la paleta de la ARTISTA, no la de un single.
+ *
+ * Sale del ADN de marca (`docs/adn/`) y de sus propias fotos, muestreadas: el
+ * rosa polvo de los fondos de estudio, la piel, el naranja quemado de la flor de
+ * ave del paraíso, el rojo tierra, la gasa contra el mar, y el violeta profundo
+ * del escenario en vivo.
+ *
+ * Existe aparte de `tema.css` —el blanco y negro de televisor de Colapsar— por
+ * una razón que conviene no olvidar: **un lanzamiento es una estación, el sitio
+ * es el lugar.** Cada single puede traer su propio mundo y agotarlo; lo que
+ * dura entre single y single es esto.
+ *
+ * El ADN pone dos límites explícitos que esta paleta respeta:
+ *   - "Nada demasiado oscuro, gótico"
+ *   - "Nada deprimente, mood de la Sad Girl"
+ * Por eso el fondo es un rosa cálido con luz y no un negro, y por eso el
+ * registro nocturno (`--color-noche-tibia`) es violeta con sangre adentro y no
+ * gris. También prohíbe la paleta fluorescente o de neón: los magentas y verdes
+ * ácidos que aparecen en las fotos de show son luces de escenario, y se quedan
+ * dentro de la fotografía — nunca son color de interfaz.
+ */
+
+@theme {
+  /* ── Los fondos ──────────────────────────────────────────────────────────
+     Ninguno es blanco puro. El rosa polvo es el fondo de sus retratos de
+     estudio, aclarado hasta que aguante texto encima sin cansar. */
+  --color-rosa: #efe3df;
+  --color-rosa-hondo: #e3cec9;
+  --color-bruma: #f7f1ed;
+
+  /* ── La tinta ────────────────────────────────────────────────────────────
+     Marrón muy oscuro, nunca negro: tiene la temperatura de la piel y del
+     rojo tierra de las fotos. Negro puro sobre rosa se ve impreso encima, no
+     escrito adentro. */
+  --color-tinta: #2b1a17;
+  --color-tinta-suave: #6d5450;
+
+  /* ── Los acentos ─────────────────────────────────────────────────────────
+     Los tres salen de la misma foto: ella con la flor de ave del paraíso. */
+  /* Se llama arcilla y no terracota porque `--color-terracota` ya existe en
+     `tema.css` con otro valor (#a8624a, el acento del museo). Dos temas en el
+     mismo CSS con un token del mismo nombre significa que gana el último import,
+     y eso es un bug que aparece meses después y en una sola página. */
+  --color-arcilla: #a36d64;     /* el fondo de esa foto y su piel */
+  --color-naranja: #9b502c;     /* el pétalo de la flor */
+  --color-tierra: #5c2b26;      /* la sombra roja del pelo */
+
+  /* ── El registro nocturno ────────────────────────────────────────────────
+     Para el en vivo y para lo místico. Violeta con sangre, no gris. */
+  --color-noche-tibia: #1c1020;
+  --color-vino: #6f104a;
+
+  /* ── El agua ─────────────────────────────────────────────────────────────
+     El único frío de la paleta, y por eso el más valioso: es la foto de la ola
+     con la gasa. Se usa poco, para que cuando aparezca refresque de verdad
+     ("algo frío que refresca", dice el universo sensorial del ADN). */
+  --color-mar: #6f90a2;
+  --color-gasa: #d1cfca;
+
+  /* ── Tipografía ──────────────────────────────────────────────────────────
+     Instrument Serif se queda: es la voz que emociona y da continuidad con lo
+     que ya existe. Lo que cambia es la voz que informa — Courier era el rótulo
+     de un museo, y este sitio no es un museo. Jost es geométrica, elegante y
+     no está en todas partes. */
+  --font-display: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-texto: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+}

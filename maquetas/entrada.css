@@ -16,5 +16,6 @@
 
 @import "tailwindcss";
 @import "@shonny/escenografia/estilos/tema.css";
+@import "@shonny/escenografia/estilos/paraiso.css";
 
 @source "./**/*.html";
