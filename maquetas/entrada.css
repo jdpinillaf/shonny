@@ -1,0 +1,20 @@
+/**
+ * El CSS de las maquetas. Se compila, no se versiona.
+ *
+ *   npm run maquetas        (desde la raíz, deja estilos.css al lado y se queda mirando)
+ *
+ * Importa el tema de verdad —el mismo archivo que usa colapsar.shonny.co— en vez
+ * de una copia de los colores. Es la diferencia entre una maqueta que se ve bien
+ * y una maqueta que ESTÁ bien: si el gris de las placas cambia en el paquete,
+ * estas páginas cambian con él, y lo que se aprueba acá es lo que se puede
+ * construir.
+ *
+ * Los efectos (grano, scanlines, papel) NO se importan: siguen viviendo dentro de
+ * colapsar hasta el segundo tiempo de la extracción, y además cada maqueta los
+ * explora distinto. Lo compartido es el tema; lo demás es exploración.
+ */
+
+@import "tailwindcss";
+@import "@shonny/escenografia/estilos/tema.css";
+
+@source "./**/*.html";

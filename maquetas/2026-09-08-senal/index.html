@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta · Señal — shonny.co</title>
+
+<!--
+  MAQUETA 3 de 3 — "Señal"
+
+  La idea: el sitio no se recorre, se sintoniza. Una sola pantalla, sin scroll,
+  y cada sección es un canal. Se cambia con los números, con las flechas o
+  apretando el dial de abajo, y entre canal y canal hay un golpe de estática.
+
+  Por qué puede funcionar: es lo más cercano a lo que ya es colapsar.shonny.co
+  (una sola pantalla, televisores, estática) y lo más memorable de las tres — la
+  gente se acuerda de un sitio que cambia de canal. En móvil funciona como una
+  historia de Instagram, que es donde vive su público.
+  Por qué puede fallar: sin scroll no hay SEO de página larga, un canal solo se
+  descubre si se aprieta, y la tienda —lo único que factura— queda escondida
+  detrás de un número. Es la apuesta más alta de las tres, para bien y para mal.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../estilos.css">
+
+<style>
+  :root { --font-instrument: "Instrument Serif"; --font-courier: "Courier Prime"; }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0; overflow: hidden; overscroll-behavior: none;
+    background: var(--color-noche); color: var(--color-tiza);
+    font-family: var(--font-mono); -webkit-font-smoothing: antialiased;
+  }
+
+  .grano, .barrido { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+  .grano {
+    opacity: .06; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23r)'/%3E%3C/svg%3E");
+  }
+  .barrido { opacity: .18; background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.55) 2px 4px); }
+
+  /* El golpe de estática entre canal y canal. Sin esto el cambio se lee como una
+     pestaña; con esto se lee como un aparato. Dura 150 ms: más y molesta. */
+  .estatica {
+    position: fixed; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 300px;
+  }
+  .estatica.golpe { animation: cortar .15s steps(3) 1; }
+  @keyframes cortar {
+    0%   { opacity: .0; }
+    30%  { opacity: .55; background-position: 40px 12px; }
+    60%  { opacity: .3;  background-position: -30px 60px; }
+    100% { opacity: 0; }
+  }
+
+  .cartela { font-size: .58rem; letter-spacing: .34em; text-transform: uppercase; color: var(--color-humo); }
+
+  /* ── El aparato ────────────────────────────────────────────────────────────
+     Marco fino, viñeta hacia los bordes y esquinas apenas curvas: lo justo para
+     que se lea como tubo sin caer en el filtro "retro CRT" de plantilla. */
+  .aparato {
+    position: fixed; inset: 0;
+    display: grid; grid-template-rows: auto 1fr auto;
+    padding: clamp(1rem, 2.4vw, 2rem) clamp(1.2rem, 4vw, 3.5rem);
+  }
+  .aparato::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 40;
+    background: radial-gradient(78% 68% at 50% 50%, transparent 40%, rgba(11,13,12,.92) 100%);
+  }
+
+  .barra-sup { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; z-index: 45; }
+  .marca { font-family: var(--font-serif); font-size: 1.4rem; letter-spacing: .05em; }
+
+  /* El número del canal, arriba a la derecha, como el OSD de un televisor. */
+  .osd { display: flex; align-items: baseline; gap: .6rem; }
+  .osd .n { font-family: var(--font-serif); font-size: 1.8rem; line-height: 1; }
+
+  /* ── Los canales ───────────────────────────────────────────────────────────
+     Todos montados, uno visible. Se cambia con opacidad y un desplazamiento
+     mínimo; nada de deslizar el contenido lateralmente, que se lee a carrusel. */
+  .pantalla { position: relative; z-index: 20; }
+  /* El canal que sale se apaga de golpe, sin fundido: la estática ya tapa el
+     corte, y encadenar un fundido con `visibility` retardada dejaba el canal
+     viejo visible medio segundo por debajo del nuevo. Un televisor no
+     desvanece: corta. El que entra sí aparece con calma, un pelo después del
+     ruido. */
+  .canal {
+    position: absolute; inset: 0; display: grid; align-content: center;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    opacity: 0; visibility: hidden; transform: translateY(10px);
+  }
+  .canal[data-activo] {
+    opacity: 1; visibility: visible; transform: none;
+    transition: opacity .45s cubic-bezier(.16,1,.3,1) .09s, transform .45s cubic-bezier(.16,1,.3,1) .09s;
+  }
+
+  .titulo { font-family: var(--font-serif); font-size: clamp(3rem, 11vw, 8.5rem); line-height: .86; margin: 0; letter-spacing: -.02em; }
+  .glow { text-shadow: 0 0 1px rgba(242,240,234,.85), 0 0 16px rgba(242,240,234,.42), 0 0 52px rgba(242,240,234,.2); }
+  .bajada { max-width: 44ch; line-height: 1.7; margin: 0; color: color-mix(in oklab, var(--color-tiza) 78%, var(--color-noche)); }
+
+  .acciones { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .boton {
+    display: inline-flex; align-items: center; padding: .75rem 1.4rem; text-decoration: none;
+    font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; color: var(--color-tiza);
+    border: 1px solid color-mix(in oklab, var(--color-tiza) 32%, transparent);
+    transition: background-color .4s cubic-bezier(.16,1,.3,1), color .4s, border-color .4s;
+  }
+  .boton:hover, .boton:focus-visible { background: var(--color-tiza); color: var(--color-noche); }
+
+  /* Canal 01: la única imagen a color del sitio entero. */
+  .ahora { display: grid; gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
+  @media (min-width: 860px) { .ahora { grid-template-columns: 1fr 16rem; } }
+  .caratula { position: relative; width: min(16rem, 60vw); aspect-ratio: 1; justify-self: start; }
+  .caratula img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1; }
+  .caratula::before {
+    content: ""; position: absolute; inset: -20%;
+    background: url("https://colapsar.shonny.co/portada.jpg") center/cover;
+    filter: blur(58px) saturate(2.4) brightness(1.2);
+    -webkit-mask-image: radial-gradient(closest-side, #000 28%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 28%, transparent 100%);
+  }
+
+  /* Canal 02: la discografía como una lista de emisión. */
+  .lista { list-style: none; margin: 0; padding: 0; max-width: 46rem; }
+  .lista li { display: grid; grid-template-columns: 2.6rem 1fr auto; gap: 1rem; align-items: baseline; padding: .95rem 0; border-bottom: 1px solid color-mix(in oklab, var(--color-tiza) 13%, transparent); }
+  .lista .t { font-family: var(--font-serif); font-size: clamp(1.4rem, 2.6vw, 2rem); }
+  .lista a { color: var(--color-humo); text-decoration: none; font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; }
+  .lista li:hover a { color: var(--color-tiza); }
+
+  /* Canal 03: la tienda, en tres columnas de vitrina. */
+  .vitrina { display: grid; gap: clamp(1.2rem, 3vw, 2.4rem); }
+  @media (min-width: 760px) { .vitrina { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+  .vitrina figure { margin: 0; display: grid; gap: .7rem; }
+  .vitrina .foto { aspect-ratio: 4/5; overflow: hidden; }
+  .vitrina img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.14) brightness(.8); transition: transform .9s cubic-bezier(.16,1,.3,1); }
+  .vitrina figure:hover img { transform: scale(1.05); }
+  .vitrina h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.3rem; margin: 0; }
+  .precio { font-size: .8rem; display: flex; gap: .6rem; }
+  .precio s { color: var(--color-humo); }
+  @media (max-width: 759px) { .vitrina figure:nth-child(n+3) { display: none; } }
+
+  /* ── El dial ───────────────────────────────────────────────────────────────
+     Abajo, siempre visible. Es la navegación entera del sitio: si no se ve, el
+     sitio no se puede recorrer. Por eso no se esconde nunca, ni en móvil. */
+  .dial { display: flex; gap: clamp(.4rem, 1.6vw, 1.4rem); align-items: baseline; flex-wrap: wrap; z-index: 45; }
+  .dial button {
+    background: none; border: 0; padding: .5rem 0; cursor: pointer; color: var(--color-humo);
+    font: inherit; font-size: .62rem; letter-spacing: .22em; text-transform: uppercase;
+    display: flex; gap: .5rem; align-items: baseline;
+    border-bottom: 1px solid transparent; transition: color .35s, border-color .35s;
+  }
+  .dial button:hover { color: var(--color-tiza); }
+  .dial button[aria-current="true"] { color: var(--color-tiza); border-bottom-color: var(--color-tiza); }
+  .dial .n { font-family: var(--font-serif); font-size: .95rem; letter-spacing: 0; }
+  @media (max-width: 560px) { .dial button span:not(.n) { display: none; } .dial { gap: 1.2rem; } }
+
+  .ayuda { font-size: .54rem; letter-spacing: .22em; text-transform: uppercase; color: color-mix(in oklab, var(--color-humo) 70%, var(--color-noche)); }
+  @media (max-width: 700px) { .ayuda { display: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grano" aria-hidden="true"></div>
+<div class="barrido" aria-hidden="true"></div>
+<div class="estatica" id="estatica" aria-hidden="true"></div>
+
+<div class="aparato">
+
+  <div class="barra-sup">
+    <span class="marca">Shonny</span>
+    <div class="osd">
+      <span class="cartela" id="osd-nombre">Ahora</span>
+      <span class="n" id="osd-num">01</span>
+    </div>
+  </div>
+
+  <div class="pantalla">
+
+    <!-- CANAL 01 -->
+    <section class="canal" data-canal="1" data-activo>
+      <div class="ahora">
+        <div style="display:grid; gap:1.4rem">
+          <p class="cartela">Canal 01 · Ya está afuera</p>
+          <h1 class="titulo glow">Colapsar</h1>
+          <p class="bajada">
+            Un corazón roto por algo que nunca pasó. Salió el 4 de septiembre y
+            tiene su propia sala: un museo de cosas que no ocurrieron.
+          </p>
+          <div class="acciones">
+            <a class="boton" href="https://sym.ffm.to/colapsar">Escuchar</a>
+            <a class="boton" href="https://colapsar.shonny.co">Entrar al museo</a>
+          </div>
+        </div>
+        <div class="caratula"><img src="https://colapsar.shonny.co/portada.jpg" alt="Portada de Colapsar"></div>
+      </div>
+    </section>
+
+    <!-- CANAL 02 -->
+    <section class="canal" data-canal="2">
+      <p class="cartela">Canal 02 · Lo que suena</p>
+      <ol class="lista">
+        <li><span class="cartela">01</span><span class="t">Colapsar</span><a href="https://sym.ffm.to/colapsar">Escuchar</a></li>
+        <li><span class="cartela">02</span><span class="t">Pausa</span><a href="https://ffm.to/b87oerw">Escuchar</a></li>
+        <li><span class="cartela">03</span><span class="t">Renacer</span><a href="https://open.spotify.com/intl-es/artist/70axD2kGUWcyWjZAGAtgft">Escuchar</a></li>
+      </ol>
+      <p class="cartela">Pendiente · la discografía real y en orden</p>
+    </section>
+
+    <!-- CANAL 03 -->
+    <section class="canal" data-canal="3">
+      <p class="cartela">Canal 03 · La tienda · Colección Renacer</p>
+      <div class="vitrina">
+        <figure>
+          <div class="foto"><img src="https://colapsar.shonny.co/fotos/02-bn.jpg" alt="Bandana Renacer"></div>
+          <h3>Bandana Renacer</h3>
+          <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
+        </figure>
+        <figure>
+          <div class="foto"><img src="https://colapsar.shonny.co/fotos/05-bn.jpg" alt="Bandana Ser"></div>
+          <h3>Bandana Ser</h3>
+          <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
+        </figure>
+        <figure>
+          <div class="foto"><img src="https://colapsar.shonny.co/fotos/07-bn.jpg" alt="Maxi Renacer"></div>
+          <h3>Maxi Renacer</h3>
+          <p class="precio"><strong>COP 140.000</strong> <s>160.000</s></p>
+        </figure>
+      </div>
+      <div class="acciones"><a class="boton" href="https://www.shonny.co/shop">Ir a la tienda</a></div>
+    </section>
+
+    <!-- CANAL 04 -->
+    <section class="canal" data-canal="4">
+      <p class="cartela">Canal 04 · En vivo</p>
+      <h2 class="titulo" style="font-size:clamp(2.4rem,7vw,5rem)">Sin señal<br>todavía</h2>
+      <p class="bajada">
+        No hay fechas anunciadas. La próxima se anuncia primero en El Paraíso y
+        después en todo lo demás.
+      </p>
+      <div class="acciones"><a class="boton" href="https://infoshonny.systeme.io/elparaiso">Enterarme primero</a></div>
+    </section>
+
+    <!-- CANAL 05 -->
+    <section class="canal" data-canal="5">
+      <p class="cartela">Canal 05 · El Paraíso · Grupo privado</p>
+      <h2 class="titulo" style="font-size:clamp(2.2rem,6vw,4.4rem); max-width:16ch">
+        Voice notes, demos, errores.
+      </h2>
+      <p class="bajada">
+        Quiero que estemos más cerca. Ahí se enteran de todo primero y me ayudan
+        a decidir. Todo lo lindo, pa' mis aves del paraíso.
+      </p>
+      <div class="acciones"><a class="boton" href="https://infoshonny.systeme.io/elparaiso">Unirme</a></div>
+    </section>
+
+  </div>
+
+  <div class="barra-sup" style="align-items:flex-end">
+    <nav class="dial" id="dial" aria-label="Canales"></nav>
+    <p class="ayuda">Flechas o 1–5 para cambiar de canal</p>
+  </div>
+
+</div>
+
+<script>
+  /**
+   * El sintonizador. Es todo el JavaScript del sitio: cinco canales, uno visible.
+   *
+   * Los canales existen en el HTML desde el servidor y solo se ocultan con CSS.
+   * Si el JS no carga, la página sigue teniendo todo el contenido — que en un
+   * sitio de una sola pantalla es la diferencia entre una maqueta y una trampa.
+   */
+  const CANALES = [
+    { n: 1, nombre: "Ahora" },
+    { n: 2, nombre: "Música" },
+    { n: 3, nombre: "Tienda" },
+    { n: 4, nombre: "En vivo" },
+    { n: 5, nombre: "El Paraíso" },
+  ];
+
+  const dial = document.getElementById("dial");
+  const estatica = document.getElementById("estatica");
+  const osdNum = document.getElementById("osd-num");
+  const osdNombre = document.getElementById("osd-nombre");
+  let actual = 1;
+
+  for (const c of CANALES) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.innerHTML = `<span class="n">0${c.n}</span><span>${c.nombre}</span>`;
+    b.addEventListener("click", () => sintonizar(c.n));
+    dial.append(b);
+  }
+
+  function sintonizar(n) {
+    if (n === actual) return;
+    actual = n;
+
+    // El corte va primero: la estática tapa el cambio, no lo acompaña.
+    estatica.classList.remove("golpe");
+    void estatica.offsetWidth; // reinicia la animación
+    estatica.classList.add("golpe");
+
+    for (const s of document.querySelectorAll(".canal")) {
+      s.toggleAttribute("data-activo", Number(s.dataset.canal) === n);
+    }
+    for (const [i, b] of [...dial.children].entries()) {
+      b.setAttribute("aria-current", String(CANALES[i].n === n));
+    }
+    const c = CANALES.find((c) => c.n === n);
+    osdNum.textContent = `0${c.n}`;
+    osdNombre.textContent = c.nombre;
+  }
+
+  addEventListener("keydown", (e) => {
+    if (e.key >= "1" && e.key <= "5") sintonizar(Number(e.key));
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") sintonizar((actual % 5) + 1);
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") sintonizar(((actual + 3) % 5) + 1);
+  });
+
+  sintonizar(1);
+  document.querySelector("#dial button").setAttribute("aria-current", "true");
+</script>
+
+</body>
+</html>

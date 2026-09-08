@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquetas del home — shonny.co</title>
+
+<!--
+  La mesa donde se comparan las tres. Existe para que la decisión se tome viendo,
+  no leyendo: cada maqueta se abre entera en su pestaña, y acá quedan juntas la
+  apuesta de cada una y el motivo por el que podría no funcionar.
+
+  Las tres hablan el mismo idioma —el blanco y negro de televisor de Colapsar— y
+  se diferencian en la estructura, que es lo que hay que elegir. Ninguna es un
+  punto de partida "seguro": si las tres gustan a medias, la respuesta correcta
+  es mezclarlas, no promediarlas.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+
+<style>
+  :root { --font-instrument: "Instrument Serif"; --font-courier: "Courier Prime"; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--color-noche); color: var(--color-tiza);
+    font-family: var(--font-mono); -webkit-font-smoothing: antialiased;
+    padding: clamp(2rem, 6vw, 5rem) clamp(1.2rem, 5vw, 4rem) 6rem;
+  }
+  .cartela { font-size: .58rem; letter-spacing: .34em; text-transform: uppercase; color: var(--color-humo); }
+  h1 { font-family: var(--font-serif); font-size: clamp(2.6rem, 7vw, 5rem); line-height: .95; margin: .5rem 0 0; font-weight: 400; }
+  .intro { max-width: 58ch; line-height: 1.75; margin: 1.6rem 0 0; color: color-mix(in oklab, var(--color-tiza) 78%, var(--color-noche)); }
+
+  .mesa { display: grid; gap: clamp(2rem, 4vw, 3rem); margin-top: clamp(3rem, 7vw, 5rem); }
+  @media (min-width: 900px) { .mesa { grid-template-columns: repeat(3, 1fr); } }
+
+  .ficha { display: grid; gap: 1rem; align-content: start; text-decoration: none; color: inherit; }
+  .ficha .marco {
+    aspect-ratio: 16/11; overflow: hidden; position: relative;
+    border: 1px solid color-mix(in oklab, var(--color-tiza) 14%, transparent);
+    background: #101211;
+  }
+  .ficha iframe {
+    width: 1440px; height: 990px; border: 0; transform-origin: 0 0;
+    position: absolute; top: 0; left: 0; pointer-events: none;
+  }
+  .ficha h2 { font-family: var(--font-serif); font-weight: 400; font-size: 1.9rem; margin: 0; }
+  .ficha p { margin: 0; line-height: 1.65; font-size: .85rem; color: color-mix(in oklab, var(--color-tiza) 76%, var(--color-noche)); }
+  .ficha .contra { color: var(--color-terracota); }
+  .ficha .abrir { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: var(--color-humo); }
+  .ficha:hover .abrir { color: var(--color-tiza); }
+  .ficha:hover .marco { border-color: color-mix(in oklab, var(--color-tiza) 40%, transparent); }
+</style>
+</head>
+<body>
+
+<p class="cartela">Shonny · 8 sep 2026 · exploración de diseño</p>
+<h1>Tres maneras<br>de armar el home</h1>
+<p class="intro">
+  Las tres hablan el idioma que ya existe en colapsar.shonny.co: blanco y negro de
+  televisor, Courier para informar, Instrument Serif para emocionar, y el color
+  reservado para una sola cosa — la portada del disco, que es lo único que sí
+  existe. Lo que cambia entre ellas es la estructura, que es lo que hay que
+  decidir. Abrí cada una entera; acá está el argumento y la objeción de cada cual.
+</p>
+
+<div class="mesa">
+
+  <a class="ficha" href="2026-09-08-museo-permanente/">
+    <div class="marco"><iframe src="2026-09-08-museo-permanente/" title="Museo permanente" style="transform:scale(.32)" scrolling="no" loading="lazy"></iframe></div>
+    <p class="cartela">Maqueta 01</p>
+    <h2>Museo permanente</h2>
+    <p>El sitio es la sala grande del mismo museo. Cada sección es una sala numerada, con su cartela. Se recorre bajando.</p>
+    <p class="contra">Riesgo: un museo se mira despacio, y una artista de pop necesita que aprieten cosas.</p>
+    <span class="abrir">Abrir →</span>
+  </a>
+
+  <a class="ficha" href="2026-09-08-cartelera/">
+    <div class="marco"><iframe src="2026-09-08-cartelera/" title="Cartelera" style="transform:scale(.32)" scrolling="no" loading="lazy"></iframe></div>
+    <p class="cartela">Maqueta 02</p>
+    <h2>Cartelera</h2>
+    <p>Una pared de papeles con chinche. Cada cosa que anunciar es una nota colgada, y cuelgan más a medida que hay más.</p>
+    <p class="contra">Riesgo: mucha nota junta es ruido, y el papel es lo único que rompe el blanco y negro.</p>
+    <span class="abrir">Abrir →</span>
+  </a>
+
+  <a class="ficha" href="2026-09-08-senal/">
+    <div class="marco"><iframe src="2026-09-08-senal/" title="Señal" style="transform:scale(.32)" scrolling="no" loading="lazy"></iframe></div>
+    <p class="cartela">Maqueta 03</p>
+    <h2>Señal</h2>
+    <p>No se recorre: se sintoniza. Una pantalla, cinco canales, estática entre uno y otro. Lo más memorable de las tres.</p>
+    <p class="contra">Riesgo: sin scroll no hay SEO de página larga, y la tienda queda detrás de un número.</p>
+    <span class="abrir">Abrir →</span>
+  </a>
+
+</div>
+
+</body>
+</html>

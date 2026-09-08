@@ -12,5 +12,8 @@
   "scripts": {
     "colapsar": "npm run dev -w colapsar",
     "maquetas": "npx @tailwindcss/cli -i maquetas/entrada.css -o maquetas/estilos.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3"
   }
 }

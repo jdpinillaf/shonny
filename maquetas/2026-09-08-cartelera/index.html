@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta · Cartelera — shonny.co</title>
+
+<!--
+  MAQUETA 2 de 3 — "Cartelera"
+
+  La idea: el sitio es la pared de papel del museo, pero usada para lo que sirve
+  una pared con chinches — anunciar. Todo lo que hay que decir es una nota
+  colgada: el single nuevo, el próximo lanzamiento, cada fecha, cada prenda.
+  Cuelgan de un chinche y se balancean si les pasás el mouse.
+
+  Por qué puede funcionar: es lo contrario de solemne. Una pared de anuncios pide
+  que la toques, cabe cualquier cosa nueva sin rediseñar nada (se cuelga otra
+  nota) y hereda del museo la pieza más querible que tiene: el papel.
+  Por qué puede fallar: mucha nota junta es ruido, y el papel beige es lo único
+  que rompe el blanco y negro. Si se llena, deja de leerse una jerarquía.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../estilos.css">
+
+<style>
+  :root {
+    --font-instrument: "Instrument Serif";
+    --font-courier: "Courier Prime";
+
+    /* La tinta del papel no es negra: es la del museo, marrón muy oscuro. Negro
+       puro sobre papel beige se ve impreso a láser, no escrito. */
+    --tinta: #22201c;
+    --tinta-borde: rgba(34,32,28,.22);
+    --tinta-pie: rgba(34,32,28,.5);
+
+    /* Sombra corta y dura + una larga y suave. La corta es la que hace que el
+       papel se lea PEGADO a la pared en vez de flotando como una tarjeta. */
+    --sombra-pared: 2px 4px 0 rgba(0,0,0,.42), 0 14px 30px rgba(0,0,0,.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--color-noche);
+    color: var(--color-tiza);
+    font-family: var(--font-mono);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* La pared: no es plana, tiene una luz que cae desde arriba a la izquierda,
+     como la de una sala con una sola ventana. */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(120% 80% at 18% -10%, rgba(242,240,234,.07), transparent 60%),
+      var(--color-noche);
+  }
+  .grano {
+    position: fixed; inset: 0; pointer-events: none; z-index: 60;
+    opacity: .06; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23r)'/%3E%3C/svg%3E");
+  }
+
+  .cartela { font-size: .58rem; letter-spacing: .34em; text-transform: uppercase; color: var(--color-humo); }
+
+  header {
+    display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    padding: clamp(1.4rem, 3vw, 2.6rem) clamp(1.2rem, 4vw, 3rem) 0;
+  }
+  .marca { font-family: var(--font-serif); font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1; }
+  .lema { max-width: 30ch; line-height: 1.6; color: color-mix(in oklab, var(--color-tiza) 70%, var(--color-noche)); font-size: .82rem; }
+
+  /* ── La pared ──────────────────────────────────────────────────────────────
+     Columnas CSS y no grid: las notas tienen alturas distintas a propósito y con
+     grid quedarían alineadas en filas, que es justo lo que una pared de anuncios
+     no hace. Con `columns` se apilan como caen. */
+  .pared {
+    /* Las notas están rotadas, así que sus esquinas se salen un par de píxeles
+       del contenedor y eso alcanzaba para dar 2px de scroll horizontal en móvil.
+       `clip` y no `hidden` para no crear un contenedor de scroll. */
+    overflow-x: clip;
+    columns: 1; column-gap: clamp(1.5rem, 3vw, 2.6rem);
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.2rem, 4vw, 3rem) 6rem;
+  }
+  @media (min-width: 700px)  { .pared { columns: 2; } }
+  @media (min-width: 1100px) { .pared { columns: 3; } }
+
+  /* ── La nota ───────────────────────────────────────────────────────────────
+     El eje del balanceo es el chinche, no el centro: transform-origin en la
+     cabeza del papel. Un papel que gira sobre su centro se ve como una carta
+     dando vueltas; sobre el chinche, se ve colgado. */
+  .nota {
+    break-inside: avoid; display: block; position: relative;
+    margin: 0 0 clamp(1.5rem, 3vw, 2.6rem);
+    padding: 2.4rem 1.5rem 1.5rem;
+    background: var(--color-papel); color: var(--tinta);
+    box-shadow: var(--sombra-pared);
+    text-decoration: none;
+    transform: rotate(var(--r, -1deg));
+    transform-origin: 50% 4px;
+    transition: transform .7s cubic-bezier(.16,1,.3,1);
+  }
+  a.nota:hover, a.nota:focus-visible { transform: rotate(calc(var(--r, -1deg) * -1.9)); }
+
+  /* El chinche. Dos capas: el metal y el brillo desplazado hacia la luz. */
+  .nota::before {
+    content: ""; position: absolute; left: 50%; top: 8px; width: 14px; height: 14px;
+    transform: translateX(-50%); border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #cfc7b8, #8c8377 62%, #4b463f);
+    box-shadow: 0 2px 3px rgba(0,0,0,.5);
+  }
+
+  .nota h2, .nota h3 { font-family: var(--font-serif); font-weight: 400; margin: .4rem 0 0; line-height: 1.05; }
+  .nota h2 { font-size: clamp(2.4rem, 5vw, 3.6rem); }
+  .nota h3 { font-size: 1.6rem; }
+  .nota p { line-height: 1.6; margin: .9rem 0 0; font-size: .86rem; }
+  .nota .rotulo { font-size: .56rem; letter-spacing: .3em; text-transform: uppercase; color: var(--tinta-pie); }
+  .nota .pie { margin-top: 1.4rem; padding-top: .8rem; border-top: 1px solid var(--tinta-borde); font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta-pie); }
+  a.nota:hover .pie { color: var(--tinta); }
+
+  /* La nota del single: la única a color de toda la pared, porque la portada del
+     disco es lo único que sí existe. */
+  .nota--single { --r: -1.6deg; padding-bottom: 0; overflow: hidden; }
+  .nota--single img { width: calc(100% + 3rem); margin: 1.4rem -1.5rem 0; display: block; }
+
+  /* La nota rasgada: el próximo lanzamiento todavía no tiene fecha, así que el
+     papel está roto abajo. Es literal y por eso se entiende sin leer. */
+  .nota--rasgada { --r: 1.4deg; padding-bottom: 2.6rem; }
+  .nota--rasgada::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 16px;
+    background: var(--color-noche);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='16' preserveAspectRatio='none'%3E%3Cpath d='M0 16 L0 8 Q10 2 20 7 T40 6 T60 10 T80 4 T100 9 T120 6 L120 16 Z' fill='%23000'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='16' preserveAspectRatio='none'%3E%3Cpath d='M0 16 L0 8 Q10 2 20 7 T40 6 T60 10 T80 4 T100 9 T120 6 L120 16 Z' fill='%23000'/%3E%3C/svg%3E");
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  }
+
+  /* Las notas de la tienda llevan foto en gris: la ropa es del museo, no del
+     catálogo. */
+  .nota--prenda { --r: .9deg; }
+  .nota--prenda img { width: calc(100% + 3rem); margin: 1.2rem -1.5rem 1rem; display: block; filter: grayscale(1) contrast(1.12) brightness(.92); }
+  .precio { display: flex; gap: .7rem; align-items: baseline; font-size: .9rem; margin-top: .3rem; }
+  .precio s { color: var(--tinta-pie); }
+
+  /* La nota de plataformas es una lista, no un párrafo: se viene a apretar. */
+  .nota--enlaces { --r: -.8deg; }
+  .nota--enlaces ul { list-style: none; margin: 1rem 0 0; padding: 0; }
+  .nota--enlaces li { border-top: 1px solid var(--tinta-borde); }
+  .nota--enlaces a { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: .7rem 0; color: var(--tinta); text-decoration: none; font-size: .82rem; }
+  .nota--enlaces a span { font-size: .58rem; letter-spacing: .22em; text-transform: uppercase; color: var(--tinta-pie); }
+  .nota--enlaces a:hover { padding-left: .4rem; }
+  .nota--enlaces a { transition: padding-left .4s cubic-bezier(.16,1,.3,1); }
+
+  /* La nota escrita a mano de ella: sin chinche centrado sino en una esquina, y
+     con la voz en primera persona. Es la única que no anuncia nada. */
+  .nota--voz { --r: 2deg; background: color-mix(in oklab, var(--color-papel) 88%, #b9a98c); }
+  .nota--voz::before { left: 22px; transform: none; }
+  .nota--voz blockquote { font-family: var(--font-serif); font-size: 1.45rem; line-height: 1.32; margin: .8rem 0 0; }
+
+  .entra { animation: colgar .85s cubic-bezier(.16,1,.3,1) backwards; animation-delay: var(--retardo, 0s); }
+  @keyframes colgar {
+    from { opacity: 0; transform: rotate(calc(var(--r, -1deg) * 3.5)) translateY(-18px); }
+    to   { opacity: 1; transform: rotate(var(--r, -1deg)); }
+  }
+
+  footer { padding: 0 clamp(1.2rem, 4vw, 3rem) 4rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grano" aria-hidden="true"></div>
+
+<header>
+  <div>
+    <p class="cartela">Museo de lo que nunca pasó · cartelera</p>
+    <h1 class="marca">Shonny</h1>
+  </div>
+  <p class="lema">Spicy pop: impredecible, sensual, trascendental.<br>Nada es tan casual.</p>
+</header>
+
+<main class="pared">
+
+  <a class="nota nota--single entra" style="--retardo:.05s" href="https://sym.ffm.to/colapsar">
+    <p class="rotulo">Ya está afuera · 4 sep 2026</p>
+    <h2>Colapsar</h2>
+    <p>Un corazón roto por algo que nunca pasó.</p>
+    <img src="https://colapsar.shonny.co/portada.jpg" alt="Portada de Colapsar">
+  </a>
+
+  <a class="nota entra" style="--retardo:.12s; --r:1.1deg" href="https://colapsar.shonny.co">
+    <p class="rotulo">La sala del single</p>
+    <h3>Museo de lo que nunca pasó</h3>
+    <p>
+      Dejá tu confesión en la pared. Ya hay 69 cosas que no pasaron colgadas
+      ahí, escritas por gente que escuchó la canción.
+    </p>
+    <p class="pie">Entrar →</p>
+  </a>
+
+  <div class="nota nota--rasgada entra" style="--retardo:.18s">
+    <p class="rotulo">Lo próximo</p>
+    <h3>Todavía sin nombre</h3>
+    <p>
+      Se anuncia primero en El Paraíso. Acá aparece el día que tenga fecha —
+      esta nota está rota hasta entonces.
+    </p>
+  </div>
+
+  <a class="nota nota--prenda entra" style="--retardo:.24s" href="https://www.shonny.co/shop">
+    <p class="rotulo">Colección Renacer · Pre-order</p>
+    <img src="https://colapsar.shonny.co/fotos/02-bn.jpg" alt="Bandana Renacer">
+    <h3>Bandana Renacer</h3>
+    <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
+    <p class="pie">Comprar →</p>
+  </a>
+
+  <div class="nota nota--voz entra" style="--retardo:.3s">
+    <p class="rotulo">El Paraíso · grupo privado</p>
+    <blockquote>
+      Quiero que estemos más cerca. Voice notes, demos, errores. Se enteran
+      primero y me ayudan a decidir.
+    </blockquote>
+    <p class="pie" style="border:0; padding:0; margin-top:1.2rem">
+      <a href="https://infoshonny.systeme.io/elparaiso" style="color:inherit">Unirme →</a>
+    </p>
+  </div>
+
+  <a class="nota nota--prenda entra" style="--retardo:.36s; --r:-1.3deg" href="https://www.shonny.co/shop">
+    <p class="rotulo">Colección Renacer · Pre-order</p>
+    <img src="https://colapsar.shonny.co/fotos/07-bn.jpg" alt="Maxi Renacer">
+    <h3>Maxi Renacer</h3>
+    <p class="precio"><strong>COP 140.000</strong> <s>160.000</s></p>
+    <p class="pie">Comprar →</p>
+  </a>
+
+  <div class="nota entra" style="--retardo:.42s; --r:-.6deg">
+    <p class="rotulo">En vivo</p>
+    <h3>Sin fechas anunciadas</h3>
+    <p>
+      Cuando haya show, esta nota deja de estar sola. Las fechas se cuelgan acá
+      una por una, con su propia chinche.
+    </p>
+    <p class="pie">Pendiente · faltan las fechas reales</p>
+  </div>
+
+  <div class="nota nota--enlaces entra" style="--retardo:.48s">
+    <p class="rotulo">Dónde suena</p>
+    <ul>
+      <li><a href="https://open.spotify.com/intl-es/artist/70axD2kGUWcyWjZAGAtgft">Spotify <span>Escuchar</span></a></li>
+      <li><a href="https://music.apple.com/us/artist/shonny/1677008444">Apple Music <span>Escuchar</span></a></li>
+      <li><a href="https://music.amazon.com/artists/B07B4Q6T3W/shonny">Amazon <span>Escuchar</span></a></li>
+      <li><a href="https://www.youtube.com/@ShonnyLaMusa">YouTube <span>Ver</span></a></li>
+      <li><a href="https://www.instagram.com/shonny___/">Instagram <span>Seguir</span></a></li>
+      <li><a href="https://www.tiktok.com/@shonny_____">TikTok <span>Seguir</span></a></li>
+    </ul>
+  </div>
+
+</main>
+
+<footer>
+  <p class="cartela">Shonny · Ave del paraíso</p>
+  <p class="cartela">© 2026</p>
+</footer>
+
+</body>
+</html>

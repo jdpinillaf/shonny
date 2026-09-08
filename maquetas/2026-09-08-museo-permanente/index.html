@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta · Museo permanente — shonny.co</title>
+
+<!--
+  MAQUETA 1 de 3 — "Museo permanente"
+
+  La idea: el sitio es la sala grande del mismo museo que ya existe en
+  colapsar.shonny.co. El single fue una exposición temporal; esto es la colección
+  permanente. Cada sección es una sala numerada y todo lleva su cartela.
+
+  Por qué puede funcionar: el lenguaje ya está construido y probado, la gente que
+  llega del QR no siente que cambió de casa, y la estructura aguanta lanzamientos
+  nuevos sin rehacerse (una sala más, una cartela más).
+  Por qué puede fallar: un museo es un sitio para mirar despacio, y una artista de
+  pop necesita que la gente APRIETE cosas. Si la solemnidad gana, no vende nada.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../estilos.css">
+
+<style>
+  /* next/font no existe acá, así que las variables que espera el tema se ponen
+     a mano. Los nombres tienen que ser exactamente estos. */
+  :root {
+    --font-instrument: "Instrument Serif";
+    --font-courier: "Courier Prime";
+
+    --sala: clamp(4rem, 9vw, 9rem);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--color-noche);
+    color: var(--color-tiza);
+    font-family: var(--font-mono);
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── El grano y las líneas de barrido, encima de todo y sin estorbar ────────
+     Es el sello de la marca: la página no es una pantalla limpia, es una señal.
+     Van fixed para que no se muevan con el scroll — un grano que hace parallax
+     se lee como textura de fondo, no como ruido de la imagen. */
+  .grano, .barrido { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+  .grano {
+    opacity: .055;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23r)'/%3E%3C/svg%3E");
+  }
+  .barrido {
+    opacity: .16;
+    background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.5) 2px 4px);
+  }
+
+  /* ── Cartela ───────────────────────────────────────────────────────────────
+     El rótulo de museo: mono, versalitas, tracking ancho. Es la voz institucional
+     de la página, y aparece en todos lados para que la jerarquía la marque el
+     tamaño y no un color. */
+  .cartela {
+    font-size: clamp(.5rem, .62vw, .6rem);
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: var(--color-humo);
+  }
+
+  /* ── Cabecera ──────────────────────────────────────────────────────────────
+     No es una barra: es la línea superior del edificio. Se queda pegada arriba y
+     no crece ni se pone opaca al bajar; el grano ya separa. */
+  header {
+    position: fixed; inset: 0 0 auto; z-index: 50;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 2rem;
+    padding: clamp(1rem, 2.2vw, 1.8rem) clamp(1.2rem, 4vw, 3.5rem);
+    mix-blend-mode: difference;
+  }
+  .marca { font-family: var(--font-serif); font-size: 1.35rem; letter-spacing: .06em; }
+  nav { display: flex; gap: clamp(.9rem, 2vw, 2rem); }
+  nav a { color: var(--color-tiza); text-decoration: none; opacity: .62; transition: opacity .35s cubic-bezier(.16,1,.3,1); }
+  nav a:hover, nav a:focus-visible { opacity: 1; }
+  @media (max-width: 640px) { nav { display: none; } }
+
+  /* ── Sala ──────────────────────────────────────────────────────────────────
+     El ritmo del scroll. El espacio entre salas es grande a propósito: lo que
+     separa una sala de otra en un museo es caminar. */
+  /* `overflow-x: clip` y no `hidden`: clip recorta sin convertir la sección en un
+     contenedor de scroll, así que no rompe el `position: sticky` de nada ni se
+     come el scroll de la página. Hace falta porque el halo de la portada
+     (`.caratula::before`, inset -18%) se sale por el costado y en un móvil de
+     390px empujaba el ancho del documento a 434 — barra horizontal en toda la
+     página. En escritorio no se nota: ahí el halo cabe de sobra. */
+  section { padding: var(--sala) clamp(1.2rem, 4vw, 3.5rem); position: relative; overflow-x: clip; }
+  /* El número de sala y su cartela van en la misma línea de base. La primera
+     versión ponía el número en absolute detrás del texto y el resultado era que
+     se pisaban: un número gigante al 7% de opacidad debajo de un rótulo de 10px
+     no es una marca de agua, es un rótulo ilegible. */
+  .encabezado { display: flex; align-items: baseline; gap: clamp(.8rem, 2vw, 1.6rem); }
+  .numero {
+    font-family: var(--font-serif); font-size: clamp(2.2rem, 5vw, 4rem);
+    color: var(--color-tiza); opacity: .22; line-height: .8; user-select: none;
+  }
+
+  /* ── Sala 01 · la portada ──────────────────────────────────────────────────
+     Asimétrica: el texto pegado al borde izquierdo y los televisores desbordando
+     por la derecha. Centrarlo lo volvería un póster de agencia. */
+  .portada {
+    min-height: 100svh; display: grid; align-content: center;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 6vw, 5rem);
+    padding-top: clamp(6rem, 14vh, 10rem);
+  }
+  @media (min-width: 900px) {
+    .portada { grid-template-columns: 1.05fr .95fr; align-items: center; }
+  }
+
+  .titulo {
+    font-family: var(--font-serif);
+    font-size: clamp(4.2rem, 15vw, 12rem);
+    line-height: .84; letter-spacing: -.02em; margin: .12em 0 0;
+    text-shadow: 0 0 1px rgba(242,240,234,.85), 0 0 16px rgba(242,240,234,.42), 0 0 52px rgba(242,240,234,.2);
+  }
+  .bajada { max-width: 34ch; margin: 1.6rem 0 0; line-height: 1.65; color: color-mix(in oklab, var(--color-tiza) 78%, var(--color-noche)); }
+
+  .acciones { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 2.2rem; }
+  .boton {
+    display: inline-flex; align-items: center; gap: .6rem;
+    padding: .78rem 1.5rem; text-decoration: none;
+    font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--color-tiza); border: 1px solid color-mix(in oklab, var(--color-tiza) 34%, transparent);
+    transition: background-color .4s cubic-bezier(.16,1,.3,1), color .4s, border-color .4s;
+  }
+  .boton:hover, .boton:focus-visible { background: var(--color-tiza); color: var(--color-noche); border-color: var(--color-tiza); }
+  .boton--fantasma { border-color: transparent; padding-left: 0; padding-right: 0; color: var(--color-humo); }
+  .boton--fantasma:hover, .boton--fantasma--focus { background: none; color: var(--color-tiza); text-decoration: underline; text-underline-offset: .4em; }
+
+  /* Los televisores. Cada marco lleva su propio reloj (--t, --r) para que la
+     deriva nunca coincida: dos fotos que se mueven al unísono se leen como un
+     carrusel, y esto tiene que leerse como cinco aparatos encendidos. */
+  .canales { position: relative; aspect-ratio: 4 / 3.4; }
+  .canal {
+    position: absolute; overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--color-tiza) 12%, transparent);
+    box-shadow: 0 30px 60px rgba(0,0,0,.55);
+    transform: rotate(var(--r, 0deg));
+  }
+  .canal img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: grayscale(1) contrast(1.16) brightness(.74);
+    animation: deriva var(--t, 26s) ease-in-out infinite alternate;
+  }
+  @keyframes deriva {
+    from { transform: scale(1.08) translate3d(0,0,0); }
+    to   { transform: scale(1.2) translate3d(var(--dx, -2%), var(--dy, 3%), 0); }
+  }
+  .c1 { inset: 0 34% 46% 0;   --r: -1.2deg; --t: 24s; }
+  .c2 { inset: 12% 0 30% 46%; --r: .9deg;   --t: 31s; --dx: 3%; --dy: -2%; }
+  .c3 { inset: 58% 52% 0 6%;  --r: 1.6deg;  --t: 27s; --dx: -3%; --dy: -3%; }
+  .c4 { inset: 66% 12% 4% 54%; --r: -.7deg; --t: 35s; }
+
+  /* La viñeta que hunde los bordes: sin esto los cuatro marcos flotan sobre un
+     rectángulo y se ve el montaje.
+
+     Iba con `inset: -10%` para que el degradado muriera fuera del contenedor, y
+     en un móvil de 390px eso empujaba el ancho del documento a 434: barra de
+     scroll horizontal en toda la página. Un pseudo-elemento no aparece en
+     `querySelectorAll`, así que fue el último sitio donde se me ocurrió mirar.
+     Ahora queda dentro y el degradado se cierra antes. */
+  .canales::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(58% 50% at 50% 50%, transparent 0, var(--color-noche) 100%);
+  }
+
+  /* ── Sala 02 · lo que suena ────────────────────────────────────────────────
+     El único color de todo el sitio: la portada del disco. La regla viene del
+     museo — lo que no pasó es gris, la canción es lo único que existe de verdad. */
+  .disco { display: grid; gap: clamp(2rem, 5vw, 4rem); align-items: end; }
+  @media (min-width: 820px) { .disco { grid-template-columns: 22rem 1fr; } }
+  .caratula { position: relative; width: 100%; max-width: 22rem; aspect-ratio: 1; }
+  .caratula img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; }
+  /* El halo: copia desenfocada y saturada de la propia portada. Necesita máscara
+     radial o se lee como un panel gris detrás del cuadrado. */
+  .caratula::before {
+    content: ""; position: absolute; inset: -18%;
+    background: url("https://colapsar.shonny.co/portada.jpg") center/cover;
+    filter: blur(62px) saturate(2.4) brightness(1.2);
+    -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+    opacity: .85;
+  }
+  .pistas { list-style: none; margin: 0; padding: 0; border-top: 1px solid color-mix(in oklab, var(--color-tiza) 14%, transparent); }
+  .pistas li {
+    display: grid; grid-template-columns: 2.4rem 1fr auto; gap: 1rem; align-items: baseline;
+    padding: 1.05rem 0; border-bottom: 1px solid color-mix(in oklab, var(--color-tiza) 14%, transparent);
+  }
+  .pistas .n { color: var(--color-humo); font-size: .72rem; }
+  .pistas .t { font-family: var(--font-serif); font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1; }
+  .pistas a { color: var(--color-humo); text-decoration: none; font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; }
+  .pistas li:hover .t { text-shadow: 0 0 10px rgba(242,240,234,.26), 0 0 34px rgba(242,240,234,.12); }
+  .pistas li:hover a { color: var(--color-tiza); }
+
+  /* ── Sala 03 · la tienda ───────────────────────────────────────────────────
+     Las prendas son piezas de la colección: número de catálogo, materia, precio.
+     Sin tarjetas: una tarjeta convierte un objeto en un producto de e-commerce y
+     lo saca del museo. */
+  .piezas { display: grid; gap: clamp(2rem, 4vw, 3.5rem); }
+  @media (min-width: 720px) { .piezas { grid-template-columns: repeat(3, 1fr); } }
+  .pieza { display: grid; gap: .9rem; align-content: start; }
+  .pieza .foto { aspect-ratio: 3 / 4; overflow: hidden; background: #141615; }
+  .pieza img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.1) brightness(.8); transition: filter .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+  .pieza:hover img { transform: scale(1.04); filter: grayscale(1) contrast(1.18) brightness(.95); }
+  .pieza h3 { font-family: var(--font-serif); font-size: 1.5rem; margin: 0; font-weight: 400; }
+  .precio { display: flex; gap: .8rem; align-items: baseline; font-size: .82rem; }
+  .precio s { color: var(--color-humo); }
+
+  /* ── Sala 04 · en vivo ─────────────────────────────────────────────────────
+     El vacío no dice "no hay eventos": dice dónde se van a enterar. Un vacío que
+     no enseña nada es la peor sala del sitio, y hoy es exactamente lo que tiene
+     www.shonny.co. */
+  .vacio { border: 1px dashed color-mix(in oklab, var(--color-tiza) 22%, transparent); padding: clamp(2rem, 5vw, 4rem); max-width: 46rem; }
+  .vacio p { margin: .8rem 0 0; color: color-mix(in oklab, var(--color-tiza) 72%, var(--color-noche)); line-height: 1.7; }
+
+  /* ── Sala 05 · El Paraíso ──────────────────────────────────────────────────
+     Lo más cálido del sitio, y aun así en gris. El calor lo pone la voz, no el
+     color: es la única sección escrita en primera persona. */
+  .paraiso { border-top: 1px solid color-mix(in oklab, var(--color-tiza) 14%, transparent); }
+  .paraiso blockquote { font-family: var(--font-serif); font-size: clamp(1.6rem, 3.6vw, 2.9rem); line-height: 1.28; margin: 1.5rem 0 0; max-width: 24ch; }
+
+  footer { padding: var(--sala) clamp(1.2rem, 4vw, 3.5rem) 4rem; display: grid; gap: 2.5rem; }
+  @media (min-width: 820px) { footer { grid-template-columns: repeat(3, 1fr); } }
+  footer ul { list-style: none; margin: .9rem 0 0; padding: 0; display: grid; gap: .5rem; }
+  footer a { color: color-mix(in oklab, var(--color-tiza) 74%, var(--color-noche)); text-decoration: none; }
+  footer a:hover { color: var(--color-tiza); text-decoration: underline; text-underline-offset: .35em; }
+
+  /* ── Entrada escalonada ────────────────────────────────────────────────────
+     Un solo momento coreografiado al cargar, en vez de micro-animaciones por
+     todos lados. `backwards` y no `both`: si el elemento termina con una
+     transformación propia, `both` se la congela. */
+  .entra { animation: entrar .9s cubic-bezier(.16,1,.3,1) backwards; animation-delay: var(--retardo, 0s); }
+  @keyframes entrar { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grano" aria-hidden="true"></div>
+<div class="barrido" aria-hidden="true"></div>
+
+<header>
+  <a class="marca" href="#" style="color:inherit;text-decoration:none">Shonny</a>
+  <nav class="cartela">
+    <a href="#suena">Lo que suena</a>
+    <a href="#tienda">La tienda</a>
+    <a href="#vivo">En vivo</a>
+    <a href="#paraiso">El Paraíso</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ── SALA 01 ─────────────────────────────────────────────────────────── -->
+  <section class="portada">
+    <div>
+      <p class="cartela entra" style="--retardo:.05s">Sala 01 · Exposición actual</p>
+      <h1 class="titulo entra" style="--retardo:.15s">Colapsar</h1>
+      <p class="bajada entra" style="--retardo:.3s">
+        Un corazón roto por algo que nunca pasó. Salió el 4 de septiembre y ya
+        tiene su propia sala: un museo de cosas que no ocurrieron, con las
+        confesiones de quien pasó por ahí colgadas de la pared.
+      </p>
+      <div class="acciones entra" style="--retardo:.42s">
+        <a class="boton" href="https://open.spotify.com/track/6a2fZAHDcC4MBCceSnMX6I">Escuchar</a>
+        <a class="boton" href="https://colapsar.shonny.co">Entrar al museo</a>
+      </div>
+    </div>
+
+    <div class="canales entra" style="--retardo:.2s" aria-hidden="true">
+      <figure class="canal c1"><img src="https://colapsar.shonny.co/fotos/01-bn.jpg" alt=""></figure>
+      <figure class="canal c2"><img src="https://colapsar.shonny.co/fotos/04-bn.jpg" alt=""></figure>
+      <figure class="canal c3"><img src="https://colapsar.shonny.co/fotos/06-bn.jpg" alt=""></figure>
+      <figure class="canal c4"><img src="https://colapsar.shonny.co/fotos/08-bn.jpg" alt=""></figure>
+    </div>
+  </section>
+
+  <!-- ── SALA 02 ─────────────────────────────────────────────────────────── -->
+  <section id="suena">
+    <div class="encabezado">
+      <span class="numero" aria-hidden="true">02</span>
+      <p class="cartela">Sala 02 · Lo que suena</p>
+    </div>
+    <div class="disco" style="margin-top:2.5rem">
+      <div class="caratula">
+        <img src="https://colapsar.shonny.co/portada.jpg" alt="Portada de Colapsar">
+      </div>
+      <ol class="pistas">
+        <li>
+          <span class="n">01</span>
+          <span class="t">Colapsar</span>
+          <a href="https://sym.ffm.to/colapsar">Escuchar</a>
+        </li>
+        <li>
+          <span class="n">02</span>
+          <span class="t">Pausa</span>
+          <a href="https://ffm.to/b87oerw">Escuchar</a>
+        </li>
+        <li>
+          <span class="n">03</span>
+          <span class="t">Renacer</span>
+          <a href="https://open.spotify.com/intl-es/artist/70axD2kGUWcyWjZAGAtgft">Escuchar</a>
+        </li>
+      </ol>
+    </div>
+    <p class="cartela" style="margin-top:2rem">
+      Pendiente · la discografía real, en orden, sale de la página de Spotify de ella
+    </p>
+  </section>
+
+  <!-- ── SALA 03 ─────────────────────────────────────────────────────────── -->
+  <section id="tienda">
+    <div class="encabezado">
+      <span class="numero" aria-hidden="true">03</span>
+      <p class="cartela">Sala 03 · La tienda · Colección Renacer</p>
+    </div>
+    <div class="piezas" style="margin-top:2.5rem">
+      <article class="pieza">
+        <div class="foto"><img src="https://colapsar.shonny.co/fotos/02-bn.jpg" alt="Bandana Renacer"></div>
+        <p class="cartela">N.º 01 · Pre-order</p>
+        <h3>Bandana Renacer</h3>
+        <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
+      </article>
+      <article class="pieza">
+        <div class="foto"><img src="https://colapsar.shonny.co/fotos/05-bn.jpg" alt="Bandana Ser"></div>
+        <p class="cartela">N.º 02 · Pre-order</p>
+        <h3>Bandana Ser</h3>
+        <p class="precio"><strong>COP 66.000</strong> <s>77.000</s></p>
+      </article>
+      <article class="pieza">
+        <div class="foto"><img src="https://colapsar.shonny.co/fotos/07-bn.jpg" alt="Maxi Renacer"></div>
+        <p class="cartela">N.º 03 · Pre-order</p>
+        <h3>Maxi Renacer</h3>
+        <p class="precio"><strong>COP 140.000</strong> <s>160.000</s></p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── SALA 04 ─────────────────────────────────────────────────────────── -->
+  <section id="vivo">
+    <div class="encabezado">
+      <span class="numero" aria-hidden="true">04</span>
+      <p class="cartela">Sala 04 · En vivo</p>
+    </div>
+    <div class="vacio" style="margin-top:2.5rem">
+      <p class="cartela">Sin fechas anunciadas</p>
+      <p>
+        La próxima se anuncia primero en El Paraíso, el grupo de WhatsApp, y
+        después en todo lo demás. Si querés enterarte antes que el resto, es
+        por ahí.
+      </p>
+      <div class="acciones">
+        <a class="boton" href="https://infoshonny.systeme.io/elparaiso">Entrar al Paraíso</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SALA 05 ─────────────────────────────────────────────────────────── -->
+  <section id="paraiso" class="paraiso">
+    <div class="encabezado">
+      <span class="numero" aria-hidden="true">05</span>
+      <p class="cartela">Sala 05 · El Paraíso · Grupo privado</p>
+    </div>
+    <blockquote>
+      Voice notes, demos, reflexiones, pruebas y errores. Se enteran de todo
+      primero y me ayudan a decidir.
+    </blockquote>
+    <p class="cartela" style="margin-top:2rem">Todo lo lindo, pa' mis aves del paraíso</p>
+    <div class="acciones">
+      <a class="boton" href="https://infoshonny.systeme.io/elparaiso">Unirme</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div>
+    <p class="cartela">Escuchar</p>
+    <ul>
+      <li><a href="https://open.spotify.com/intl-es/artist/70axD2kGUWcyWjZAGAtgft">Spotify</a></li>
+      <li><a href="https://music.apple.com/us/artist/shonny/1677008444">Apple Music</a></li>
+      <li><a href="https://music.amazon.com/artists/B07B4Q6T3W/shonny">Amazon Music</a></li>
+      <li><a href="https://www.youtube.com/@ShonnyLaMusa">YouTube</a></li>
+    </ul>
+  </div>
+  <div>
+    <p class="cartela">Seguir</p>
+    <ul>
+      <li><a href="https://www.instagram.com/shonny___/">Instagram</a></li>
+      <li><a href="https://www.tiktok.com/@shonny_____">TikTok</a></li>
+      <li><a href="https://www.threads.com/@shonny___">Threads</a></li>
+    </ul>
+  </div>
+  <div>
+    <p class="cartela">Shonny · Ave del paraíso</p>
+    <p style="margin:.9rem 0 0; max-width:28ch; line-height:1.6; color:color-mix(in oklab, var(--color-tiza) 68%, var(--color-noche))">
+      Spicy pop: impredecible, sensual, trascendental. Nada es tan casual.
+    </p>
+    <p class="cartela" style="margin-top:1.4rem">© 2026</p>
+  </div>
+</footer>
+
+</body>
+</html>
