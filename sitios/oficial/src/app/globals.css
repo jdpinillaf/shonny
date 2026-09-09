@@ -131,6 +131,7 @@
      no es un marco. El degradado de la máscara es más generoso abajo, donde la
      imagen tiene que fundirse con la luz de la página. */
   .retrato {
+    margin: 0;
     position: relative; aspect-ratio: 4/5; overflow: hidden;
     -webkit-mask-image: radial-gradient(78% 74% at 52% 42%, #000 52%, transparent 100%);
             mask-image: radial-gradient(78% 74% at 52% 42%, #000 52%, transparent 100%);
@@ -148,6 +149,34 @@
   .retrato img:nth-child(3) { animation-delay: 16s, 16s; }
   @keyframes cruzar { 0%, 27% { opacity: 1; } 36%, 94% { opacity: 0; } 100% { opacity: 1; } }
   @keyframes derivar { 0% { transform: scale(1.04) translate3d(0,0,0); } 33% { transform: scale(1.1) translate3d(-2%, 1.5%, 0); } 100% { transform: scale(1.04); } }
+
+  /* ── En móvil, primero la cara y nada más ─────────────────────────────────
+     Como abre el sitio de Elena Rose: al entrar desde el link de Instagram, lo
+     primero y lo único que se ve es ella. El texto empieza después, al
+     scrollear.
+
+     La foto ocupa la pantalla menos la cabecera y sangra hasta los dos bordes,
+     así que se pierden la máscara suave y la proporción 4/5 —las dos existen
+     para que la foto conviva con el texto al lado, y acá no hay texto al lado.
+
+     `100svh` y no `100vh`: en un teléfono, `vh` cuenta la barra del navegador
+     como si no existiera y la foto queda cortada por abajo. */
+  @media (max-width: 939px) {
+    .portada { min-height: 0; padding-top: 0; gap: clamp(2rem, 7vw, 3rem); }
+    .portada > div { order: 2; }
+
+    .retrato {
+      order: 1;
+      aspect-ratio: auto;
+      height: calc(100svh - 4.6rem);
+      margin-inline: calc(var(--margen) * -1);
+      -webkit-mask-image: none;
+              mask-image: none;
+    }
+    /* El encuadre baja a la cara: en vertical, `cover` centrado deja la cabeza
+       fuera y el hombro adentro. */
+    .retrato img { object-position: 50% 22%; }
+  }
 
   /* El aviso del lanzamiento. Una línea, no un cartel: la jerarquía la marca la
      tipografía, no una caja de color. */

@@ -57,7 +57,10 @@ export function Portada({
         </div>
       </div>
 
-      <figure className="retrato entra" style={{ ["--retardo" as string]: ".2s", margin: 0 }}>
+      {/* El `margin: 0` va en la hoja de estilos y no acá: un estilo en línea le
+          gana a cualquier regla, y en móvil este figure necesita margen
+          negativo para sangrar hasta los bordes. */}
+      <figure className="retrato entra" style={{ ["--retardo" as string]: ".2s" }}>
         {artista.retratos.map((src, i) => (
           // Sin `next/image`: son tres capas superpuestas que animan opacidad y
           // transform, y acá el control del posicionamiento pesa más que la

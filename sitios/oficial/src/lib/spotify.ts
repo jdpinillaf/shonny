@@ -65,13 +65,30 @@ export async function discografia(): Promise<Cancion[] | null> {
   const bearer = await token();
   if (!bearer) return null;
 
-  const r = await fetch(
-    `https://api.spotify.com/v1/artists/${ARTISTA}/albums?include_groups=album,single&market=CO&limit=50`,
-    { headers: { authorization: `Bearer ${bearer}` }, next: { revalidate: REVALIDAR } },
-  );
-  if (!r.ok) return null;
-
-  const { items } = (await r.json()) as { items: Album[] };
+  /**
+   * Se pide de a 10 y no de a 50.
+   *
+   * La documentación dice que el límite de este endpoint es 50, y no es cierto
+   * para esta app: con `limit=12` en adelante devuelve `400 Invalid limit`, y con
+   * 10 contesta bien. Verificado a mano subiendo de a poco. Como ella tiene 22
+   * lanzamientos, hay que paginar sí o sí.
+   *
+   * Las páginas van en serie y no en paralelo a propósito: son tres llamadas,
+   * el ahorro sería de milisegundos, y disparar todo junto contra un endpoint
+   * que ya demostró ser quisquilloso con los parámetros invita a que nos limite.
+   */
+  const items: Album[] = [];
+  for (let desde = 0; desde < 60; desde += 10) {
+    const r = await fetch(
+      `https://api.spotify.com/v1/artists/${ARTISTA}/albums?include_groups=album,single&limit=10&offset=${desde}`,
+      { headers: { authorization: `Bearer ${bearer}` }, next: { revalidate: REVALIDAR } },
+    );
+    if (!r.ok) break;
+    const pagina = (await r.json()) as { items: Album[]; total: number };
+    items.push(...pagina.items);
+    if (items.length >= pagina.total) break;
+  }
+  if (!items.length) return null;
 
   /**
    * Spotify publica el mismo título varias veces —el single suelto, el que va
