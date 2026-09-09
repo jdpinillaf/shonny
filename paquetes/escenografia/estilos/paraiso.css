@@ -63,11 +63,20 @@
      del rol y no de la fuente a propósito: cambiar de tipografía no puede
      obligar a tocar cada archivo que la usa.
 
-     Para el sitio de la artista, las familias salen de shonny.co: **Work Sans
-     ExtraLight** manda (66 usos en su HTML) y **Futura LT Light** es el acento
-     (7). No hay ninguna serif en su sitio. Futura es de pago y Wix la licencia;
-     el equivalente libre es Jost, que se dibujó justamente como sustituta de
-     Futura. */
+     Para el sitio de la artista quedaron **Fraunces Light** en el titular y
+     **Jost** en todo lo demás, elegidas comparando seis combinaciones con el
+     mismo contenido en `maquetas/tipografias/`.
+
+     El punto de partida fue lo que ya usa: shonny.co (Wix) va con Work Sans
+     ExtraLight —66 usos en su HTML— y Futura LT Light, y el deck de shows 2026
+     va con Antonio Bold y Raleway. Fraunces entra porque es la única de las
+     candidatas que se parece al universo sensorial del ADN —fruta recién
+     cortada, seda, atardecer— en vez de solo verse cara. Jost se queda cubriendo
+     el papel de Futura, que es de pago y Wix licencia: Jost se dibujó
+     justamente como su sustituta libre.
+
+     Antonio no se descarta: sigue siendo la letra de los afiches y del en vivo,
+     donde gritar está bien. */
   --font-display: var(--font-titular), ui-sans-serif, system-ui, sans-serif;
   --font-texto: var(--font-cuerpo), ui-sans-serif, system-ui, sans-serif;
   --font-rotulo: var(--font-geometrica), ui-sans-serif, system-ui, sans-serif;
