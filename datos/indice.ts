@@ -1,13 +1,12 @@
 /**
  * El contenido del sitio, escrito a mano y versionado.
  *
- * Es la fuente de última instancia. En producción el anuncio, las fechas y los
- * textos salen del CMS de Wix, y la discografía sale de Spotify; esto es lo que
- * se sirve cuando esas dos no contestan —o antes de que existan las
- * credenciales, que es donde estamos hoy.
+ * Es la fuente de última instancia. En producción el anuncio y las fechas salen
+ * de Notion, y la discografía de Spotify; esto es lo que se sirve cuando esas
+ * dos no contestan.
  *
  * **Por eso importa que esté al día aunque parezca redundante:** el día que se
- * caiga Wix, esto es lo que va a ver la gente.
+ * caiga Notion, esto es lo que va a ver la gente.
  */
 
 import type { Contenido } from "./tipos";
@@ -52,9 +51,9 @@ export const contenido: Contenido = {
   ],
 
   /**
-   * Copia de la tienda de Wix. Se queda escrita acá para que el sitio no dependa
-   * de la API para pintar una vitrina, pero **el precio que manda es el de Wix**:
-   * si no coinciden, el que está mal es este.
+   * Copia de la tienda de Wix, escrita a mano. La tienda sigue viviendo en Wix
+   * —ahí está el stock y el cobro— y esto es solo la vitrina. **El precio que
+   * manda es el de Wix**: si no coinciden, el que está mal es este.
    */
   tienda: [
     {
@@ -80,8 +79,32 @@ export const contenido: Contenido = {
     },
   ],
 
-  /** Vacío a propósito: hoy no hay fechas y el sitio lo dice sin disfrazarlo. */
-  eventos: [],
+  /**
+   * El respaldo de las fechas. La lista viva sale de la base `Shows` de Notion;
+   * esto es lo que se sirve si Notion no contesta.
+   *
+   * Conviene mantenerlo al día con lo que esté confirmado y cerca: un show que
+   * está en Notion y no acá desaparece del sitio el día que se caiga la API, y
+   * ese es justo el día en que más gente lo busca.
+   */
+  eventos: [
+    {
+      slug: "living-room-sessions-w-bogota",
+      titulo: "Living Room Sessions — W Bogotá",
+      // Sin hora: todavía no está confirmada, y una hora inventada en un sitio
+      // público es peor que ninguna.
+      inicio: "2026-09-10",
+      lugar: "W Bogotá",
+      ciudad: "Bogotá",
+    },
+    {
+      slug: "caribe-funk-tarima-de-lucho",
+      titulo: "Concierto de Caribe Funk",
+      inicio: "2026-11-06T20:00:00-05:00",
+      lugar: "La Tarima de Lucho",
+      ciudad: "Barranquilla",
+    },
+  ],
 
   paraiso: {
     titulo: "Quiero que estemos más cerca.",

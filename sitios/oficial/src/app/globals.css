@@ -342,6 +342,33 @@
   }
   .vivo h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: 0; flex: 1 1 14ch; }
   .vivo .boton { margin: 0; }
+
+  /* ── La lista de fechas ────────────────────────────────────────────────────
+     Nunca se había usado: el componente la renderiza desde el primer día, pero
+     hasta hoy no hubo ni una fecha que mostrar, así que no tenía estilos. La
+     primera vez que hubo un show, habría salido como una lista pelada sobre la
+     foto del mar.
+
+     `flex-basis: 100%` para que rompa la fila de la franja: el vacío es una
+     línea horizontal, la lista es un bloque. */
+  .fechas { flex: 1 1 100%; list-style: none; margin: .4rem 0 0; padding: 0; }
+  .fechas li {
+    display: grid; gap: .2rem 1.4rem; align-items: baseline;
+    padding: 1rem 0;
+    border-top: 1px solid color-mix(in oklab, var(--color-bruma) 28%, transparent);
+  }
+  .fechas li:last-child { border-bottom: 1px solid color-mix(in oklab, var(--color-bruma) 28%, transparent); }
+  @media (min-width: 700px) {
+    /* `max-content` y no un ancho fijo: "10 de septiembre · 8:00 p. m." mide el
+       doble que "6 de nov", y con 9rem fijos la fecha se partía en dos líneas. */
+    .fechas li { grid-template-columns: max-content 1fr auto; }
+  }
+  .fechas .cuando {
+    font-family: var(--font-display); font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+    white-space: nowrap;
+  }
+  .fechas .donde { font-size: .9rem; color: color-mix(in oklab, var(--color-bruma) 82%, transparent); }
+  .fechas .boton { justify-self: start; }
   /* En una pantalla angosta las tres piezas no caben en una línea y el titular
      se le montaba encima al rótulo. Apiladas y alineadas a la izquierda. */
   @media (max-width: 700px) {

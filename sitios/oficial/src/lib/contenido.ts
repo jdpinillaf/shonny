@@ -2,12 +2,12 @@ import "server-only";
 import { contenido as versionado } from "@shonny/datos";
 import type { Contenido } from "@shonny/datos/tipos";
 import { discografia } from "./spotify";
-import { anuncio as anuncioWix, eventos as eventosWix } from "./wix";
+import { anuncio as anuncioNotion, eventos as eventosNotion } from "./notion";
 
 /**
  * De dónde sale cada cosa.
  *
- * Esta es la única función del sitio que sabe que existen Wix y Spotify. Todo lo
+ * Esta es la única función del sitio que sabe que existen Notion y Spotify. Todo lo
  * demás recibe un `Contenido` y no puede notar de dónde vino, que es lo que
  * permite construir y desplegar hoy sin credenciales y encender las fuentes
  * después sin tocar un componente.
@@ -27,8 +27,8 @@ import { anuncio as anuncioWix, eventos as eventosWix } from "./wix";
 export async function leerContenido(): Promise<Contenido> {
   const [canciones, anuncio, eventos] = await Promise.all([
     discografia(),
-    anuncioWix(),
-    eventosWix(),
+    anuncioNotion(),
+    eventosNotion(),
   ]);
 
   return {
@@ -47,7 +47,7 @@ export async function leerContenido(): Promise<Contenido> {
 export function fuentes() {
   return {
     spotify: Boolean(process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET),
-    wix: Boolean(process.env.WIX_API_KEY && process.env.WIX_SITE_ID),
+    notion: Boolean(process.env.NOTION_TOKEN && process.env.NOTION_DB_SHOWS),
   };
 }
 

@@ -11,12 +11,33 @@ import type { Evento } from "@shonny/datos/tipos";
  * cambiar de forma.
  */
 export function EnVivo({ eventos, paraiso }: { eventos: Evento[]; paraiso: string }) {
-  const fmt = (iso: string) =>
-    new Date(iso).toLocaleDateString("es-CO", {
+  /**
+   * La hora se muestra solo si el dato la trae. Un ISO sin `T` es una fecha
+   * suelta: significa que el show está confirmado pero la hora no, y escribir
+   * una hora que nadie confirmó es peor que no poner ninguna.
+   */
+  const fmt = (iso: string) => {
+    const d = new Date(iso);
+    /**
+     * Una fecha suelta se formatea en UTC, no en Bogotá.
+     *
+     * `new Date("2026-09-10")` es medianoche UTC, y al pintarla en
+     * America/Bogotá (UTC−5) retrocede cinco horas: el show del 10 salía
+     * anunciado el 9. Con hora explícita no pasa, porque el ISO trae su offset.
+     */
+    const dia = d.toLocaleDateString("es-CO", {
       day: "numeric",
       month: "long",
+      timeZone: iso.includes("T") ? "America/Bogota" : "UTC",
+    });
+    if (!iso.includes("T")) return dia;
+    const hora = d.toLocaleTimeString("es-CO", {
+      hour: "numeric",
+      minute: "2-digit",
       timeZone: "America/Bogota",
     });
+    return `${dia} · ${hora}`;
+  };
 
   return (
     <section id="vivo" className="vivo">
