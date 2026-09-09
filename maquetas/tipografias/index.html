@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipografías — Shonny</title>
+
+<!--
+  Muestrario para elegir tipografía.
+
+  Hoy conviven tres sistemas distintos en los materiales de Shonny, y ninguno
+  sabe de los otros:
+
+  - shonny.co (Wix): Work Sans ExtraLight (66 usos en su HTML) + Futura LT Light.
+  - Deck de ADN de marca: una condensada pesada para títulos y una serif para el
+    cuerpo.
+  - Deck de shows 2026 (Canva): Antonio Bold para los titulares gigantes en
+    mayúsculas y Raleway para el texto.
+
+  Cada opción de abajo muestra EL MISMO contenido —su nombre, un rótulo, un
+  titular de sección, una fila de la lista de canciones y un párrafo— para que la
+  comparación sea de tipografía y no de contenido. Todas las familias están en
+  Google Fonts: gratis, y se cargan sin licencia que gestionar.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Italiana&family=Jost:wght@300;400&family=Raleway:ital,wght@0,300;0,400;0,600;1,300&family=Work+Sans:ital,wght@0,200;0,300;1,200&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../estilos.css">
+
+<style>
+  :root { --font-titular: "Jost"; --font-cuerpo: "Jost"; --font-geometrica: "Jost"; }
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--color-rosa); color: var(--color-tinta);
+    font-family: "Jost", sans-serif; font-weight: 300; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.4rem, 5vw, 4rem) 6rem;
+  }
+  a { color: inherit; }
+
+  .rotulo { font-size: .64rem; letter-spacing: .3em; text-transform: uppercase; color: var(--color-tinta-suave); }
+  .intro { max-width: 64ch; margin: 1.6rem 0 0; }
+  h1 { font-family: "Bodoni Moda", serif; font-weight: 400; font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1; margin: .6rem 0 0; }
+
+  /* ── Una muestra ───────────────────────────────────────────────────────────
+     Cada bloque fija sus dos familias en variables propias y todo lo de adentro
+     las hereda. Así la comparación es limpia: cambia la tipografía y nada más. */
+  .muestra {
+    --display: "Jost"; --texto: "Jost"; --peso: 400; --tracking: 0em;
+    margin-top: clamp(3rem, 6vw, 4.5rem); padding-top: clamp(1.6rem, 3vw, 2.4rem);
+    border-top: 1px solid color-mix(in oklab, var(--color-tinta) 16%, transparent);
+  }
+  .ficha { display: flex; flex-wrap: wrap; align-items: baseline; gap: .6rem 1.4rem; }
+  .ficha .n { font-family: "Bodoni Moda", serif; font-size: 1.4rem; }
+  .ficha .par { font-size: .82rem; color: var(--color-tinta-suave); }
+  .veredicto { max-width: 62ch; margin: .5rem 0 0; font-size: .88rem; }
+  .veredicto b { font-weight: 400; color: var(--color-tierra); }
+
+  .lienzo { margin-top: 1.8rem; }
+  .nombre {
+    font-family: var(--display); font-weight: var(--peso); letter-spacing: var(--tracking);
+    font-size: clamp(3.4rem, 11vw, 8rem); line-height: .9; margin: 0;
+  }
+  .seccion {
+    font-family: var(--display); font-weight: var(--peso); letter-spacing: var(--tracking);
+    font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1; margin: 1.4rem 0 0;
+  }
+  .mini { font-family: var(--texto); font-size: .62rem; letter-spacing: .3em; text-transform: uppercase; color: var(--color-tinta-suave); margin: 1.6rem 0 0; }
+
+  .fila {
+    display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: baseline;
+    padding: .8rem 0; margin-top: .4rem;
+    border-block: 1px solid color-mix(in oklab, var(--color-tinta) 12%, transparent);
+  }
+  .fila .cancion { font-family: var(--display); font-weight: var(--peso); letter-spacing: var(--tracking); font-size: clamp(1.4rem, 2.6vw, 2rem); }
+  .fila .anio { font-family: var(--texto); font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; color: var(--color-tinta-suave); }
+  .parrafo { font-family: var(--texto); max-width: 48ch; margin: 1.1rem 0 0; }
+
+  /* ── Las cinco combinaciones ──────────────────────────────────────────────
+     El peso y el tracking cambian por familia a propósito: una ExtraLight
+     gigante necesita tracking negativo para volver a formar palabra, y una
+     condensada pesada necesita el contrario. Poner los mismos números para todas
+     sería comparar mal. */
+  .m-worksans  { --display: "Work Sans";        --texto: "Jost";    --peso: 200; --tracking: -.025em; }
+  .m-antonio   { --display: "Antonio";          --texto: "Raleway"; --peso: 700; --tracking: .005em; }
+  .m-fraunces  { --display: "Fraunces";         --texto: "Jost";    --peso: 300; --tracking: -.01em; }
+  .m-bodoni    { --display: "Bodoni Moda";      --texto: "Jost";    --peso: 400; --tracking: -.015em; }
+  .m-italiana  { --display: "Italiana";         --texto: "Jost";    --peso: 400; --tracking: .02em; }
+  .m-cormorant { --display: "Cormorant Garamond"; --texto: "Jost";  --peso: 300; --tracking: -.005em; }
+
+  .m-antonio .nombre, .m-antonio .seccion { text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<p class="rotulo">Shonny · 8 sep 2026</p>
+<h1>Qué letra<br>es la de ella</h1>
+
+<p class="intro">
+  Hoy conviven tres sistemas tipográficos y ninguno sabe de los otros: su sitio de
+  Wix usa <b>Work Sans ExtraLight</b> con <b>Futura LT Light</b>; el deck de ADN
+  usa una condensada pesada con una serif; y el deck de shows 2026 usa
+  <b>Antonio Bold</b> con <b>Raleway</b>. Abajo, el mismo contenido en seis
+  combinaciones. Todas están en Google Fonts.
+</p>
+
+<!-- ── 1 ─────────────────────────────────────────────────────────────────── -->
+<section class="muestra m-worksans">
+  <div class="ficha">
+    <span class="n">01</span>
+    <span class="par">Work Sans ExtraLight + Jost</span>
+    <span class="rotulo">La que ya usa su sitio</span>
+  </div>
+  <p class="veredicto">
+    Continuidad total: es la letra con la que su público ya la reconoce, y Jost
+    cubre el papel de Futura sin licencia que pagar. <b>El riesgo es que Work Sans
+    está en todos lados</b>, así que sostiene la marca pero no la distingue.
+  </p>
+  <div class="lienzo">
+    <p class="nombre">Shonny</p>
+    <p class="mini">Lo que suena</p>
+    <p class="seccion">La música</p>
+    <div class="fila"><span class="cancion">Colapsar</span><span class="anio">2026 · nuevo</span></div>
+    <p class="parrafo">Pop con consciencia desde el Caribe. Lo cotidiano también es sagrado.</p>
+  </div>
+</section>
+
+<!-- ── 2 ─────────────────────────────────────────────────────────────────── -->
+<section class="muestra m-antonio">
+  <div class="ficha">
+    <span class="n">02</span>
+    <span class="par">Antonio Bold + Raleway</span>
+    <span class="rotulo">La del deck de shows</span>
+  </div>
+  <p class="veredicto">
+    Es la que ya usa para vender shows y funciona ahí: gigante, en mayúsculas,
+    imposible de ignorar. <b>Pero grita, y el ADN pide sofisticación.</b> La
+    dejaría solo para la sección de en vivo y los afiches, no para el sitio
+    entero.
+  </p>
+  <div class="lienzo">
+    <p class="nombre">Shonny</p>
+    <p class="mini">Lo que suena</p>
+    <p class="seccion">La música</p>
+    <div class="fila"><span class="cancion">Colapsar</span><span class="anio">2026 · nuevo</span></div>
+    <p class="parrafo">Pop con consciencia desde el Caribe. Lo cotidiano también es sagrado.</p>
+  </div>
+</section>
+
+<!-- ── 3 ─────────────────────────────────────────────────────────────────── -->
+<section class="muestra m-fraunces">
+  <div class="ficha">
+    <span class="n">03</span>
+    <span class="par">Fraunces Light + Jost</span>
+    <span class="rotulo">Mi recomendación</span>
+  </div>
+  <p class="veredicto">
+    Una serif cálida, con curvas que no son perfectas a propósito. <b>Es la única
+    de la lista que se parece al universo sensorial del ADN</b> —fruta, seda,
+    atardecer— en vez de solo verse cara. Tiene personalidad sin gritar, y casi
+    nadie en el pop latino la está usando.
+  </p>
+  <div class="lienzo">
+    <p class="nombre">Shonny</p>
+    <p class="mini">Lo que suena</p>
+    <p class="seccion">La música</p>
+    <div class="fila"><span class="cancion">Colapsar</span><span class="anio">2026 · nuevo</span></div>
+    <p class="parrafo">Pop con consciencia desde el Caribe. Lo cotidiano también es sagrado.</p>
+  </div>
+</section>
+
+<!-- ── 4 ─────────────────────────────────────────────────────────────────── -->
+<section class="muestra m-bodoni">
+  <div class="ficha">
+    <span class="n">04</span>
+    <span class="par">Bodoni Moda + Jost</span>
+    <span class="rotulo">Editorial de moda</span>
+  </div>
+  <p class="veredicto">
+    Didone de portada de revista: contraste altísimo, remates finos como un hilo.
+    Es la que más sube el estatus de un vistazo. <b>Se lee peor a tamaño chico</b>
+    y pide fotos impecables al lado — con material flojo, delata.
+  </p>
+  <div class="lienzo">
+    <p class="nombre">Shonny</p>
+    <p class="mini">Lo que suena</p>
+    <p class="seccion">La música</p>
+    <div class="fila"><span class="cancion">Colapsar</span><span class="anio">2026 · nuevo</span></div>
+    <p class="parrafo">Pop con consciencia desde el Caribe. Lo cotidiano también es sagrado.</p>
+  </div>
+</section>
+
+<!-- ── 5 ─────────────────────────────────────────────────────────────────── -->
+<section class="muestra m-italiana">
+  <div class="ficha">
+    <span class="n">05</span>
+    <span class="par">Italiana + Jost</span>
+    <span class="rotulo">Alta costura</span>
+  </div>
+  <p class="veredicto">
+    La más fina y la más femenina de todas, casi art nouveau. Preciosa para el
+    nombre. <b>Tiene un solo peso y ninguna cursiva</b>, así que no puede cargar
+    un sitio sola: sirve como firma, no como sistema.
+  </p>
+  <div class="lienzo">
+    <p class="nombre">Shonny</p>
+    <p class="mini">Lo que suena</p>
+    <p class="seccion">La música</p>
+    <div class="fila"><span class="cancion">Colapsar</span><span class="anio">2026 · nuevo</span></div>
+    <p class="parrafo">Pop con consciencia desde el Caribe. Lo cotidiano también es sagrado.</p>
+  </div>
+</section>
+
+<!-- ── 6 ─────────────────────────────────────────────────────────────────── -->
+<section class="muestra m-cormorant">
+  <div class="ficha">
+    <span class="n">06</span>
+    <span class="par">Cormorant Garamond Light + Jost</span>
+    <span class="rotulo">Clásica y mística</span>
+  </div>
+  <p class="veredicto">
+    Garamond llevada al extremo fino. Suena a libro antiguo, a carta de tarot —el
+    primer territorio del ADN. <b>Es la más delicada y la que peor aguanta el
+    móvil</b>: a 16px pierde cuerpo y se vuelve gris.
+  </p>
+  <div class="lienzo">
+    <p class="nombre">Shonny</p>
+    <p class="mini">Lo que suena</p>
+    <p class="seccion">La música</p>
+    <div class="fila"><span class="cancion">Colapsar</span><span class="anio">2026 · nuevo</span></div>
+    <p class="parrafo">Pop con consciencia desde el Caribe. Lo cotidiano también es sagrado.</p>
+  </div>
+</section>
+
+</body>
+</html>
