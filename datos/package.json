@@ -1,0 +1,10 @@
+{
+  "name": "@shonny/datos",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./indice.ts",
+    "./tipos": "./tipos.ts"
+  }
+}

@@ -1,0 +1,438 @@
+@import "tailwindcss";
+@import "@shonny/escenografia/estilos/paraiso.css";
+
+/* Tailwind v4 no escanea `node_modules`: sin esto, cualquier clase que solo se
+   use dentro del paquete desaparece del CSS de producción y sigue funcionando en
+   dev, que es lo que lo hace difícil de atribuir. */
+@source "../../../../node_modules/@shonny/escenografia";
+
+:root {
+  /* `next/font` inyecta `--font-titular` (Fraunces) y `--font-cuerpo` (Jost).
+     El tercer rol lo cubre la misma Jost: los rótulos en versalitas son la voz
+     geométrica, y cargar una cuarta familia por eso sería peso regalado. */
+  --font-geometrica: var(--font-cuerpo);
+
+  --aire: clamp(2.6rem, 5.5vw, 5rem);
+  --margen: clamp(1.4rem, 5vw, 5rem);
+}
+
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--color-rosa);
+    color: var(--color-tinta);
+    font-family: var(--font-texto);
+    font-weight: 300;
+    font-size: clamp(.95rem, 1.05vw, 1.05rem);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── La luz ────────────────────────────────────────────────────────────────
+     No es un degradado decorativo: es la hora del día. Arriba entra la bruma de
+     la mañana y abajo cae el atardecer, que son literalmente los dos primeros
+     renglones del universo sensorial del ADN. Va fixed para que la página
+     parezca estar dentro de una luz y no encima de una imagen. */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(90% 60% at 78% -8%, var(--color-bruma), transparent 62%),
+      radial-gradient(80% 55% at 8% 104%, color-mix(in oklab, var(--color-arcilla) 42%, var(--color-rosa)), transparent 68%),
+      var(--color-rosa);
+  }
+
+  /* Grano cálido y casi invisible. El del museo era ruido de televisor; este es
+     el grano de una película en color, que es otra cosa: no ensucia, calienta. */
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: 70; pointer-events: none;
+    opacity: .35; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='.14'/%3E%3C/svg%3E");
+  }
+
+  /* ── Rótulos ───────────────────────────────────────────────────────────────
+     Versalitas anchas, pero en la sans y en tinta suave: informan sin fingir que
+     son una placa de museo. */
+  .rotulo {
+    font-family: var(--font-rotulo);
+    font-size: .68rem; font-weight: 400;
+    letter-spacing: .3em; text-transform: uppercase;
+    color: var(--color-tinta-suave);
+  }
+
+  /* Light (300) y tracking apenas negativo. Fraunces tiene eje de tamaño óptico
+     (9..144): `font-optical-sizing: auto` hace que el navegador afine los
+     remates a medida que crece el titular, que es justo lo que una serif
+     necesita para no verse tosca a 11rem ni endeble a 1rem. */
+  h1, h2, h3 {
+    font-family: var(--font-display); font-weight: 300;
+    letter-spacing: -.01em; font-optical-sizing: auto; margin: 0;
+  }
+  h1 { font-size: clamp(3.6rem, 13vw, 11rem); line-height: .86; letter-spacing: -.015em; }
+  h2 { font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: .96; }
+  h3 { font-size: clamp(1.5rem, 2.4vw, 2rem); line-height: 1.1; }
+  em { font-style: italic; }
+
+  a { color: inherit; }
+
+  /* ── Cabecera ──────────────────────────────────────────────────────────────
+     Discreta, sin fondo ni sombra. En un sitio con esta luz, una barra opaca
+     arriba se ve como una pieza de otro sitio pegada encima. */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+    padding: 1.4rem var(--margen);
+    /* El menú se va al bajar y vuelve al subir. Antes era translúcido y el
+       título de la sección se leía por debajo, hecho papilla; ponerle una barra
+       opaca lo arreglaba pero le clavaba a la página una franja que no pega con
+       nada. Esconderlo resuelve las dos cosas y de paso es movimiento: la página
+       responde a lo que hacés con el dedo. */
+    background: color-mix(in oklab, var(--color-rosa) 92%, transparent);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    transition: transform .55s cubic-bezier(.16,1,.3,1);
+  }
+  header.oculta { transform: translateY(-105%); }
+  /* Arriba del todo no hace falta fondo: la portada ya es clara. */
+  header.arriba { background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  }
+  .marca { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: .04em; text-decoration: none; }
+  header nav { display: flex; align-items: baseline; gap: clamp(1rem, 2.4vw, 2.4rem); }
+  /* Los sociales viven arriba a la derecha, después del menú, más chicos y más
+     claros: están para quien los busca, no para competir con los destinos del
+     sitio. Es lo que hace el sitio de Elena Rose, y funciona. */
+  header .redes { display: flex; gap: 1rem; margin-left: clamp(1rem, 2.4vw, 2.4rem); padding-left: clamp(1rem, 2.4vw, 2.4rem); border-left: 1px solid color-mix(in oklab, var(--color-tinta) 20%, transparent); }
+  header .redes a { font-size: .68rem; letter-spacing: .12em; color: color-mix(in oklab, var(--color-tinta-suave) 78%, transparent); }
+  @media (max-width: 900px) { header .redes { display: none; } }
+  header nav a { text-decoration: none; font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--color-tinta-suave); transition: color .4s cubic-bezier(.16,1,.3,1); }
+  header nav a:hover { color: var(--color-tierra); }
+  @media (max-width: 700px) { header nav { display: none; } }
+
+  section { padding: var(--aire) var(--margen); position: relative; overflow-x: clip; }
+
+  /* ── Portada ───────────────────────────────────────────────────────────────
+     La artista primero y el single después. Las otras maquetas abrían con
+     "COLAPSAR" enorme; eso convierte el sitio en la landing de una canción, y en
+     seis meses hay que rehacerlo. Acá el nombre grande es el de ella y el
+     lanzamiento entra como una franja que se cambia sin tocar el diseño. */
+  .portada {
+    min-height: min(86svh, 740px); display: grid; align-content: center;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-top: clamp(2rem, 6vh, 5rem);
+  }
+  @media (min-width: 940px) { .portada { grid-template-columns: 1.1fr .9fr; align-items: center; } }
+
+  .lema { max-width: 30ch; margin: 1.8rem 0 0; font-size: clamp(1.05rem, 1.5vw, 1.25rem); }
+  .lema em { color: var(--color-tierra); }
+
+  /* La flor se recorta con una máscara suave en vez de un rectángulo: es gasa,
+     no es un marco. El degradado de la máscara es más generoso abajo, donde la
+     imagen tiene que fundirse con la luz de la página. */
+  .retrato {
+    position: relative; aspect-ratio: 4/5; overflow: hidden;
+    -webkit-mask-image: radial-gradient(78% 74% at 52% 42%, #000 52%, transparent 100%);
+            mask-image: radial-gradient(78% 74% at 52% 42%, #000 52%, transparent 100%);
+  }
+  /* Tres retratos que se cruzan cada 24 segundos. No es un carrusel —no hay
+     flechas ni puntos que apretar— es la luz de la página cambiando sola. Cada
+     foto además deriva un 6% mientras está en pantalla, así que ni siquiera
+     mientras se ve está quieta. */
+  .retrato img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+    opacity: 0; animation: cruzar 24s ease-in-out infinite, derivar 24s ease-in-out infinite;
+  }
+  .retrato img:nth-child(1) { animation-delay: 0s, 0s; }
+  .retrato img:nth-child(2) { animation-delay: 8s, 8s; }
+  .retrato img:nth-child(3) { animation-delay: 16s, 16s; }
+  @keyframes cruzar { 0%, 27% { opacity: 1; } 36%, 94% { opacity: 0; } 100% { opacity: 1; } }
+  @keyframes derivar { 0% { transform: scale(1.04) translate3d(0,0,0); } 33% { transform: scale(1.1) translate3d(-2%, 1.5%, 0); } 100% { transform: scale(1.04); } }
+
+  /* El aviso del lanzamiento. Una línea, no un cartel: la jerarquía la marca la
+     tipografía, no una caja de color. */
+  .aviso {
+    display: inline-flex; align-items: baseline; gap: .9rem; flex-wrap: wrap;
+    margin-top: 2.4rem; padding-top: 1.1rem;
+    border-top: 1px solid color-mix(in oklab, var(--color-tinta) 18%, transparent);
+    text-decoration: none;
+  }
+  .aviso .que { font-family: var(--font-display); font-size: 1.5rem; }
+  .aviso .flecha { transition: transform .5s cubic-bezier(.16,1,.3,1); display: inline-block; }
+  .aviso:hover .flecha { transform: translateX(.4rem); }
+
+  .acciones { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2.2rem; }
+  .boton {
+    display: inline-flex; align-items: center; gap: .6rem;
+    padding: .85rem 1.7rem; border-radius: 999px; text-decoration: none;
+    font-size: .74rem; letter-spacing: .18em; text-transform: uppercase;
+    background: var(--color-tierra); color: var(--color-bruma);
+    transition: background-color .45s cubic-bezier(.16,1,.3,1), transform .45s cubic-bezier(.16,1,.3,1);
+  }
+  .boton:hover { background: var(--color-naranja); transform: translateY(-2px); }
+  .boton--linea {
+    background: none; color: var(--color-tinta);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-tinta) 26%, transparent);
+  }
+  .boton--linea:hover { background: color-mix(in oklab, var(--color-arcilla) 22%, transparent); }
+
+  /* ── Lo nuevo ──────────────────────────────────────────────────────────────
+     La sección que hay que poder cambiar en cinco minutos cada vez que sale una
+     canción, y la única del sitio donde se puede escuchar sin irse. El reproductor
+     es el embed de Spotify con `theme=0`: sin ese parámetro, Spotify tiñe la caja
+     con el color dominante de la portada y la franja deja de pertenecer a la
+     página.
+
+     Va sobre el rosa hondo para que se despegue del resto sin pedir un color
+     nuevo, y arriba de todo lo demás porque es lo que se vino a ver. */
+  .destacado {
+    /* El rosa hondo solo no alcanzaba para despegarla: la luz de la página ya es
+       rosada y la franja se perdía. Con las dos líneas se lee como una pieza
+       aparte sin meter un color que no existe en la paleta. */
+    background: var(--color-rosa-hondo);
+    border-block: 1px solid color-mix(in oklab, var(--color-tierra) 22%, transparent);
+    padding-block: clamp(2.2rem, 4.5vw, 3.4rem);
+    display: grid; gap: clamp(1.6rem, 4vw, 3rem); align-items: center;
+  }
+  @media (min-width: 860px) { .destacado { grid-template-columns: 18rem 1fr; } }
+  .destacado .tapa { position: relative; width: 100%; max-width: 18rem; aspect-ratio: 1; }
+  .destacado .tapa img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; }
+  /* El halo: copia desenfocada y saturada de la portada. Sin la máscara radial se
+     lee como un panel gris detrás del cuadrado en vez de como luz. */
+  .destacado .tapa::before {
+    content: ""; position: absolute; inset: -14%;
+    background: url("https://colapsar.shonny.co/portada.jpg") center/cover;
+    filter: blur(48px) saturate(2.2) brightness(1.15);
+    -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+  }
+  .destacado h2 { font-size: clamp(2.6rem, 6.5vw, 4.6rem); line-height: .95; margin: .4rem 0 0; }
+  .destacado .frase { margin: .8rem 0 0; max-width: 34ch; }
+  .destacado iframe { border: 0; border-radius: 10px; width: min(100%, 34rem); margin-top: 1.3rem; display: block; }
+  .destacado .secundario { display: inline-flex; gap: .5rem; margin-top: 1rem; font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--color-tinta-suave); text-decoration: none; }
+  .destacado .secundario:hover { color: var(--color-tierra); }
+
+  /* ── Lo que suena ──────────────────────────────────────────────────────────
+     La portada del disco es la única imagen cuadrada y con borde duro de todo el
+     sitio: un disco es un objeto, no es atmósfera. */
+  .suena { display: grid; gap: clamp(2rem, 5vw, 4rem); }
+  /* La carátula se fue a la franja de arriba, así que la lista ocupa el ancho
+     entero. La figura sigue en el HTML con `hidden` a propósito: es el bloque
+     que hay que devolver acá el día que la franja destaque un álbum y no una
+     canción suelta. */
+  @media (min-width: 880px) { .suena { grid-template-columns: 1fr; } }
+  .disco img { width: 100%; display: block; box-shadow: 0 24px 60px -20px color-mix(in oklab, var(--color-tierra) 55%, transparent); }
+  .disco figcaption { margin-top: 1rem; }
+
+  .canciones { list-style: none; margin: 0; padding: 0; }
+  /* El grid vive en el <a> y no en el <li>: el enlace envuelve el título y el
+     destino, así que si la fila fuera el grid, su único hijo sería el enlace y
+     "Spotify" terminaba pegado al año en vez de irse al margen derecho. */
+  .canciones li { border-bottom: 1px solid color-mix(in oklab, var(--color-tinta) 12%, transparent); }
+  .canciones a {
+    display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: baseline;
+    padding: .85rem 0; color: inherit;
+    transition: padding-left .55s cubic-bezier(.16,1,.3,1);
+  }
+  .canciones li:hover a { padding-left: .7rem; }
+  .canciones li:first-child { border-top: 1px solid color-mix(in oklab, var(--color-tinta) 12%, transparent); }
+  .canciones .titulo { font-family: var(--font-display); font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+  .canciones .titulo small { font-family: var(--font-texto); font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--color-tinta-suave); margin-left: .9rem; }
+  .canciones .ir { text-decoration: none; font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--color-tinta-suave); white-space: nowrap; }
+  .canciones li:hover .ir { color: var(--color-naranja); }
+
+  /* ── El universo ───────────────────────────────────────────────────────────
+     El primer objetivo del ADN es mostrarla como artista que va más allá de la
+     música: danza y audiovisual. Ninguna de las tres maquetas anteriores tenía
+     dónde poner eso. Acá es una sala entera, y son las fotos las que hablan.
+
+     La rejilla es deliberadamente desigual —una imagen manda y las otras dos la
+     acompañan— porque tres imágenes del mismo tamaño se leen como un catálogo. */
+  /* Era una rejilla de dos filas con una imagen grande y dos chicas, y medía
+     1.671px: la sección más alta del sitio para decir lo que dicen tres fotos en
+     una fila. Ahora es una fila y la sección entera cabe en media pantalla. */
+  .universo { display: grid; gap: clamp(.8rem, 1.6vw, 1.2rem); }
+  @media (min-width: 820px) { .universo { grid-template-columns: repeat(3, 1fr); } }
+  .universo figure { margin: 0; position: relative; overflow: hidden; aspect-ratio: 1; }
+  .universo img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.12); transition: filter .8s cubic-bezier(.16,1,.3,1); will-change: transform; }
+  /* El hover ya no toca `transform`: lo maneja el parallax. Se usa el brillo,
+     que además es más suave. */
+  .universo figure:hover img { filter: brightness(1.06); }
+  .universo figcaption {
+    position: absolute; inset: auto 0 0 0; padding: 1.2rem;
+    color: var(--color-bruma);
+    background: linear-gradient(to top, rgba(28,16,32,.75), transparent);
+    font-size: .7rem; letter-spacing: .22em; text-transform: uppercase;
+  }
+
+  /* ── La tienda ────────────────────────────────────────────────────────────
+     Un preview que no deja ver el producto no es un preview: es un cartel. Estas
+     son las fotos reales de la tienda de Wix —bajadas de las mismas fichas de
+     producto— con su nombre y su precio, como en cualquier tienda que uno
+     entiende de un vistazo.
+
+     Lo que NO se hace acá es carrito. Cada tarjeta abre su ficha en Wix, que es
+     donde vive el catálogo completo, el stock y el cobro. Una sola fuente de
+     verdad: el día que cambie un precio, cambia en un solo lado. */
+  .vitrina { display: grid; gap: clamp(1.4rem, 3vw, 2.4rem); }
+  @media (min-width: 760px) { .vitrina { grid-template-columns: repeat(3, 1fr); } }
+
+  .prenda { display: grid; gap: .7rem; text-decoration: none; color: inherit; align-content: start; }
+  .prenda .foto {
+    aspect-ratio: 1; overflow: hidden;
+    background: color-mix(in oklab, var(--color-arcilla) 14%, var(--color-bruma));
+  }
+  .prenda img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
+  .prenda:hover img { transform: scale(1.04); }
+  .prenda h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; margin: .3rem 0 0; }
+  .prenda .precio { display: flex; gap: .6rem; align-items: baseline; margin: 0; font-size: .95rem; }
+  .prenda .precio s { color: var(--color-tinta-suave); font-size: .85rem; }
+  /* El botón es de línea y no sólido: son tres seguidos, y tres botones llenos
+     en fila compiten entre ellos y con el de El Paraíso, que es el que importa. */
+  .prenda .comprar {
+    justify-self: start; margin-top: .5rem; padding: .6rem 1.4rem; border-radius: 999px;
+    font-size: .64rem; letter-spacing: .2em; text-transform: uppercase;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-tinta) 24%, transparent);
+    transition: background-color .45s cubic-bezier(.16,1,.3,1), box-shadow .45s;
+  }
+  .prenda:hover .comprar { background: var(--color-tierra); color: var(--color-bruma); box-shadow: inset 0 0 0 1px var(--color-tierra); }
+
+  .tienda-pie { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .8rem; margin-top: clamp(1.4rem, 3vw, 2rem); }
+
+  /* ── En vivo ───────────────────────────────────────────────────────────────
+     Un vacío que enseña a dónde ir, no un vacío que informa que no hay nada.
+     Va sobre la foto del mar porque es el único frío de la paleta y acá cae
+     bien: es la sección que promete que algo va a pasar. */
+  /* Era una sección entera de 711px para decir que no hay fechas. Ahora es una
+     franja: el mismo mar de fondo, una línea, un botón. Cuando haya shows crece
+     sola con la lista adentro. */
+  .vivo {
+    position: relative; color: var(--color-bruma); overflow: hidden;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2.5rem;
+    padding-block: clamp(2rem, 4vw, 3rem);
+  }
+  .vivo h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: 0; flex: 1 1 14ch; }
+  .vivo .boton { margin: 0; }
+  /* En una pantalla angosta las tres piezas no caben en una línea y el titular
+     se le montaba encima al rótulo. Apiladas y alineadas a la izquierda. */
+  @media (max-width: 700px) {
+    /* La vitrina ya no es una fila flex sino una rejilla de productos, así que
+       acá solo queda la franja de en vivo. */
+    .vivo { flex-direction: column; align-items: flex-start; }
+  }
+  .vivo::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: url("/fotos/ola-gasa.jpg") center 30% / cover;
+  }
+  .vivo::after {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(105deg, color-mix(in oklab, var(--color-tierra) 78%, transparent), color-mix(in oklab, var(--color-mar) 42%, transparent));
+  }
+  .vivo .rotulo { color: color-mix(in oklab, var(--color-bruma) 82%, transparent); }
+  .vivo p { max-width: 42ch; }
+
+  /* ── El Paraíso ────────────────────────────────────────────────────────────
+     Cierra el sitio y no es un pie de página. El ADN pide construir una
+     comunidad que se nutra del universo del proyecto, y una comunidad no se
+     mete en el footer entre los links legales.
+
+     Es el registro nocturno: violeta con sangre. La única sección oscura del
+     sitio, y por eso funciona — si todo fuera oscuro, esto no diría nada. */
+  .paraiso { background: var(--color-noche-tibia); color: var(--color-bruma); }
+  .paraiso::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(70% 60% at 20% 15%, color-mix(in oklab, var(--color-vino) 60%, transparent), transparent 70%);
+  }
+  .paraiso > * { position: relative; }
+  .paraiso .rotulo { color: color-mix(in oklab, var(--color-bruma) 70%, transparent); }
+  .paraiso blockquote { margin: 1.6rem 0 0; max-width: 26ch; font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 3.2rem); line-height: 1.16; }
+  .paraiso .boton { background: var(--color-bruma); color: var(--color-noche-tibia); }
+  .paraiso .boton:hover { background: var(--color-naranja); color: var(--color-bruma); }
+
+  footer { padding: clamp(2rem, 4vw, 3rem) var(--margen) 2.5rem; display: grid; gap: 1.8rem; }
+  @media (min-width: 820px) { footer { grid-template-columns: repeat(3, 1fr); } }
+  footer ul { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .55rem; }
+  footer a { text-decoration: none; color: var(--color-tinta-suave); transition: color .35s; }
+  footer a:hover { color: var(--color-tierra); }
+
+  /* ── Entrada ───────────────────────────────────────────────────────────────
+     Sube y se asienta, como tela que cae. Nada de rebotes: la gasa no rebota. */
+  /* ── La cinta ──────────────────────────────────────────────────────────────
+     El universo sensorial del ADN pasando despacio. Es lo que le da pulso a la
+     página entre sección y sección: siempre hay algo moviéndose, aunque nadie
+     scrollee.
+
+     La lista va DOS veces en el HTML y la animación recorre exactamente el 50%:
+     así el bucle no salta. Con una sola copia quedaría un vacío en cada vuelta.
+     La segunda mitad va con `aria-hidden` para que un lector de pantalla no lea
+     todo dos veces. */
+  .cinta {
+    overflow: hidden; padding: clamp(2rem, 4vw, 3.5rem) 0;
+    border-block: 1px solid color-mix(in oklab, var(--color-tinta) 12%, transparent);
+  }
+  .cinta ul {
+    display: flex; align-items: center; gap: 3.5rem;
+    list-style: none; margin: 0; padding: 0; width: max-content;
+    animation: correr 46s linear infinite;
+  }
+  .cinta:hover ul { animation-play-state: paused; }
+  .cinta li {
+    font-family: var(--font-display); font-style: italic;
+    font-size: clamp(1.2rem, 2.6vw, 2rem); color: var(--color-tinta-suave);
+    display: flex; align-items: center; gap: 3.5rem; white-space: nowrap;
+  }
+  .cinta li::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--color-arcilla); flex: none; }
+  @keyframes correr { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+
+  /* ── Aparecer al scrollear ─────────────────────────────────────────────────
+     Cada sección levanta sus hijos en cascada. El retardo sale de `--i`, que lo
+     pone el JS por posición, así una sección de dos elementos no tarda lo mismo
+     que una de seis. */
+  .revela > * { opacity: 0; transform: translateY(26px); }
+  .revela.visto > * {
+    animation: subir 1s cubic-bezier(.16,1,.3,1) forwards;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+
+  /* ── En móvil las fotos se deslizan ───────────────────────────────────────
+     Apiladas a ancho completo, las tres del universo y las tres de la tienda
+     sumaban más de 2.000px de scroll para ver seis imágenes. Deslizándose, cada
+     sección ocupa una pantalla y se gana un gesto: en un teléfono arrastrar es
+     más barato que scrollear.
+
+     `scroll-snap` para que cada foto quede encuadrada sola, y el margen negativo
+     con su padding para que la primera arranque alineada al texto pero la tira
+     llegue al borde de la pantalla: cortarla en el margen se lee como un error. */
+  @media (max-width: 819px) {
+    .universo, .vitrina {
+      display: flex; gap: .8rem;
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      margin-inline: calc(var(--margen) * -1); padding-inline: var(--margen);
+      scrollbar-width: none;
+    }
+    .universo::-webkit-scrollbar, .vitrina::-webkit-scrollbar { display: none; }
+    .universo > *, .vitrina > * { flex: 0 0 72vw; scroll-snap-align: start; }
+  }
+
+  .entra { animation: subir 1.1s cubic-bezier(.16,1,.3,1) backwards; animation-delay: var(--retardo, 0s); }
+  @keyframes subir { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+  /* Al imprimir no corre ninguna animación, así que sin esto la página sale en
+     blanco: todo el contenido vive en `opacity: 0` esperando su turno. Importa
+     porque imprimir el sitio es exactamente lo que hace alguien de prensa. */
+  @media print {
+    .revela > * { opacity: 1 !important; transform: none !important; }
+    .cinta, header { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+    /* Sin animación, `.revela` dejaría todo invisible para siempre: hay que
+       devolverle el estado final a mano. Es el error clásico de las apariciones
+       al scrollear, y deja la página en blanco justo para quien pidió menos
+       movimiento. */
+    .revela > * { opacity: 1; transform: none; }
+    .retrato img { opacity: 0; }
+    .retrato img:first-child { opacity: 1; }
+    .cinta ul { animation: none; transform: none; }
+  }

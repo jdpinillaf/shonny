@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/indice.ts",
     "./fuentes": "./src/fuentes.ts",
-    "./estilos/*": "./estilos/*"
+    "./estilos/*": "./estilos/*",
+    "./fuentes-paraiso": "./src/fuentes-paraiso.ts"
   }
 }

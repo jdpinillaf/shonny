@@ -12,7 +12,8 @@
   "scripts": {
     "colapsar": "npm run dev -w colapsar",
     "maquetas": "npx @tailwindcss/cli -i maquetas/entrada.css -o maquetas/estilos.css --watch",
-    "ver-maquetas": "python3 -m http.server 8811 --directory maquetas"
+    "ver-maquetas": "python3 -m http.server 8811 --directory maquetas",
+    "oficial": "npm run dev -w oficial"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3"

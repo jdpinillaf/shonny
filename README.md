@@ -7,7 +7,7 @@ datos en la cabeza de quien los tuviera a mano.
 ```
 sitios/         lo desplegable
   colapsar/     landing del single "Colapsar" → colapsar.shonny.co
-  oficial/      el home, si algún día sale de Wix
+  oficial/      el sitio de la artista → shonny.co
 paquetes/
   escenografia/ el sistema visual: tokens, efectos, fuentes, piezas compartidas
   wix/          guiones contra las APIs de Wix (eventos, tienda, CMS)
@@ -21,6 +21,7 @@ docs/           specs, decisiones, y el reparto de qué manda el código y qué 
 ```bash
 npm install            # una sola vez, desde la raíz
 npm run colapsar       # el museo en http://localhost:3000
+npm run oficial        # el sitio de la artista en http://localhost:3000
 npm run ver-maquetas   # las maquetas del home en http://localhost:8811
 npm run maquetas       # recompila el CSS de las maquetas y se queda mirando
 ```
