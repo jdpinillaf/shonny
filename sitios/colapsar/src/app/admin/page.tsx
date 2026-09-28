@@ -7,6 +7,7 @@ import { haySesion, hayPuerta } from "@/lib/admin.server";
 import { leerPiezasSinCache } from "@/lib/piezas.server";
 import { cupo, hayInstagram, publicadas, type Publicada } from "@/lib/story/instagram.server";
 import { anadir, entrar, publicar, retirar, salir } from "./acciones";
+import { Descargar } from "./Descargar";
 
 export const metadata: Metadata = {
   title: "Panel — Colapsar",
@@ -29,9 +30,9 @@ const FECHA = new Intl.DateTimeFormat("es-CO", {
  * quitar algo de la pared era un `curl` con el token pegado a mano. Esto es lo
  * mismo, con el dedo, desde el móvil.
  *
- * Todo el trabajo pasa en el servidor: no hay ni un componente de cliente:
- * la lista se pinta con lo que hay en Redis y los tres botones son formularios.
- * Un panel que se ve tres veces al mes no necesita hidratarse.
+ * Todo el trabajo pasa en el servidor: la lista se pinta con lo que hay en
+ * Redis y los botones son formularios. La única excepción es `Descargar`, que
+ * necesita el navegador para enseñar que el PNG se está haciendo.
  */
 export default async function Panel({ searchParams }: PageProps<"/admin">) {
   // Sin `ADMIN_TOKEN` puesto, la ruta no existe. Es la misma respuesta que da la
@@ -190,17 +191,12 @@ function Miniatura({ id }: { id: string }) {
   );
 }
 
-/** Los tres enlaces de exportar. `download` + `?descargar` bajan el archivo con nombre. */
+/** Los tres enlaces de exportar. `?descargar` hace que la ruta mande el archivo con nombre. */
 function Exportar({ id }: { id: string }) {
-  const enlace = "text-humo underline underline-offset-4 hover:text-tiza";
   return (
     <>
-      <a href={`/api/story/${id}?formato=papel&descargar`} download className={enlace}>
-        PNG papel
-      </a>
-      <a href={`/api/story/${id}?formato=png&descargar`} download className={enlace}>
-        PNG story
-      </a>
+      <Descargar href={`/api/story/${id}?formato=papel&descargar`}>PNG papel</Descargar>
+      <Descargar href={`/api/story/${id}?formato=png&descargar`}>PNG story</Descargar>
       <a href={`/api/story/${id}`} target="_blank" rel="noreferrer" className="text-humo/70 underline underline-offset-4 hover:text-tiza">
         ver story
       </a>
