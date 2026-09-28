@@ -3,6 +3,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { del } from "@vercel/blob";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { esPieza, type Pieza } from "@/content/pieza";
+import { site } from "@/content/site";
 import { redis } from "@/lib/redis.server";
 
 const LISTA = "piezas";
@@ -122,6 +123,29 @@ export async function retirarPieza(id: string): Promise<Pieza | null> {
   // Acá sí se expira de golpe, al revés que al publicar: cuando estás quitando
   // algo de la pared no quieres que la siguiente visita todavía lo vea mientras
   // se refresca por detrás. Que la próxima pague la espera.
+  revalidateTag(TAG, { expire: 0 });
+  revalidatePath("/");
+
+  return pieza;
+}
+
+/**
+ * Colgar una pieza a mano, desde el panel.
+ *
+ * Se salta el filtro y el presupuesto a propósito: quien está acá tiene el
+ * token, y el filtro existe para lo que escribe gente que no lo tiene. El resto
+ * es lo mismo que deja la ruta pública —mismo tope de largo, misma lista—, así
+ * que en la pared no se distingue de lo que dejó alguien.
+ */
+export async function anadirPieza(texto: string): Promise<Pieza | null> {
+  const limpio = texto.trim().slice(0, site.maxRespuesta);
+  if (!limpio) return null;
+
+  const pieza: Pieza = { id: crypto.randomUUID(), texto: limpio, creado: Date.now() };
+  await guardarPieza(pieza);
+
+  // De golpe, como al retirar: quien la cuelga va a abrir la portada justo
+  // después para verla, y con `"max"` le tocaría la versión de antes.
   revalidateTag(TAG, { expire: 0 });
   revalidatePath("/");
 
