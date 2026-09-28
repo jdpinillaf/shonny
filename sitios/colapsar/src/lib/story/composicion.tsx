@@ -90,17 +90,37 @@ export function recortar(texto: string, tope: number) {
   return `${espacio > 0 ? corte.slice(0, espacio) : corte}…`;
 }
 
-export function Composicion({ pieza }: { pieza: Pieza }) {
+/**
+ * El lienzo del papel suelto: sobra por todos lados a propósito. Lo que no es
+ * papel es transparente y la ruta lo recorta con `sharp().trim()`, así que el
+ * alto real de la nota no hace falta saberlo acá.
+ */
+export const ANCHO_SOLO = 760;
+export const ALTO_SOLO = 1100;
+
+/**
+ * `lienzo="papel"` es la misma nota sin la story alrededor: ni negro ni placa,
+ * solo el papel con su chinche sobre transparente. Es la que se exporta desde
+ * el panel para usarla donde sea; el papel no se dibuja dos veces.
+ */
+export function Composicion({
+  pieza,
+  lienzo = "story",
+}: {
+  pieza: Pieza;
+  lienzo?: "story" | "papel";
+}) {
+  const story = lienzo === "story";
   return (
     <div
       style={{
-        width: ANCHO,
-        height: ALTO,
+        width: story ? ANCHO : ANCHO_SOLO,
+        height: story ? ALTO : ALTO_SOLO,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: NOCHE,
+        background: story ? NOCHE : "transparent",
         overflow: "hidden",
         fontFamily: "Courier Prime",
       }}
@@ -111,21 +131,23 @@ export function Composicion({ pieza }: { pieza: Pieza }) {
 
           El texto sale de `site.placa`, el mismo de la página. Escribirlo acá a
           mano era el cuarto sitio con la misma cadena copiada. */}
-      <div
-        style={{
-          position: "absolute",
-          top: ZONA_IG,
-          left: 0,
-          width: ANCHO,
-          display: "flex",
-          justifyContent: "center",
-          fontSize: 26,
-          letterSpacing: "0.34em",
-          color: HUMO,
-        }}
-      >
-        {site.placa.toUpperCase()}
-      </div>
+      {story && (
+        <div
+          style={{
+            position: "absolute",
+            top: ZONA_IG,
+            left: 0,
+            width: ANCHO,
+            display: "flex",
+            justifyContent: "center",
+            fontSize: 26,
+            letterSpacing: "0.34em",
+            color: HUMO,
+          }}
+        >
+          {site.placa.toUpperCase()}
+        </div>
+      )}
 
       <div
         style={{

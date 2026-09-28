@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { notas } from "@/content/notas";
+import { PIEZAS_TEXTO } from "@/content/coleccion";
 import type { Pieza } from "@/content/pieza";
+import { site } from "@/content/site";
 import { haySesion, hayPuerta } from "@/lib/admin.server";
 import { leerPiezasSinCache } from "@/lib/piezas.server";
 import { cupo, hayInstagram, publicadas, type Publicada } from "@/lib/story/instagram.server";
-import { entrar, publicar, retirar, salir } from "./acciones";
+import { anadir, entrar, publicar, retirar, salir } from "./acciones";
 
 export const metadata: Metadata = {
   title: "Panel — Colapsar",
@@ -37,7 +38,7 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
   // API: quien la busque no puede distinguir "no configurado" de "no está".
   if (!hayPuerta()) notFound();
 
-  const { mal, borrar, ig } = await searchParams;
+  const { mal, borrar, ig, nueva } = await searchParams;
 
   if (!(await haySesion())) {
     return (
@@ -67,7 +68,7 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
               ? "nada todavía"
               : `${piezas.length} ${piezas.length === 1 ? "pieza" : "piezas"}`}
             {" · "}
-            {notas.length} semillas fijas en el repo, esas no se tocan desde acá
+            {PIEZAS_TEXTO.length} semillas fijas en el repo, esas no se tocan desde acá
             {hoy && ` · ${hoy.usadas} de ${hoy.total} stories hoy`}
           </p>
         </div>
@@ -94,6 +95,8 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
         </p>
       )}
 
+      <Anadir />
+
       {piezas.length === 0 ? (
         <p className="text-sm text-humo">
           La pared está solo con sus semillas. Cuando alguien escriba algo y pase
@@ -108,11 +111,100 @@ export default async function Panel({ searchParams }: PageProps<"/admin">) {
               confirmando={aConfirmar === pieza.id}
               conIg={conIg}
               publicada={yaSalieron.get(pieza.id)}
+              nueva={nueva === pieza.id}
             />
           ))}
         </ul>
       )}
+
+      {/* Las semillas no se borran ni se editan desde acá —viven en el repo—,
+          pero se exportan igual que el resto: son la mayor parte de la pared. */}
+      <details className="mt-10 border-t border-humo/25 pt-6">
+        <summary className="cursor-pointer text-xs text-humo hover:text-tiza">
+          semillas ({PIEZAS_TEXTO.length}) — solo exportar
+        </summary>
+        <ul className="mt-4 flex flex-col gap-3">
+          {PIEZAS_TEXTO.map((pieza) => (
+            <li key={pieza.id} className="flex gap-4 rounded-sm border border-humo/25 p-4">
+              <Miniatura id={pieza.id} />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="font-mono text-[11px] text-humo">{pieza.id}</span>
+                <p className="mt-2 text-sm whitespace-pre-wrap text-tiza">{pieza.texto}</p>
+                <div className="mt-auto flex flex-wrap gap-4 pt-3 text-xs">
+                  <Exportar id={pieza.id} />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </details>
     </Marco>
+  );
+}
+
+/**
+ * Colgar una confesión a mano. Entra directa, sin filtro: ver `anadirPieza`.
+ */
+function Anadir() {
+  return (
+    <form action={anadir} className="mb-8 flex flex-col gap-2">
+      <label htmlFor="texto" className="text-xs text-humo">
+        añadir a la pared
+      </label>
+      <textarea
+        id="texto"
+        name="texto"
+        required
+        rows={3}
+        maxLength={site.maxRespuesta}
+        placeholder={site.marcador}
+        className="w-full resize-y rounded-sm border border-humo/35 bg-transparent px-3 py-2 text-sm text-tiza outline-none focus:border-tiza/70"
+      />
+      <div className="flex items-baseline justify-between text-[11px] text-humo">
+        <span>hasta {site.maxRespuesta} caracteres · entra sin pasar por el filtro</span>
+        <button
+          type="submit"
+          className="cursor-pointer rounded-sm border border-humo/35 px-3 py-1.5 text-xs text-tiza hover:border-tiza/70"
+        >
+          colgar
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/**
+ * El papel tal cual sale al exportarlo. `lazy` porque cada uno es un render de
+ * Satori en el servidor: con la lista larga no se piden todos de golpe.
+ */
+function Miniatura({ id }: { id: string }) {
+  return (
+    <a
+      href={`/api/story/${id}?formato=papel`}
+      target="_blank"
+      rel="noreferrer"
+      className="w-28 shrink-0 self-start"
+    >
+      <img src={`/api/story/${id}?formato=papel`} alt="" loading="lazy" className="w-full" />
+    </a>
+  );
+}
+
+/** Los tres enlaces de exportar. `download` + `?descargar` bajan el archivo con nombre. */
+function Exportar({ id }: { id: string }) {
+  const enlace = "text-humo underline underline-offset-4 hover:text-tiza";
+  return (
+    <>
+      <a href={`/api/story/${id}?formato=papel&descargar`} download className={enlace}>
+        PNG papel
+      </a>
+      <a href={`/api/story/${id}?formato=png&descargar`} download className={enlace}>
+        PNG story
+      </a>
+      <a href={`/api/story/${id}`} target="_blank" rel="noreferrer" className="text-humo/70 underline underline-offset-4 hover:text-tiza">
+        ver story
+      </a>
+    </>
   );
 }
 
@@ -172,93 +264,91 @@ function Fila({
   confirmando,
   conIg,
   publicada,
+  nueva,
 }: {
   pieza: Pieza;
   confirmando: boolean;
   conIg: boolean;
   publicada?: Publicada;
+  nueva: boolean;
 }) {
   return (
-    <li className="rounded-sm border border-humo/25 p-4">
-      <div className="flex items-baseline justify-between gap-4 text-[11px] text-humo">
-        <span>{FECHA.format(new Date(pieza.creado))}</span>
-        <span className="font-mono">{pieza.id.slice(0, 8)}</span>
-      </div>
+    <li
+      className={`flex gap-4 rounded-sm border p-4 ${nueva ? "border-tiza/60" : "border-humo/25"}`}
+    >
+      {pieza.texto && <Miniatura id={pieza.id} />}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-4 text-[11px] text-humo">
+          <span>{FECHA.format(new Date(pieza.creado))}</span>
+          <span className="font-mono">{pieza.id.slice(0, 8)}</span>
+        </div>
 
-      {pieza.texto && (
-        <p className="mt-2 text-sm whitespace-pre-wrap text-tiza">{pieza.texto}</p>
-      )}
-
-      {pieza.foto && (
-        // A pelo y no con `next/image`: son las mismas fotos que ya optimiza la
-        // portada, y pasarlas otra vez por el optimizador para verlas tres veces
-        // al mes es gastar transformaciones en nada.
-        <img
-          src={pieza.foto.url}
-          alt=""
-          width={pieza.foto.w}
-          height={pieza.foto.h}
-          className="mt-3 max-h-64 w-auto rounded-sm border border-humo/25"
-        />
-      )}
-
-      <div className="mt-3 flex items-center gap-4 text-xs">
-        {confirmando ? (
-          <>
-            <span className="text-humo">¿Seguro? No hay vuelta atrás.</span>
-            <form action={retirar}>
-              <input type="hidden" name="id" value={pieza.id} />
-              <button
-                type="submit"
-                className="cursor-pointer text-terracota underline underline-offset-4"
-              >
-                sí, borrar
-              </button>
-            </form>
-            <a href="/admin" className="text-humo underline underline-offset-4">
-              no
-            </a>
-          </>
-        ) : (
-          // Un enlace y no un botón: la confirmación es otra pantalla, no un
-          // `confirm()`. Así un dedo torpe en el móvil no borra nada de golpe.
-          <>
-            <a
-              href={`/admin?borrar=${pieza.id}`}
-              className="text-humo underline underline-offset-4 hover:text-terracota"
-            >
-              borrar
-            </a>
-
-            {/* Sin texto no hay story: la ruta devuelve 404 para las piezas de
-                solo foto, así que el botón tampoco se ofrece. */}
-            {conIg &&
-              pieza.texto &&
-              (publicada ? (
-                <span className="text-humo">
-                  story del {FECHA.format(new Date(publicada.cuando))}
-                </span>
-              ) : (
-                <form action={publicar}>
-                  <input type="hidden" name="id" value={pieza.id} />
-                  <button type="submit" className="cursor-pointer text-humo underline underline-offset-4 hover:text-tiza">
-                    publicar story
-                  </button>
-                </form>
-              ))}
-
-            {pieza.texto && (
-              <a
-                href={`/api/story/${pieza.id}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-humo/70 underline underline-offset-4 hover:text-tiza"
-              >
-                ver story
-              </a>
-            )}
-          </>
+        {pieza.texto && (
+          <p className="mt-2 text-sm whitespace-pre-wrap text-tiza">{pieza.texto}</p>
         )}
+
+        {pieza.foto && (
+          // A pelo y no con `next/image`: son las mismas fotos que ya optimiza la
+          // portada, y pasarlas otra vez por el optimizador para verlas tres veces
+          // al mes es gastar transformaciones en nada.
+          <img
+            src={pieza.foto.url}
+            alt=""
+            width={pieza.foto.w}
+            height={pieza.foto.h}
+            className="mt-3 max-h-64 w-auto rounded-sm border border-humo/25"
+          />
+        )}
+
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+          {confirmando ? (
+            <>
+              <span className="text-humo">¿Seguro? No hay vuelta atrás.</span>
+              <form action={retirar}>
+                <input type="hidden" name="id" value={pieza.id} />
+                <button
+                  type="submit"
+                  className="cursor-pointer text-terracota underline underline-offset-4"
+                >
+                  sí, borrar
+                </button>
+              </form>
+              <a href="/admin" className="text-humo underline underline-offset-4">
+                no
+              </a>
+            </>
+          ) : (
+            // Un enlace y no un botón: la confirmación es otra pantalla, no un
+            // `confirm()`. Así un dedo torpe en el móvil no borra nada de golpe.
+            <>
+              <a
+                href={`/admin?borrar=${pieza.id}`}
+                className="text-humo underline underline-offset-4 hover:text-terracota"
+              >
+                borrar
+              </a>
+
+              {/* Sin texto no hay story: la ruta devuelve 404 para las piezas de
+                  solo foto, así que el botón tampoco se ofrece. */}
+              {conIg &&
+                pieza.texto &&
+                (publicada ? (
+                  <span className="text-humo">
+                    story del {FECHA.format(new Date(publicada.cuando))}
+                  </span>
+                ) : (
+                  <form action={publicar}>
+                    <input type="hidden" name="id" value={pieza.id} />
+                    <button type="submit" className="cursor-pointer text-humo underline underline-offset-4 hover:text-tiza">
+                      publicar story
+                    </button>
+                  </form>
+                ))}
+
+              {pieza.texto && <Exportar id={pieza.id} />}
+            </>
+          )}
+        </div>
       </div>
     </li>
   );

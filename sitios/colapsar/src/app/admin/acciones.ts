@@ -3,11 +3,11 @@
 import { redirect } from "next/navigation";
 import { ES_ID } from "@/content/pieza";
 import { abrirSesion, cerrarSesion, haySesion, puedeIntentar } from "@/lib/admin.server";
-import { retirarPieza } from "@/lib/piezas.server";
+import { anadirPieza, retirarPieza } from "@/lib/piezas.server";
 import { publicarStory } from "@/lib/story/instagram.server";
 
 /**
- * Las tres acciones del panel.
+ * Las acciones del panel.
  *
  * **Cada una comprueba la sesión por su cuenta.** Un action es un POST público
  * contra la ruta: que la página no pinte el botón si no has entrado no impide
@@ -37,6 +37,16 @@ export async function retirar(datos: FormData) {
   // Se vuelve a `/admin` limpio para soltar el `?borrar=` de la confirmación:
   // sin esto, recargar reabre el "¿seguro?" sobre una pieza que ya no existe.
   redirect("/admin");
+}
+
+export async function anadir(datos: FormData) {
+  if (!(await haySesion())) redirect("/admin");
+
+  const pieza = await anadirPieza(String(datos.get("texto") ?? ""));
+
+  // Vuelve con la marca para que la nueva se vea resaltada arriba de la lista:
+  // sin eso, colgar algo es un formulario que se vacía y nada más.
+  redirect(pieza ? `/admin?nueva=${pieza.id}` : "/admin");
 }
 
 /**
